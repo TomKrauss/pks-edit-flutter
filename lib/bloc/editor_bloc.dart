@@ -17,7 +17,6 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_code_editor/flutter_code_editor.dart';
-import 'package:highlight/highlight.dart';
 import 'package:path/path.dart';
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
 import 'package:pks_edit_flutter/bloc/templates.dart';
@@ -29,8 +28,22 @@ import 'package:rxdart/rxdart.dart';
 ///
 class OpenFileState {
   final List<OpenFile> files;
-  int currentIndex;
-  OpenFileState({required this.files, required this.currentIndex});
+  late final StreamController<OpenFile?> _controller;
+  Stream<OpenFile?> get currentFile => _controller.stream;
+  int _currentIndex;
+  int get currentIndex => _currentIndex;
+  OpenFile? get _currentFile => currentIndex < 0 || files.length <= currentIndex ? null : files[currentIndex];
+  set currentIndex(int idx) {
+    if (_currentIndex == idx) {
+      return;
+    }
+    _currentIndex = idx;
+    _controller.add(_currentFile);
+  }
+  OpenFileState({required this.files, required int currentIndex}) :
+    _currentIndex = currentIndex,
+    _controller = BehaviorSubject.seeded(currentIndex < 0 || files.length <= currentIndex ? null : files[currentIndex])
+  ;
 }
 
 ///
@@ -47,7 +60,7 @@ class OpenFile {
     var name = basename(filename);
     return modified ? "* $name" : name;
   }
-  late final Mode language;
+  late final Language language;
   void Function(OpenFile file)? _changedListener;
 
   void _updateModified(bool newModified) {
@@ -66,7 +79,7 @@ class OpenFile {
 
   OpenFile({required this.filename, required this.text, this.modified = false, this.encoding = utf8, required this.isNew}) {
     language = Languages.singleton.modeForFilename(filename);
-    controller = CodeController(text: text, language: language);
+    controller = CodeController(text: text, language: language.mode);
   }
 
   ///

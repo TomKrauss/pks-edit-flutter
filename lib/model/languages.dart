@@ -23,33 +23,39 @@ import 'package:highlight/languages/python.dart';
 import 'package:highlight/languages/xml.dart';
 import 'package:highlight/languages/yaml.dart';
 
+class Language {
+  final Mode mode;
+  final String name;
+  const Language({required this.name, required this.mode});
+}
+
 ///
 /// Support for programming languages.
 ///
 class Languages {
   static final Languages singleton = Languages._();
   Languages._();
-  final Map<RegExp, Mode> _languageMappings = {
-    RegExp(r".*\.java"): java,
-    RegExp(r".*\.dart"): dart,
-    RegExp(r".*\.go"): go,
-    RegExp(r".*\.(properties|prop)"): properties,
-    RegExp(r".*\.(json|jsn)"): json,
-    RegExp(r".*\.(yaml|yml)"): yaml,
-    RegExp(r".*\.c"): cpp,
-    RegExp(r".*\.(c\+\+|cpp)"): cpp,
-    RegExp(r".*\.(html|xhtml|htm)"): htmlbars,
-    RegExp(r".*\.xml"): xml,
-    RegExp(r".*\.py"): python,
+  final Map<RegExp, Language> _languageMappings = {
+    RegExp(r".*\.java"): Language(name: "java", mode: java),
+    RegExp(r".*\.dart"): Language(name: "dart", mode: dart),
+    RegExp(r".*\.go"): Language(name: "go", mode: go),
+    RegExp(r".*\.(properties|prop)"): Language(name: "properties", mode: properties),
+    RegExp(r".*\.(json|jsn)"): Language(name: "json", mode: json),
+    RegExp(r".*\.(yaml|yml)"): Language(name: "yaml", mode: yaml),
+    RegExp(r".*\.c"): Language(name: "cpp", mode: cpp),
+    RegExp(r".*\.(c\+\+|cpp)"): Language(name: "c", mode: cpp),
+    RegExp(r".*\.(html|xhtml|htm)"): Language(name: "html", mode: htmlbars),
+    RegExp(r".*\.xml"): Language(name: "xml", mode: xml),
+    RegExp(r".*\.py"): Language(name: "python", mode: python),
   };
 
-  Mode modeForFilename(String fileName) {
+  Language modeForFilename(String fileName) {
     for (var e in _languageMappings.entries) {
       if (e.key.hasMatch(fileName)) {
         return e.value;
       }
     }
-    return Mode();
+    return Language(name: "Unknown", mode: Mode());
   }
 
 }
