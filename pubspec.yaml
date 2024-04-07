@@ -1,0 +1,30 @@
+name: pks_edit_flutter
+description: "A code editor implemented in Flutter"
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.3.2 <4.0.0'
+
+dependencies:
+  rxdart: ^0.27.4
+  package_info_plus: ^6.0.0
+  flutter_code_editor: ^0.3.1
+  highlight: ^0.7.0
+  collection: ^1.18.0
+  path: ^1.8.2
+  file_selector: ^1.0.3
+  flutter_highlight: ^0.7.0
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - lib/assets/images/
