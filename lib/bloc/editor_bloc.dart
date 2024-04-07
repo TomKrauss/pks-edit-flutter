@@ -20,6 +20,7 @@ import 'package:flutter_code_editor/flutter_code_editor.dart';
 import 'package:path/path.dart';
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
 import 'package:pks_edit_flutter/bloc/templates.dart';
+import 'package:pks_edit_flutter/config/pks_sys.dart';
 import 'package:pks_edit_flutter/model/languages.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -229,10 +230,15 @@ class EditorBloc {
     for (var arg in arguments) {
       if (!arg.startsWith("-")) {
         await openFile(arg);
+      } else {
+        if (arg.startsWith("-pks_sys:")) {
+          PksConfiguration.singleton.pksSysDirectory = arg.substring(9);
+        }
       }
     }
-    await newFile("Test.java");
-    await newFile("Test.dart");
+    for (var f in PksConfiguration.singleton.currentSession.openEditors) {
+      await openFile(f.path);
+    }
   }
 
   Future<void> dispose() async {

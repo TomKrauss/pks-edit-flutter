@@ -14,6 +14,7 @@ dependencies:
   highlight: ^0.7.0
   collection: ^1.18.0
   path: ^1.8.2
+  logger: ^2.0.2
   file_selector: ^1.0.3
   flutter_highlight: ^0.7.0
   flutter:

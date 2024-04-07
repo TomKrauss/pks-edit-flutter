@@ -14,10 +14,13 @@
 import 'package:highlight/highlight.dart';
 import 'package:highlight/languages/cpp.dart';
 import 'package:highlight/languages/dart.dart';
+import 'package:highlight/languages/dos.dart';
 import 'package:highlight/languages/go.dart';
+import 'package:highlight/languages/groovy.dart';
 import 'package:highlight/languages/htmlbars.dart';
 import 'package:highlight/languages/java.dart';
 import 'package:highlight/languages/json.dart';
+import 'package:highlight/languages/markdown.dart';
 import 'package:highlight/languages/properties.dart';
 import 'package:highlight/languages/python.dart';
 import 'package:highlight/languages/xml.dart';
@@ -45,7 +48,10 @@ class Languages {
     RegExp(r".*\.c"): Language(name: "cpp", mode: cpp),
     RegExp(r".*\.(c\+\+|cpp)"): Language(name: "c", mode: cpp),
     RegExp(r".*\.(html|xhtml|htm)"): Language(name: "html", mode: htmlbars),
-    RegExp(r".*\.xml"): Language(name: "xml", mode: xml),
+    RegExp(r".*\.md"): Language(name: "markdown", mode: markdown),
+    RegExp(r".*\.bat"): Language(name: "batch", mode: dos),
+    RegExp(r".*\.(xml|pom)"): Language(name: "xml", mode: xml),
+    RegExp(r".*\.(gradle|groovy)"): Language(name: "groovy", mode: groovy),
     RegExp(r".*\.py"): Language(name: "python", mode: python),
   };
 
