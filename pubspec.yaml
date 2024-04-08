@@ -10,8 +10,8 @@ environment:
 dependencies:
   rxdart: ^0.27.4
   package_info_plus: ^6.0.0
-  flutter_code_editor: ^0.3.1
-  highlight: ^0.7.0
+  re_editor: ^0.1.0
+  re_highlight: ^0.0.3
   collection: ^1.18.0
   path: ^1.8.2
   logger: ^2.0.2

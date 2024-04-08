@@ -16,12 +16,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
 import 'package:path/path.dart';
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
 import 'package:pks_edit_flutter/bloc/templates.dart';
 import 'package:pks_edit_flutter/config/pks_sys.dart';
 import 'package:pks_edit_flutter/model/languages.dart';
+import 'package:re_editor/re_editor.dart';
 import 'package:rxdart/rxdart.dart';
 
 ///
@@ -53,16 +53,29 @@ class OpenFileState {
 class OpenFile {
   final String filename;
   final String text;
+  late String _lastSavedText;
   final Encoding encoding;
   bool isNew;
   bool modified;
-  late final CodeController controller;
+  late final CodeLineEditingController controller;
   String get title {
     var name = basename(filename);
     return modified ? "* $name" : name;
   }
   late final Language language;
   void Function(OpenFile file)? _changedListener;
+
+  void saved() {
+    _lastSavedText = controller.text;
+    _updateModified(false);
+  }
+
+  void onChanged(CodeLineEditingValue value) {
+    if (controller.codeLines.equals(controller.preValue?.codeLines)) {
+      return;
+    }
+    _updateModified(controller.text != _lastSavedText);
+  }
 
   void _updateModified(bool newModified) {
     var oldModified = modified;
@@ -72,15 +85,10 @@ class OpenFile {
     }
   }
 
-  void _changed() {
-    if (!modified && controller.text != text) {
-      _updateModified(true);
-    }
-  }
-
   OpenFile({required this.filename, required this.text, this.modified = false, this.encoding = utf8, required this.isNew}) {
     language = Languages.singleton.modeForFilename(filename);
-    controller = CodeController(text: text, language: language.mode);
+    _lastSavedText = text;
+    controller = CodeLineEditingController.fromText(text);
   }
 
   ///
@@ -88,14 +96,13 @@ class OpenFile {
   ///
   void addChangeListener(void Function(OpenFile file) listener) {
     _changedListener = listener;
-    controller.addListener(_changed);
   }
 
   ///
   /// Remove the change listener. Must be called, when the OpenFile element is disposed.
   ///
   void removeChangeListener() {
-    controller.removeListener(_changed);
+    _changedListener = null;
   }
 }
 
@@ -144,6 +151,23 @@ class EditorBloc {
     return f.absolute.path;
   }
 
+  ///
+  /// Save the current active file.
+  ///
+  Future<CommandResult> saveActiveFile() async {
+    final f = _openFileState._currentFile;
+    if (f == null) {
+      return CommandResult(success: true, message: "No current file");
+    }
+    try {
+      final file = File(f.filename);
+      file.writeAsStringSync(f.controller.text);
+      f.saved();
+      return CommandResult(success: true, message: "Successfully saved ${f.filename}");
+    } catch(ex) {
+      return CommandResult(success: false, message: ex.toString());
+    }
+  }
 
   ///
   /// Add an open file to the list of open files.
@@ -165,6 +189,9 @@ class EditorBloc {
     filename = _makeAbsolute(filename);
     if (_selectFile(filename)) {
       return CommandResult(success: true, message: "File with the given name was open already.");
+    }
+    if (File(filename).existsSync()) {
+      return await openFile(filename);
     }
     _addOpenFile(OpenFile(filename: filename, isNew: true, text: Templates.singleton.generateInitialContent(filename)));
     return CommandResult(success: true);

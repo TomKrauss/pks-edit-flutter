@@ -14,13 +14,12 @@
 import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_code_editor/flutter_code_editor.dart';
-import 'package:flutter_highlight/themes/monokai-sublime.dart';
+import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/ui/actions.dart';
+import 'package:re_editor/re_editor.dart';
 
 ///
 /// Main page of the PKS Edit application.
@@ -48,6 +47,12 @@ class _PksEditMainPageState extends State<PksEditMainPage>
             execute: _newFile,
             text: "New File",
             icon: Icons.create_outlined),
+        PksEditAction(
+            id: "save-file",
+            execute: _saveFile,
+            text: "Save File",
+            description: "Save current file",
+            icon: Icons.save),
       ];
 
   @override
@@ -122,6 +127,11 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     }
   }
 
+  void _saveFile(Object? actionContext) async {
+    final bloc = EditorBloc.of(context);
+    _handleCommandResult(await bloc.saveActiveFile());
+  }
+
   void _newFile(Object? actionContext) async {
     _handleCommandResult(await EditorBloc.of(context).newFile("Test.yaml"));
   }
@@ -154,28 +164,32 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   List<Widget> _buildEditors(List<OpenFile> files) {
     return files.map(
       (e) {
-        final scrollController = ScrollController();
-        return Scrollbar(
-            controller: scrollController,
-            trackVisibility: true,
-            thumbVisibility: true,
-            child: CodeTheme(
-                data: CodeThemeData(styles: monokaiSublimeTheme),
-                child: SingleChildScrollView(
-                  controller: scrollController,
-                  child: TextField(
-                    decoration: const InputDecoration(
-                        border: InputBorder.none,
-                        contentPadding: EdgeInsets.all(4),
-                        errorBorder: InputBorder.none,
-                        focusedErrorBorder: InputBorder.none,
-                        focusedBorder: InputBorder.none,
-                        enabledBorder: InputBorder.none,
-                        disabledBorder: InputBorder.none),
+        return CodeEditor(
+          onChanged: e.onChanged,
+          indicatorBuilder: (context, editingController, chunkController, notifier) {
+            return Row(
+              children: [
+                DefaultCodeLineNumber(
+                  controller: editingController,
+                  notifier: notifier,
+                ),
+                DefaultCodeChunkIndicator(
+                    width: 20,
+                    controller: chunkController,
+                    notifier: notifier
+                )
+              ],
+            );
+          },
                     controller: e.controller,
-                    maxLines: null,
-                  ),
-                )));
+              style: CodeEditorStyle(
+
+                  codeTheme:
+                  CodeHighlightTheme(
+                      theme: atomOneDarkTheme,
+                      languages: {e.language.name: CodeHighlightThemeMode(mode: e.language.mode)})
+              ),
+                );
       },
     ).toList();
   }
@@ -228,26 +242,26 @@ class ToolBarWidget extends StatelessWidget {
   const ToolBarWidget(
       {super.key, required this.actions, this.iconColor = Colors.blue});
 
-  void _notImplemented() {}
-
-  Widget _buildButton(IconData icon, Function() callback) => InkWell(
+  Widget _buildButton(PksEditAction action, Function() callback) =>
+      Tooltip(
+        message: action.description,
+          child: InkWell(
       onTap: callback,
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 3),
-        child: Icon(icon, color: iconColor),
-      ));
+        child: Icon(action.icon, color: iconColor),
+      )));
 
   List<Widget> _buildToolbarItems(BuildContext context) {
     return [
       ...actions
           .where((e) => e.displayInToolbar)
-          .map((e) => _buildButton(e.icon!, () => e.execute(null))),
+          .map((e) => _buildButton(e, () => e.execute(null))),
         VerticalDivider(
             indent: 3,
             endIndent: 3,
             color: Theme.of(context).dividerColor,
           ),
-      _buildButton(Icons.delete, _notImplemented)
     ];
   }
 

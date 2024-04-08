@@ -18,12 +18,17 @@ import 'package:flutter/cupertino.dart';
 ///
 class PksEditAction {
   final String id;
+  final String? _description;
   String? text;
   IconData? icon;
   ///
   /// Returns the label to be used to display the action in a UI.
   ///
   String get label => text ?? id;
+  ///
+  /// Returns the text to be displayed as a description (tooltip) for this action
+  ///
+  String get description => _description ?? label;
   final bool Function(Object? context) isEnabled;
   final void Function(Object? context) execute;
 
@@ -33,5 +38,5 @@ class PksEditAction {
   static bool _alwaysEnabled(Object? context) => true;
 
   PksEditAction({required this.id, this.isEnabled = _alwaysEnabled, required this.execute,
-    this.text, this.icon});
+    this.text, this.icon, String? description}) : _description = description;
 }
