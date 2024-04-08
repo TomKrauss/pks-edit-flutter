@@ -16,6 +16,7 @@ import 'dart:io';
 
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
+import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:window_manager/window_manager.dart';
 
 class OpenEditor {
@@ -39,6 +40,7 @@ class OpenEditor {
 /// Captures the previous saved state of the main window.
 ///
 class MainWindowPlacement {
+  static const swShowMaximized = 3;
   final int flags;
   final int show;
   final int top;
@@ -113,6 +115,7 @@ class PksConfiguration {
   final Logger _logger = Logger(printer: SimplePrinter(printTime: true, colors: false));
   String? _pksSysDirectory;
   PksEditSession? _pksEditSession;
+  EditorConfiguration? _editorConfiguration;
 
   set pksSysDirectory(String newDir) {
     _logger.i("Assigning new PKS_SYS directory to $newDir");
@@ -154,6 +157,23 @@ class PksConfiguration {
       _logger.i("Assuming PKS_SYS directory in $_pksSysDirectory");
     }
     return _pksSysDirectory ?? pksSysVariable;
+  }
+
+  ///
+  /// Returns the current editor configuration.
+  ///
+  Future<EditorConfiguration> get configuration async {
+    if (_editorConfiguration == null) {
+      var sessionFile = File(join(pksSysDirectory, defaultConfigFilename));
+      if (sessionFile.existsSync()) {
+        _logger.i("Reading configuration file ${sessionFile.path}.");
+        var string = sessionFile.readAsStringSync();
+        _editorConfiguration = EditorConfiguration.from(jsonDecode(string));
+      } else {
+        _editorConfiguration = EditorConfiguration.defaultConfiguration;
+      }
+    }
+    return _editorConfiguration!;
   }
 
   ///

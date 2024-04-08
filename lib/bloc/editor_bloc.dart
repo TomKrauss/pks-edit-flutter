@@ -14,15 +14,19 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:math';
+import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:path/path.dart';
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
 import 'package:pks_edit_flutter/bloc/templates.dart';
+import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/config/pks_sys.dart';
 import 'package:pks_edit_flutter/model/languages.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:window_manager/window_manager.dart';
 
 ///
 /// Represents the model of all files currently opened in PKS-Edit.
@@ -123,6 +127,7 @@ class CommandResult {
 class EditorBloc {
   static EditorBloc of(BuildContext context) => SimpleBlocProvider.of(context);
   late final OpenFileState _openFileState;
+  late final EditorConfiguration editorConfiguration;
   final StreamController<OpenFileState> _openFileSubject = BehaviorSubject.seeded(OpenFileState(files: const [], currentIndex: -1));
   Stream<OpenFileState> get openFileStream => _openFileSubject.stream;
   final List<String> openFiles = [];
@@ -279,6 +284,34 @@ class EditorBloc {
     _refreshFiles();
   }
 
+  Future<void> initWindowOptions(PksEditSession session) async {
+    final p = session.mainWindowPlacement;
+  // First get the FlutterView.
+    FlutterView view = WidgetsBinding.instance.platformDispatcher.views.first;
+  // Dimensions in physical pixels (px)
+    Size screenSize = view.physicalSize;
+    var width = session.screenWidth;
+    var height = session.screenWidth;
+    var wFactor = screenSize.width / max(1, width);
+    var hFactor = screenSize.height / max(1, height);
+    var size = Size((p.right-p.left)*wFactor, (p.bottom-p.top)*hFactor);
+    WindowOptions windowOptions = WindowOptions(
+        size: p.show == MainWindowPlacement.swShowMaximized ? null : size,
+        minimumSize: p.show == MainWindowPlacement.swShowMaximized ? null : size,
+        skipTaskbar: false,
+        fullScreen: null);
+    if (p.show == MainWindowPlacement.swShowMaximized) {
+      WidgetsBinding.instance.addPersistentFrameCallback((timeStamp) {
+        windowManager.maximize();
+      });
+    } else {
+      await windowManager.waitUntilReadyToShow(windowOptions, () async {
+        await windowManager.focus();
+        await windowManager.show();
+      });
+    }
+  }
+
   ///
   /// Initializes the BLOC interpreting the command line arguments.
   ///
@@ -294,6 +327,8 @@ class EditorBloc {
       }
     }
     var session = await PksConfiguration.singleton.currentSession;
+    editorConfiguration = await PksConfiguration.singleton.configuration;
+    await initWindowOptions(session);
     for (var f in session.openEditors) {
       await openFile(f.path);
     }

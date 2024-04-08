@@ -13,6 +13,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
+import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/ui/main_page.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -23,26 +24,52 @@ void main(List<String> args) async {
   WidgetsFlutterBinding.ensureInitialized();
   await windowManager.ensureInitialized();
   await windowManager.setPreventClose(true);
-  runApp(PksEditApplication(arguments: args));
+  runApp(SimpleBlocProvider(
+      commandLineArguments: args,
+      child: const PksEditApplication()));
 }
 
 ///
 /// The main window of PKS Edit.
 ///
 class PksEditApplication extends StatelessWidget {
-  final List<String> arguments;
-  const PksEditApplication({super.key, required this.arguments});
+  const PksEditApplication({super.key});
+
+  ThemeData _createTheme(BuildContext context) {
+    final bloc = EditorBloc.of(context);
+    var themeName = bloc.editorConfiguration.themeName;
+    if (themeName == "dark") {
+      return ThemeData(
+          colorScheme: const ColorScheme.dark(),
+          dividerColor: Colors.white24,
+          appBarTheme: const AppBarTheme(backgroundColor: Colors.white10));
+    }
+    if (themeName == "spring") {
+      return ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
+          dividerColor: Colors.green.shade200,
+          appBarTheme: AppBarTheme(backgroundColor: Colors.green.shade50));
+    }
+    if (themeName == "pink") {
+      return ThemeData(
+          colorScheme: ColorScheme.fromSeed(seedColor: Colors.pinkAccent),
+          dividerColor: Colors.pink.shade200,
+          appBarTheme: AppBarTheme(backgroundColor: Colors.pink.shade50));
+    }
+    return ThemeData(
+        colorScheme: const ColorScheme.light(),
+        dividerColor: Colors.black26,
+        appBarTheme: const AppBarTheme(backgroundColor: Colors.black12));
+  }
 
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'PKS EDIT',
-      debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-          colorScheme: const ColorScheme.dark(), dividerColor: Colors.white24, appBarTheme: const AppBarTheme(backgroundColor: Colors.white10)),
-      home: SimpleBlocProvider(commandLineArguments: arguments, child: const PksEditMainPage(title: 'PKS EDIT')),
-    );
+          title: 'PKS EDIT',
+          debugShowCheckedModeBanner: false,
+          theme: _createTheme(context),
+          home: const PksEditMainPage(title: 'PKS EDIT'),
+        );
   }
 }
-

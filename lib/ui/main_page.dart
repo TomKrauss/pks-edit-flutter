@@ -15,6 +15,7 @@ import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
@@ -281,6 +282,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   }
 
   List<Widget> _buildEditors(List<OpenFile> files) {
+    final bloc = EditorBloc.of(context);
     return files.map(
       (e) {
         return CodeEditor(
@@ -300,9 +302,9 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           },
           controller: e.controller,
           style: CodeEditorStyle(
-            fontFamily: Platform.isWindows ? "Consolas" : "Courier New",
+              fontFamily: bloc.editorConfiguration.defaultFontFace,
               codeTheme: CodeHighlightTheme(
-                  theme: atomOneLightTheme,
+                  theme: bloc.editorConfiguration.themeName == "dark" ? atomOneDarkTheme : atomOneLightTheme,
                   languages: {
                 e.language.name: CodeHighlightThemeMode(mode: e.language.mode)
               })),

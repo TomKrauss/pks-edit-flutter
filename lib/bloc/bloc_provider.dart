@@ -88,6 +88,9 @@ class SimpleBlocState<S extends SimpleBlocProvider> extends State<S> {
             data: ThemeData(colorScheme: const ColorScheme.light(background: Colors.white), useMaterial3: false),
             child: const Center(child: CircularProgressIndicator()));
       }
+      if (snapshot.hasError) {
+        return ErrorWidget("Error initializing BLOC: ${snapshot.error}");
+      }
     }
     return ApplicationContextWidget(
       bloc: bloc,
