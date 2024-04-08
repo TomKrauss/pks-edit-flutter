@@ -14,11 +14,15 @@
 import 'package:flutter/material.dart';
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
 import 'package:pks_edit_flutter/ui/main_page.dart';
+import 'package:window_manager/window_manager.dart';
 
 ///
 /// Start the PKS Edit application
 ///
-void main(List<String> args) {
+void main(List<String> args) async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await windowManager.ensureInitialized();
+  await windowManager.setPreventClose(true);
   runApp(PksEditApplication(arguments: args));
 }
 

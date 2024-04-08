@@ -29,21 +29,23 @@ import 'package:rxdart/rxdart.dart';
 ///
 class OpenFileState {
   final List<OpenFile> files;
-  late final StreamController<OpenFile?> _controller;
-  Stream<OpenFile?> get currentFile => _controller.stream;
+  OpenFile? get currentFileSync => _currentFile;
   int _currentIndex;
   int get currentIndex => _currentIndex;
+  final void Function()? _currentChanged;
   OpenFile? get _currentFile => currentIndex < 0 || files.length <= currentIndex ? null : files[currentIndex];
   set currentIndex(int idx) {
     if (_currentIndex == idx) {
       return;
     }
     _currentIndex = idx;
-    _controller.add(_currentFile);
+    if (_currentChanged != null) {
+      _currentChanged();
+    }
   }
-  OpenFileState({required this.files, required int currentIndex}) :
+  OpenFileState({required this.files, required int currentIndex, void Function()? currentChanged}) :
     _currentIndex = currentIndex,
-    _controller = BehaviorSubject.seeded(currentIndex < 0 || files.length <= currentIndex ? null : files[currentIndex])
+    _currentChanged = currentChanged
   ;
 }
 
@@ -120,13 +122,19 @@ class CommandResult {
 ///
 class EditorBloc {
   static EditorBloc of(BuildContext context) => SimpleBlocProvider.of(context);
-  final OpenFileState _openFileState = OpenFileState(files: [], currentIndex: -1);
+  late final OpenFileState _openFileState;
   final StreamController<OpenFileState> _openFileSubject = BehaviorSubject.seeded(OpenFileState(files: const [], currentIndex: -1));
   Stream<OpenFileState> get openFileStream => _openFileSubject.stream;
+  final List<String> openFiles = [];
 
   void _refreshFiles() {
     _openFileSubject.add(_openFileState);
   }
+
+  ///
+  /// Whether there are any editor windows open, which are currently in the state modified.
+  ///
+  bool get hasChangedWindows => _openFileState.files.where((element) => element.modified).isNotEmpty;
 
   ///
   /// Try to select (make current) the file with the given absolute [filename].
@@ -151,6 +159,17 @@ class EditorBloc {
     return f.absolute.path;
   }
 
+  Future<CommandResult> _saveFile(OpenFile fileHandle) async {
+    try {
+      final file = File(fileHandle.filename);
+      file.writeAsStringSync(fileHandle.controller.text, encoding: fileHandle.encoding);
+      fileHandle.saved();
+      return CommandResult(success: true, message: "Successfully saved ${fileHandle.filename}");
+    } catch(ex) {
+      return CommandResult(success: false, message: ex.toString());
+    }
+  }
+
   ///
   /// Save the current active file.
   ///
@@ -159,14 +178,24 @@ class EditorBloc {
     if (f == null) {
       return CommandResult(success: true, message: "No current file");
     }
-    try {
-      final file = File(f.filename);
-      file.writeAsStringSync(f.controller.text);
-      f.saved();
-      return CommandResult(success: true, message: "Successfully saved ${f.filename}");
-    } catch(ex) {
-      return CommandResult(success: false, message: ex.toString());
+    return await _saveFile(f);
+  }
+
+  ///
+  /// Save all modified files.
+  ///
+  Future<CommandResult> saveAllModified() async {
+    int nSaved = 0;
+    for (var handle in _openFileState.files) {
+      if (handle.modified) {
+        var result = await _saveFile(handle);
+        if (!result.success) {
+          return result;
+        }
+        nSaved++;
+      }
     }
+    return CommandResult(success: true, message: "Succesfully saved $nSaved files.");
   }
 
   ///
@@ -254,6 +283,7 @@ class EditorBloc {
   /// Initializes the BLOC interpreting the command line arguments.
   ///
   Future<void> initialize({required List<String> arguments}) async {
+    _openFileState = OpenFileState(files: [], currentIndex: -1, currentChanged: _refreshFiles);
     for (var arg in arguments) {
       if (!arg.startsWith("-")) {
         await openFile(arg);
@@ -263,9 +293,11 @@ class EditorBloc {
         }
       }
     }
-    for (var f in PksConfiguration.singleton.currentSession.openEditors) {
+    var session = await PksConfiguration.singleton.currentSession;
+    for (var f in session.openEditors) {
       await openFile(f.path);
     }
+    openFiles.addAll(session.openFiles);
   }
 
   Future<void> dispose() async {
