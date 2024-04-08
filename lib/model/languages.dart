@@ -11,6 +11,8 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 
+import 'package:re_highlight/languages/bash.dart';
+import 'package:re_highlight/languages/basic.dart';
 import 'package:re_highlight/languages/c.dart';
 import 'package:re_highlight/languages/cpp.dart';
 import 'package:re_highlight/languages/dart.dart';
@@ -57,8 +59,9 @@ class Languages {
     RegExp(r".*\.(xml|pom)"): Language(name: "xml", mode: langXml),
     RegExp(r".*\.(gradle|groovy)"): Language(name: "groovy", mode: langGroovy),
     RegExp(r".*\.py"): Language(name: "python", mode: langPython),
+    RegExp(r"[^.]+"): Language(name: "shell", mode: langBash),
   };
-  final Language defaultLanguage = Language(name: "unknown", mode: Mode());
+  final Language defaultLanguage = Language(name: "basic", mode: langBasic);
 
   Language modeForFilename(String fileName) {
     for (var e in _languageMappings.entries) {

@@ -15,7 +15,7 @@ import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_highlight/themes/atom-one-dark.dart';
+import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/ui/actions.dart';
@@ -271,9 +271,9 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                     onTap: () {
                       _closeChild(e);
                     },
-                    child: const Icon(
+                    child: Icon(
                       Icons.close,
-                      color: Colors.white24,
+                      color: Theme.of(context).dividerColor,
                     ))
               ]),
             ))
@@ -300,8 +300,9 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           },
           controller: e.controller,
           style: CodeEditorStyle(
+            fontFamily: Platform.isWindows ? "Consolas" : "Courier New",
               codeTheme: CodeHighlightTheme(
-                  theme: atomOneDarkTheme,
+                  theme: atomOneLightTheme,
                   languages: {
                 e.language.name: CodeHighlightThemeMode(mode: e.language.mode)
               })),
@@ -388,11 +389,14 @@ class ToolBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => IntrinsicHeight(
-          child: Row(
+          child: Container(
+              color: Theme.of(context).appBarTheme.backgroundColor,
+              padding: const EdgeInsets.all(4),
+              child: Row(
         mainAxisAlignment: MainAxisAlignment.start,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: _buildToolbarItems(context),
-      ));
+      )));
 }
 
 ///
@@ -521,13 +525,13 @@ class StatusBarWidget extends StatelessWidget {
                 Text(current.filename),
                 Row(children: [
                   Text(current.encoding.name),
-                  const VerticalDivider(color: Colors.white30, width: 20),
+                  VerticalDivider(color: Theme.of(context).dividerColor, width: 20),
                   Text(current.language.name)
                 ])
               ],
             ));
       return Container(
-          color: Colors.white10,
+          color: Theme.of(context).appBarTheme.backgroundColor,
           child: Padding(padding: const EdgeInsets.all(4), child: row));
   }
 }
