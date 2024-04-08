@@ -33,7 +33,7 @@ import 'package:window_manager/window_manager.dart';
 ///
 class OpenFileState {
   final List<OpenFile> files;
-  OpenFile? get currentFileSync => _currentFile;
+  OpenFile? get currentFile => _currentFile;
   int _currentIndex;
   int get currentIndex => _currentIndex;
   final void Function()? _currentChanged;
@@ -57,8 +57,15 @@ class OpenFileState {
 /// Represents one open file.
 ///
 class OpenFile {
+  static const String dockNameDefault = "default";
+  static const String dockNameRight = "rightSlot";
+  static const String dockNameBottom = "bottomSlot";
   final String filename;
   final String text;
+  ///
+  /// The "dock", where this file is placed.
+  ///
+  final String dock;
   late String _lastSavedText;
   final Encoding encoding;
   bool isNew;
@@ -91,7 +98,8 @@ class OpenFile {
     }
   }
 
-  OpenFile({required this.filename, required this.text, this.modified = false, this.encoding = utf8, required this.isNew}) {
+  OpenFile({required this.filename, required this.text, this.dock = dockNameDefault,
+    this.modified = false, this.encoding = utf8, required this.isNew}) {
     language = Languages.singleton.modeForFilename(filename);
     _lastSavedText = text;
     controller = CodeLineEditingController.fromText(text);
@@ -233,7 +241,7 @@ class EditorBloc {
 
   ///
   /// Open a file with the given [filename]. If a
-  Future<CommandResult> openFile(String filename) async {
+  Future<CommandResult> openFile(String filename, {String? dockName}) async {
     filename = _makeAbsolute(filename);
     if (_selectFile(filename)) {
       return CommandResult(success: true, message: "File with the given name was open already.");
@@ -251,7 +259,7 @@ class EditorBloc {
         text = file.readAsStringSync(encoding: encoding);
       }
       _addOpenFile(OpenFile(
-          filename: filename, isNew: false, text: text, encoding: encoding));
+          filename: filename, isNew: false, text: text, encoding: encoding, dock: dockName ?? OpenFile.dockNameDefault));
     } catch(ex) {
       return CommandResult(success: false, message: ex.toString());
     }
@@ -330,7 +338,7 @@ class EditorBloc {
     editorConfiguration = await PksConfiguration.singleton.configuration;
     await initWindowOptions(session);
     for (var f in session.openEditors) {
-      await openFile(f.path);
+      await openFile(f.path, dockName: f.dockName);
     }
     openFiles.addAll(session.openFiles);
   }

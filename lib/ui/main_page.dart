@@ -15,6 +15,7 @@ import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:package_info_plus/package_info_plus.dart';
@@ -46,6 +47,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           execute: _openFile,
           text: "Open File..",
           context: context,
+          shortcut: const SingleActivator(LogicalKeyboardKey.keyO, control: true),
           group: PksEditAction.fileGroup,
           icon: Icons.file_open),
       PksEditAction(
@@ -53,6 +55,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           execute: _newFile,
           text: "New File..",
           context: context,
+          shortcut: const SingleActivator(LogicalKeyboardKey.keyN, control: true),
           group: PksEditAction.fileGroup,
           icon: Icons.create_outlined),
       PksEditAction(
@@ -61,13 +64,24 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           isEnabled: _canSave,
           text: "Save File",
           context: context,
+          shortcut: const SingleActivator(LogicalKeyboardKey.keyS, control: true),
           description: "Save current file",
           group: PksEditAction.fileGroup,
           icon: Icons.save),
       PksEditAction(
+          id: "close-window",
+          execute: _closeWindow,
+          text: "Close Window",
+          shortcut: const SingleActivator(LogicalKeyboardKey.keyW, control: true),
+          context: context,
+          description: "Closes the current editor window",
+          group: PksEditAction.fileGroup,
+          icon: Icons.close),
+      PksEditAction(
           id: "undo",
           execute: _undo,
           isEnabled: _canUndo,
+          shortcut: const SingleActivator(LogicalKeyboardKey.keyZ, control: true),
           context: context,
           text: "Undo",
           group: PksEditAction.editGroup,
@@ -76,10 +90,46 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           id: "redo",
           execute: _redo,
           isEnabled: _canRedo,
+          shortcut: const SingleActivator(LogicalKeyboardKey.keyY, control: true),
           context: context,
           text: "Redo",
           group: PksEditAction.editGroup,
           icon: Icons.redo),
+      PksEditAction(
+          id: "copy",
+          execute: _copy,
+          isEnabled: _hasFile,
+          shortcut: const SingleActivator(LogicalKeyboardKey.keyC, control: true),
+          context: context,
+          text: "Copy",
+          group: PksEditAction.editGroup,
+          icon: Icons.copy),
+      PksEditAction(
+          id: "cut",
+          execute: _cut,
+          isEnabled: _hasFile,
+          shortcut: const SingleActivator(LogicalKeyboardKey.keyX, control: true),
+          context: context,
+          text: "Cut",
+          group: PksEditAction.editGroup,
+          icon: Icons.cut),
+      PksEditAction(
+          id: "select-all",
+          execute: _selectAll,
+          isEnabled: _hasFile,
+          shortcut: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
+          context: context,
+          text: "Select All",
+          group: PksEditAction.editGroup),
+      PksEditAction(
+          id: "paste",
+          execute: _paste,
+          isEnabled: _hasFile,
+          shortcut: const SingleActivator(LogicalKeyboardKey.keyV, control: true),
+          context: context,
+          text: "Paste",
+          group: PksEditAction.editGroup,
+          icon: Icons.paste),
     ];
   }
 
@@ -101,10 +151,9 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     }
     final bloc = EditorBloc.of(context);
     if (bloc.hasChangedWindows) {
-      await showDialog(
+      await showDialog<void>(
           context: context,
-          builder: (context) {
-            return SimpleDialog(title: const Text("Exit PKS Edit"), children: [
+          builder: (context) => SimpleDialog(title: const Text("Exit PKS Edit"), children: [
               Padding(
                   padding: const EdgeInsets.all(10),
                   child: Column(children: [
@@ -115,9 +164,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         ElevatedButton(
-                            onPressed: () {
-                              windowManager.destroy();
-                            },
+                            onPressed: windowManager.destroy,
                             child: const Text("Close without Save")),
                         ElevatedButton(
                             onPressed: () async {
@@ -137,8 +184,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                       ],
                     )
                   ]))
-            ]);
-          });
+            ]));
     } else {
       windowManager.destroy();
     }
@@ -186,7 +232,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
       }
     } else {
       message ??= "An error occurred executing the command";
-      await showDialog(
+      await showDialog<void>(
           context: context,
           barrierDismissible: false,
           builder: (BuildContext context) => AlertDialog(
@@ -202,39 +248,55 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     }
   }
 
-  bool _canSave(PksEditActionContext actionContext) {
-    return actionContext.openFileState?.currentFileSync?.modified == true;
-  }
-
+  bool _canSave(PksEditActionContext actionContext) => actionContext.openFileState?.currentFile?.modified == true;
 
   bool _canUndo(PksEditActionContext actionContext) {
-    var f = actionContext.openFileState?.currentFileSync;
+    var f = actionContext.currentFile;
     if (f != null) {
       return f.controller.canUndo;
     }
     return false;
   }
 
+  bool _hasFile(PksEditActionContext actionContext) => actionContext.currentFile != null;
+
   bool _canRedo(PksEditActionContext actionContext) {
-    var f = actionContext.openFileState?.currentFileSync;
+    var f = actionContext.currentFile;
     if (f != null) {
       return f.controller.canRedo;
     }
     return false;
   }
 
-  void _undo(PksEditActionContext actionContext) {
-    var f = actionContext.openFileState?.currentFileSync;
+  void _withCurrentFile(PksEditActionContext actionContext, void Function(CodeLineEditingController controller) callback) {
+    var f = actionContext.currentFile;
     if (f != null) {
-      f.controller.undo();
+      callback(f.controller);
     }
   }
 
+  void _copy(PksEditActionContext actionContext) {
+    _withCurrentFile(actionContext, (controller) { controller.copy(); });
+  }
+
+  void _cut(PksEditActionContext actionContext) {
+    _withCurrentFile(actionContext, (controller) { controller.cut(); });
+  }
+
+  void _paste(PksEditActionContext actionContext) {
+    _withCurrentFile(actionContext, (controller) { controller.paste(); });
+  }
+
+  void _undo(PksEditActionContext actionContext) {
+    _withCurrentFile(actionContext, (controller) { controller.undo(); });
+  }
+
+  void _selectAll(PksEditActionContext actionContext) {
+    _withCurrentFile(actionContext, (controller) { controller.selectAll(); });
+  }
+
   void _redo(PksEditActionContext actionContext) {
-    var f = actionContext.openFileState?.currentFileSync;
-    if (f != null) {
-      f.controller.redo();
-    }
+    _withCurrentFile(actionContext, (controller) { controller.redo(); });
   }
 
   void _openFile(PksEditActionContext actionContext) async {
@@ -256,21 +318,24 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     _handleCommandResult(await EditorBloc.of(context).newFile("Test.yaml"));
   }
 
-  void _closeChild(OpenFile file) {
+  void _closeWindow(PksEditActionContext actionContext) {
+    var file = actionContext.currentFile;
+    if (file == null) {
+      return;
+    }
     final bloc = EditorBloc.of(context);
     if (file.modified) {}
     bloc.closeFile(file);
   }
 
-  List<Widget> _buildTabs(List<OpenFile> files) {
-    return files
+  List<Widget> _buildTabs(OpenFileState state) => state.files
         .map((e) => Tab(
               child: Row(children: [
                 Tooltip(message: e.filename, child: Text(e.title)),
                 const SizedBox(width: 4),
                 InkWell(
                     onTap: () {
-                      _closeChild(e);
+                      _closeWindow(PksEditActionContext(openFileState: state, currentFile: e));
                     },
                     child: Icon(
                       Icons.close,
@@ -279,17 +344,14 @@ class _PksEditMainPageState extends State<PksEditMainPage>
               ]),
             ))
         .toList();
-  }
 
   List<Widget> _buildEditors(List<OpenFile> files) {
     final bloc = EditorBloc.of(context);
     return files.map(
-      (e) {
-        return CodeEditor(
+      (e) => CodeEditor(
           onChanged: e.onChanged,
           indicatorBuilder:
-              (context, editingController, chunkController, notifier) {
-            return Row(
+              (context, editingController, chunkController, notifier) => Row(
               children: [
                 DefaultCodeLineNumber(
                   controller: editingController,
@@ -298,8 +360,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                 DefaultCodeChunkIndicator(
                     width: 20, controller: chunkController, notifier: notifier)
               ],
-            );
-          },
+            ),
           controller: e.controller,
           style: CodeEditorStyle(
               fontFamily: bloc.editorConfiguration.defaultFontFace,
@@ -308,14 +369,22 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                   languages: {
                 e.language.name: CodeHighlightThemeMode(mode: e.language.mode)
               })),
-        );
-      },
+        ),
     ).toList();
   }
 
+  Map<ShortcutActivator, VoidCallback> _buildShortcutMap(List<PksEditAction> actions) {
+    final result = <ShortcutActivator, VoidCallback>{};
+    for (final action in actions) {
+      if (action.shortcut is ShortcutActivator && action.onPressed != null) {
+        result[action.shortcut as ShortcutActivator] = action.onPressed!;
+      }
+    }
+    return result;
+  }
+
   @override
-  Widget build(BuildContext context) {
-    return StreamBuilder(
+  Widget build(BuildContext context) => StreamBuilder(
         stream: EditorBloc.of(context).openFileStream,
         builder: (context, snapshot) {
           var files = snapshot.data;
@@ -325,8 +394,9 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           final myActions = getActions(files);
           files ??= OpenFileState(files: [], currentIndex: 0);
           return Scaffold(
-              body: Center(
-                  child: Column(
+              body: CallbackShortcuts(bindings: _buildShortcutMap(myActions), child: Focus(
+                    autofocus: true,
+                      child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -338,7 +408,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                   controller: controller,
                   tabAlignment: TabAlignment.start,
                   isScrollable: true,
-                  tabs: _buildTabs(files.files)),
+                  tabs: _buildTabs(files)),
               Expanded(
                   child: TabBarView(
                 controller: controller,
@@ -346,9 +416,8 @@ class _PksEditMainPageState extends State<PksEditMainPage>
               )),
               StatusBarWidget(fileState: files)
             ],
-          )));
+          ))));
         });
-  }
 }
 
 ///
@@ -361,7 +430,7 @@ class ToolBarWidget extends StatelessWidget {
   const ToolBarWidget(
       {super.key, required this.actions, this.iconColor = Colors.blue});
 
-  Widget _buildButton(PksEditAction action, Function()? callback) => Tooltip(
+  Widget _buildButton(PksEditAction action, void Function()? callback) => Tooltip(
       message: action.description,
       child: InkWell(
           onTap: callback,
@@ -371,14 +440,11 @@ class ToolBarWidget extends StatelessWidget {
                 color: callback == null ? Colors.grey : iconColor),
           )));
 
-  Iterable<Widget> _buildItemsForGroup(BuildContext context, String group) {
-    return actions
+  Iterable<Widget> _buildItemsForGroup(BuildContext context, String group) => actions
         .where((e) => e.displayInToolbar && e.group == group)
         .map((e) => _buildButton(e, e.onPressed));
-  }
 
-  List<Widget> _buildToolbarItems(BuildContext context) {
-    return [
+  List<Widget> _buildToolbarItems(BuildContext context) => [
       ..._buildItemsForGroup(context, PksEditAction.fileGroup),
       VerticalDivider(
         indent: 3,
@@ -387,7 +453,6 @@ class ToolBarWidget extends StatelessWidget {
       ),
       ..._buildItemsForGroup(context, PksEditAction.editGroup),
     ];
-  }
 
   @override
   Widget build(BuildContext context) => IntrinsicHeight(
@@ -430,8 +495,7 @@ class MenuBarWidget extends StatelessWidget {
     }
   }
 
-  List<Widget> _buildMenuBarChildren(BuildContext context) {
-    return [
+  List<Widget> _buildMenuBarChildren(BuildContext context) => [
       SubmenuButton(
         menuChildren: _buildFileMenu(context),
         child: const Text("File"),
@@ -475,12 +539,9 @@ class MenuBarWidget extends StatelessWidget {
         child: const Text("?"),
       ),
     ];
-  }
 
   @override
-  Widget build(BuildContext context) {
-    return MenuBar(children: _buildMenuBarChildren(context));
-  }
+  Widget build(BuildContext context) => MenuBar(children: _buildMenuBarChildren(context));
 
   List<Widget> _buildMenuForGroup(BuildContext context, String group) {
     final List<Widget> result = [];
@@ -488,6 +549,7 @@ class MenuBarWidget extends StatelessWidget {
         .where((element) => element.displayInMenu && element.group == group)
         .map((e) => MenuItemButton(
               onPressed: e.onPressed,
+              shortcut: e.shortcut,
               child: Text(e.label),
             )));
     return result;
@@ -515,7 +577,7 @@ class StatusBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      var current = fileState.currentFileSync;
+      var current = fileState.currentFile;
       var row = (current == null)
           ? const Row(
               children: [Text("")],

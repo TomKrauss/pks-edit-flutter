@@ -28,9 +28,7 @@ class Templates {
     RegExp(r".*\.py"): Template(useCopyright: false, text:""),
   };
 
-  String _evaluate(Template template) {
-    return template.text;
-  }
+  String _evaluate(Template template) => template.text;
 
   String generateInitialContent(String fileName) {
     for (var e in _templates.entries) {

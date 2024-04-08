@@ -19,7 +19,9 @@ import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 ///
 class PksEditActionContext {
   final OpenFileState? openFileState;
-  PksEditActionContext({required this.openFileState});
+  final OpenFile? _currentFile;
+  OpenFile? get currentFile => _currentFile ?? openFileState?.currentFile;
+  PksEditActionContext({required this.openFileState, OpenFile? currentFile}) : _currentFile = currentFile;
 }
 
 ///
@@ -36,6 +38,7 @@ class PksEditAction {
   final String? _description;
   final String group;
   final PksEditActionContext context;
+  final MenuSerializableShortcut? shortcut;
   String? text;
   IconData? icon;
   ///
@@ -59,6 +62,7 @@ class PksEditAction {
   PksEditAction({required this.id, this.isEnabled = _alwaysEnabled,
     required this.execute,
     required this.context,
+    this.shortcut,
     this.group = defaultGroup,
     this.text, this.icon, String? description}) : _description = description;
 }

@@ -11,21 +11,27 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 
+import 'package:re_highlight/languages/asciidoc.dart';
 import 'package:re_highlight/languages/bash.dart';
 import 'package:re_highlight/languages/basic.dart';
 import 'package:re_highlight/languages/c.dart';
 import 'package:re_highlight/languages/cpp.dart';
+import 'package:re_highlight/languages/css.dart';
 import 'package:re_highlight/languages/dart.dart';
+import 'package:re_highlight/languages/dockerfile.dart';
 import 'package:re_highlight/languages/dos.dart';
+import 'package:re_highlight/languages/excel.dart';
 import 'package:re_highlight/languages/go.dart';
 import 'package:re_highlight/languages/groovy.dart';
 import 'package:re_highlight/languages/ini.dart';
 import 'package:re_highlight/languages/java.dart';
+import 'package:re_highlight/languages/javascript.dart';
 import 'package:re_highlight/languages/json.dart';
 import 'package:re_highlight/languages/markdown.dart';
 import 'package:re_highlight/languages/properties.dart';
 import 'package:re_highlight/languages/protobuf.dart';
 import 'package:re_highlight/languages/python.dart';
+import 'package:re_highlight/languages/typescript.dart';
 import 'package:re_highlight/languages/xml.dart';
 import 'package:re_highlight/languages/yaml.dart';
 import 'package:re_highlight/re_highlight.dart';
@@ -51,6 +57,12 @@ class Languages {
     RegExp(r".*\.(properties|prop)"): Language(name: "properties", mode: langProperties),
     RegExp(r".*\.(json|jsn)"): Language(name: "json", mode: langJson),
     RegExp(r".*\.(yaml|yml)"): Language(name: "yaml", mode: langYaml),
+    RegExp(r".*\.adoc"): Language(name: "adoc", mode: langAsciidoc),
+    RegExp(r"Dockerfile"): Language(name: "docker", mode: langDockerfile),
+    RegExp(r".*\.js"): Language(name: "javascript", mode: langJavascript),
+    RegExp(r".*\.ts"): Language(name: "typescript", mode: langTypescript),
+    RegExp(r".*\.css"): Language(name: "css", mode: langCss),
+    RegExp(r".*\.csv"): Language(name: "csv", mode: langExcel),
     RegExp(r".*\.c"): Language(name: "c", mode: langC),
     RegExp(r".*\.(c\+\+|cpp)"): Language(name: "c++", mode: langCpp),
     RegExp(r".*\.(html|xhtml|htm)"): Language(name: "html", mode: langXml),

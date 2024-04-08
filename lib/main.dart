@@ -64,12 +64,10 @@ class PksEditApplication extends StatelessWidget {
 
   // This widget is the root of your application.
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
+  Widget build(BuildContext context) => MaterialApp(
           title: 'PKS EDIT',
           debugShowCheckedModeBanner: false,
           theme: _createTheme(context),
           home: const PksEditMainPage(title: 'PKS EDIT'),
         );
-  }
 }

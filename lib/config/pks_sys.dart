@@ -24,8 +24,13 @@ class OpenEditor {
   final String path;
   final int lineNumber;
   final String openHint;
-
+  String get dockName {
+    var split = openHint.split(" ");
+    return split.first.trim();
+  }
   OpenEditor({required this.path, required this.lineNumber, required this.openHint});
+
+  String encodeJson() => "\"$path\", line: $lineNumber: $openHint";
 
   static OpenEditor? parse(String string) {
     var match = pksEditSearchListFormat.firstMatch(string);
@@ -49,8 +54,44 @@ class MainWindowPlacement {
   final int right;
   MainWindowPlacement({this.flags = 0, this.show = 1, this.top = 0, this.left = 0, this.right = 1000, this.bottom = 1000});
 
+  String encodeJson() {
+    var map = {
+      "flags": flags,
+      "show": show,
+      "top": top,
+      "bottom": bottom,
+      "left": left,
+      "right": right,
+    };
+    return jsonEncode(map);
+  }
   static MainWindowPlacement from(Map<String, dynamic> map) =>
       MainWindowPlacement(flags: map["flags"], show: map["show"], top: map["top"], bottom: map["bottom"], right: map["right"]);
+}
+
+///
+/// Describes on main frame docking area.
+///
+class MainFrameDock {
+  final String name;
+  final double x;
+  final double y;
+  final double w;
+  final double h;
+  MainFrameDock({required this.name, required this.x, required this.y, required this.w, required this.h});
+
+  static MainFrameDock? from(Map<String, dynamic> map) {
+    if (map case {
+        'name': String name,
+        'x': double x,
+        'y': double y,
+        'w': double w,
+        'h': double h,
+      }) {
+      return MainFrameDock(name: name, x: x, y: y, w: w, h: h);
+    }
+    return null;
+  }
 }
 
 ///
@@ -64,8 +105,7 @@ class PksEditSession {
   final List<String> searchPatterns;
   final List<OpenEditor> openEditors;
   final MainWindowPlacement mainWindowPlacement;
-  /// Not yet supported in Flutter version: window "Docks".
-  final Map<String, Map<String,dynamic>> docks;
+  final Map<String, MainFrameDock> docks;
   PksEditSession({
     required this.screenWidth,
     required this.screenHeight,
@@ -76,6 +116,17 @@ class PksEditSession {
     this.openFiles = const[],
     this.openEditors = const []});
 
+  String encodeJson() {
+    var map = <String, dynamic>{
+      "search-replace-options": searchReplaceOptions,
+      "open-files": openFiles,
+      "open-editors": openEditors.map((e) => e.encodeJson).toList(),
+      "screen-width": screenWidth,
+      "main-window-placement": mainWindowPlacement.encodeJson(),
+      "screen-height": screenHeight
+    };
+    return jsonEncode(map);
+  }
   static PksEditSession from(Map<String,dynamic> jsonInput) {
     final h = jsonInput["screen-height"];
     final w = jsonInput["screen-width"];
@@ -84,11 +135,14 @@ class PksEditSession {
     final searchPatterns = jsonInput["search-patterns"];
     final openEditors = jsonInput["open-editors"];
     final mainWindowPlacement = jsonInput["main-window-placement"];
-    final docks = <String,Map<String,dynamic>>{};
-    for (int i = 1; i < 10; i++) {
+    final docks = <String,MainFrameDock>{};
+    for (int i = 1; i < 3; i++) {
       var dock = jsonInput["dock$i"];
       if (dock is Map) {
-        docks["dock$i"] = Map<String,dynamic>.from(dock);
+        var mainFrameDock = MainFrameDock.from(Map<String,dynamic>.from(dock));
+        if (mainFrameDock != null) {
+          docks["dock$i"] = mainFrameDock;
+        }
       } else {
         break;
       }
@@ -101,8 +155,8 @@ class PksEditSession {
         mainWindowPlacement: mainWindowPlacement is Map<String,dynamic> ? MainWindowPlacement.from(mainWindowPlacement) : MainWindowPlacement(),
         openFiles: openFiles is List ? List<String>.from(openFiles) : const[],
         searchPatterns: searchPatterns is List ? List<String>.from(searchPatterns) : const[],
-        openEditors: openEditors is List ?
-          openEditors.map((e) => OpenEditor.parse(e)).whereType<OpenEditor>().toList() : const[]);
+        openEditors: openEditors is List<dynamic> ?
+          openEditors.map((s) => OpenEditor.parse(s.toString())).whereType<OpenEditor>().toList() : const[]);
   }
 }
 
