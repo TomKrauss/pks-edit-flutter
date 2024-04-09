@@ -19,6 +19,7 @@ dependencies:
   logger: ^2.0.2
   file_selector: ^1.0.3
   flutter_highlight: ^0.7.0
+  super_drag_and_drop: ^0.8.11
   flutter:
     sdk: flutter
 

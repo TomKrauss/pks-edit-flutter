@@ -389,14 +389,13 @@ class EditorBloc {
         minimumSize: p.show == MainWindowPlacement.swShowMaximized ? null : size,
         skipTaskbar: false,
         fullScreen: null);
+    await windowManager.waitUntilReadyToShow(windowOptions, () async {
+      await windowManager.focus();
+      await windowManager.show();
+    });
     if (p.show == MainWindowPlacement.swShowMaximized) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         windowManager.maximize();
-      });
-    } else {
-      await windowManager.waitUntilReadyToShow(windowOptions, () async {
-        await windowManager.focus();
-        await windowManager.show();
       });
     }
   }
@@ -417,11 +416,20 @@ class EditorBloc {
     }
     var session = await PksConfiguration.singleton.currentSession;
     editorConfiguration = await PksConfiguration.singleton.configuration;
-    await initWindowOptions(session);
+    int? active;
+    int idx = 0;
     for (var f in session.openEditors) {
+      if (f.active) {
+        active = idx;
+      }
+      idx++;
       await openFile(f.path, dockName: f.dockName);
     }
+    if (active != null) {
+      _openFileState.currentIndex = active;
+    }
     openFiles.addAll(session.openFiles);
+    await initWindowOptions(session);
   }
 
   Future<void> dispose() async {

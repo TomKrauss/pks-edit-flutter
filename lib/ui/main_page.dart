@@ -25,6 +25,7 @@ import 'package:pks_edit_flutter/model/languages.dart';
 import 'package:pks_edit_flutter/ui/actions.dart';
 import 'package:pks_edit_flutter/ui/confirmation_dialog.dart';
 import 'package:re_editor/re_editor.dart';
+import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:window_manager/window_manager.dart';
 
 ///
@@ -412,6 +413,23 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     return result;
   }
 
+  DropOperation _onDropOver(DropOverEvent event) => event.session.allowedOperations.firstOrNull ?? DropOperation.none;
+
+  Future<void> _onPerformDrop(PerformDropEvent event) async {
+    final bloc = EditorBloc.of(context);
+    await Future.wait(
+      event.session.items.map(
+            (e) async {
+              e.dataReader?.getValue(Formats.fileUri, (value) async {
+                if (value is Uri) {
+                  _handleCommandResult(await bloc.openFile(value.toFilePath(windows: Platform.isWindows)));
+                }
+              });
+            }
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) => StreamBuilder(
       stream: EditorBloc.of(context).openFileStream,
@@ -423,7 +441,10 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                 bindings: _buildShortcutMap(myActions),
                 child: Focus(
                     child: Scaffold(
-                        body: Column(
+                        body: DropRegion(formats: const [
+                          Formats.plainTextFile,
+                        ], onDropOver: _onDropOver,
+                            onPerformDrop: _onPerformDrop, child: Column(
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
@@ -436,7 +457,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                         })),
                         StatusBarWidget(fileState: files)
                       ],
-                    ))));
+                    )))));
       });
 }
 

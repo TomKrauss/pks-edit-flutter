@@ -19,7 +19,10 @@ import 'package:path/path.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:window_manager/window_manager.dart';
 
-class OpenEditor {
+///
+/// Represents the state of an opened editor window as read from the sessions.
+///
+class OpenEditorPanel {
   static final pksEditSearchListFormat = RegExp(r'"([^"]+)", line ([0-9]+): *(.*)');
   final String path;
   final int lineNumber;
@@ -28,16 +31,21 @@ class OpenEditor {
     var split = openHint.split(" ");
     return split.first.trim();
   }
-  OpenEditor({required this.path, required this.lineNumber, required this.openHint});
+  ///
+  /// Whether this panel had been active.
+  ///
+  bool get active => openHint.split(" ").contains("active");
+
+  OpenEditorPanel({required this.path, required this.lineNumber, required this.openHint});
 
   String encodeJson() => "\"$path\", line: $lineNumber: $openHint";
 
-  static OpenEditor? parse(String string) {
+  static OpenEditorPanel? parse(String string) {
     var match = pksEditSearchListFormat.firstMatch(string);
     if (match == null) {
       return null;
     }
-    return OpenEditor(path: match.group(1)!, lineNumber: int.tryParse(match.group(2)!) ?? 0, openHint: match.group(3)!);
+    return OpenEditorPanel(path: match.group(1)!, lineNumber: int.tryParse(match.group(2)!) ?? 0, openHint: match.group(3)!);
   }
 }
 
@@ -103,7 +111,7 @@ class PksEditSession {
   final int searchReplaceOptions;
   final List<String> openFiles;
   final List<String> searchPatterns;
-  final List<OpenEditor> openEditors;
+  final List<OpenEditorPanel> openEditors;
   final MainWindowPlacement mainWindowPlacement;
   final Map<String, MainFrameDock> docks;
   PksEditSession({
@@ -156,7 +164,7 @@ class PksEditSession {
         openFiles: openFiles is List ? List<String>.from(openFiles) : const[],
         searchPatterns: searchPatterns is List ? List<String>.from(searchPatterns) : const[],
         openEditors: openEditors is List<dynamic> ?
-          openEditors.map((s) => OpenEditor.parse(s.toString())).whereType<OpenEditor>().toList() : const[]);
+          openEditors.map((s) => OpenEditorPanel.parse(s.toString())).whereType<OpenEditorPanel>().toList() : const[]);
   }
 }
 
