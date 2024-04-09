@@ -20,7 +20,9 @@ import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
+import 'package:pks_edit_flutter/model/languages.dart';
 import 'package:pks_edit_flutter/ui/actions.dart';
+import 'package:pks_edit_flutter/ui/confirmation_dialog.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -37,7 +39,6 @@ class PksEditMainPage extends StatefulWidget {
 
 class _PksEditMainPageState extends State<PksEditMainPage>
     with TickerProviderStateMixin, WindowListener {
-  late TabController controller;
 
   List<PksEditAction> getActions(OpenFileState? fileState) {
     final context = PksEditActionContext(openFileState: fileState);
@@ -45,17 +46,19 @@ class _PksEditMainPageState extends State<PksEditMainPage>
       PksEditAction(
           id: "open-file",
           execute: _openFile,
-          text: "Open File..",
+          text: "Open File...",
           context: context,
-          shortcut: const SingleActivator(LogicalKeyboardKey.keyO, control: true),
+          shortcut:
+              const SingleActivator(LogicalKeyboardKey.keyO, control: true),
           group: PksEditAction.fileGroup,
           icon: Icons.file_open),
       PksEditAction(
           id: "new-file",
           execute: _newFile,
-          text: "New File..",
+          text: "New File...",
           context: context,
-          shortcut: const SingleActivator(LogicalKeyboardKey.keyN, control: true),
+          shortcut:
+              const SingleActivator(LogicalKeyboardKey.keyN, control: true),
           group: PksEditAction.fileGroup,
           icon: Icons.create_outlined),
       PksEditAction(
@@ -64,7 +67,8 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           isEnabled: _canSave,
           text: "Save File",
           context: context,
-          shortcut: const SingleActivator(LogicalKeyboardKey.keyS, control: true),
+          shortcut:
+              const SingleActivator(LogicalKeyboardKey.keyS, control: true),
           description: "Save current file",
           group: PksEditAction.fileGroup,
           icon: Icons.save),
@@ -72,16 +76,36 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           id: "close-window",
           execute: _closeWindow,
           text: "Close Window",
-          shortcut: const SingleActivator(LogicalKeyboardKey.keyW, control: true),
+          shortcut:
+              const SingleActivator(LogicalKeyboardKey.keyW, control: true),
           context: context,
           description: "Closes the current editor window",
           group: PksEditAction.fileGroup,
           icon: Icons.close),
       PksEditAction(
+          id: "close-all-windows",
+          execute: _closeAllWindows,
+          text: "Close All Windows",
+          shortcut:
+          const SingleActivator(LogicalKeyboardKey.keyW, control: true, shift: true),
+          context: context,
+          description: "Closes all editor windows",
+          group: PksEditAction.fileGroup),
+      PksEditAction(
+          id: "exit",
+          execute: _exit,
+          text: "Exit",
+          shortcut: const SingleActivator(LogicalKeyboardKey.f4, alt: true),
+          context: context,
+          description: "Exit PKS Edit",
+          separatorBefore: true,
+          group: PksEditAction.fileGroup),
+      PksEditAction(
           id: "undo",
           execute: _undo,
           isEnabled: _canUndo,
-          shortcut: const SingleActivator(LogicalKeyboardKey.keyZ, control: true),
+          shortcut:
+              const SingleActivator(LogicalKeyboardKey.keyZ, control: true),
           context: context,
           text: "Undo",
           group: PksEditAction.editGroup,
@@ -90,7 +114,8 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           id: "redo",
           execute: _redo,
           isEnabled: _canRedo,
-          shortcut: const SingleActivator(LogicalKeyboardKey.keyY, control: true),
+          shortcut:
+              const SingleActivator(LogicalKeyboardKey.keyY, control: true),
           context: context,
           text: "Redo",
           group: PksEditAction.editGroup,
@@ -99,47 +124,63 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           id: "copy",
           execute: _copy,
           isEnabled: _hasFile,
-          shortcut: const SingleActivator(LogicalKeyboardKey.keyC, control: true),
+          shortcut:
+              const SingleActivator(LogicalKeyboardKey.keyC, control: true),
           context: context,
           text: "Copy",
+          separatorBefore: true,
           group: PksEditAction.editGroup,
           icon: Icons.copy),
       PksEditAction(
           id: "cut",
           execute: _cut,
           isEnabled: _hasFile,
-          shortcut: const SingleActivator(LogicalKeyboardKey.keyX, control: true),
+          shortcut:
+              const SingleActivator(LogicalKeyboardKey.keyX, control: true),
           context: context,
           text: "Cut",
           group: PksEditAction.editGroup,
           icon: Icons.cut),
+      PksEditAction(
+          id: "paste",
+          execute: _paste,
+          isEnabled: _hasFile,
+          shortcut:
+              const SingleActivator(LogicalKeyboardKey.keyV, control: true),
+          context: context,
+          text: "Paste",
+          group: PksEditAction.editGroup,
+          icon: Icons.paste),
       PksEditAction(
           id: "select-all",
           execute: _selectAll,
           isEnabled: _hasFile,
           shortcut: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
           context: context,
+          separatorBefore: true,
           text: "Select All",
           group: PksEditAction.editGroup),
       PksEditAction(
-          id: "paste",
-          execute: _paste,
-          isEnabled: _hasFile,
-          shortcut: const SingleActivator(LogicalKeyboardKey.keyV, control: true),
+          id: "cycle-window-forward",
+          execute: _cycleWindowForward,
+          shortcut:
+          const SingleActivator(LogicalKeyboardKey.tab, control: true),
           context: context,
-          text: "Paste",
-          group: PksEditAction.editGroup,
-          icon: Icons.paste),
+          text: "Cycle window forward",
+          group: PksEditAction.windowGroup),
+      PksEditAction(
+          id: "cycle-window-backward",
+          execute: _cycleWindowBackward,
+          shortcut:
+          const SingleActivator(LogicalKeyboardKey.tab, control: true, shift: true),
+          context: context,
+          text: "Cycle window backward",
+          group: PksEditAction.windowGroup),
     ];
   }
 
   @override
   void initState() {
-    controller = TabController(
-      length: 0,
-      vsync: this,
-      initialIndex: 0,
-    );
     windowManager.addListener(this);
     super.initState();
   }
@@ -151,67 +192,34 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     }
     final bloc = EditorBloc.of(context);
     if (bloc.hasChangedWindows) {
-      await showDialog<void>(
+      var result = await ConfirmationDialog.show(
           context: context,
-          builder: (context) => SimpleDialog(title: const Text("Exit PKS Edit"), children: [
-              Padding(
-                  padding: const EdgeInsets.all(10),
-                  child: Column(children: [
-                    const Text(
-                        "Some files are changed and not yet saved. Do you want to exit?"),
-                    const SizedBox(height: 20),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        ElevatedButton(
-                            onPressed: windowManager.destroy,
-                            child: const Text("Close without Save")),
-                        ElevatedButton(
-                            onPressed: () async {
-                              final result = await bloc.saveAllModified();
-                              if (result.success) {
-                                windowManager.destroy();
-                              } else {
-                                _handleCommandResult(result);
-                              }
-                            },
-                            child: const Text("Save All and Exit")),
-                        ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).pop();
-                            },
-                            child: const Text("Cancel"))
-                      ],
-                    )
-                  ]))
-            ]));
-    } else {
-      windowManager.destroy();
+          title: "Exit PKS Edit",
+          message:
+              "Some files are changed and not yet saved. How should we proceed?",
+          actions: {
+            "Exit without Saving": "close",
+            "Save All and Exit": "save",
+            "Cancel": null
+          });
+      if (result == null) {
+        return;
+      }
+      if (result == "save") {
+        final result = await bloc.saveAllModified();
+        if (!result.success) {
+          _handleCommandResult(result);
+          return;
+        }
+      }
     }
+    windowManager.destroy();
   }
 
   @override
   void dispose() {
     super.dispose();
     windowManager.removeListener(this);
-  }
-
-  void updateTabs(OpenFileState openFileState) {
-    final newCount = openFileState.files.length;
-    if (controller.length != newCount ||
-        controller.index != openFileState.currentIndex) {
-      final oldController = controller;
-      controller = TabController(
-        length: newCount,
-        vsync: this,
-        initialIndex:
-            openFileState.currentIndex < 0 ? 0 : openFileState.currentIndex,
-      );
-      oldController.dispose();
-      controller.addListener(() {
-        openFileState.currentIndex = controller.index;
-      });
-    }
   }
 
   ///
@@ -248,7 +256,8 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     }
   }
 
-  bool _canSave(PksEditActionContext actionContext) => actionContext.openFileState?.currentFile?.modified == true;
+  bool _canSave(PksEditActionContext actionContext) =>
+      actionContext.openFileState?.currentFile?.modified == true;
 
   bool _canUndo(PksEditActionContext actionContext) {
     var f = actionContext.currentFile;
@@ -258,7 +267,8 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     return false;
   }
 
-  bool _hasFile(PksEditActionContext actionContext) => actionContext.currentFile != null;
+  bool _hasFile(PksEditActionContext actionContext) =>
+      actionContext.currentFile != null;
 
   bool _canRedo(PksEditActionContext actionContext) {
     var f = actionContext.currentFile;
@@ -268,7 +278,8 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     return false;
   }
 
-  void _withCurrentFile(PksEditActionContext actionContext, void Function(CodeLineEditingController controller) callback) {
+  void _withCurrentFile(PksEditActionContext actionContext,
+      void Function(CodeLineEditingController controller) callback) {
     var f = actionContext.currentFile;
     if (f != null) {
       callback(f.controller);
@@ -276,37 +287,65 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   }
 
   void _copy(PksEditActionContext actionContext) {
-    _withCurrentFile(actionContext, (controller) { controller.copy(); });
+    _withCurrentFile(actionContext, (controller) {
+      controller.copy();
+    });
   }
 
   void _cut(PksEditActionContext actionContext) {
-    _withCurrentFile(actionContext, (controller) { controller.cut(); });
+    _withCurrentFile(actionContext, (controller) {
+      controller.cut();
+    });
   }
 
   void _paste(PksEditActionContext actionContext) {
-    _withCurrentFile(actionContext, (controller) { controller.paste(); });
+    _withCurrentFile(actionContext, (controller) {
+      controller.paste();
+    });
   }
 
   void _undo(PksEditActionContext actionContext) {
-    _withCurrentFile(actionContext, (controller) { controller.undo(); });
+    _withCurrentFile(actionContext, (controller) {
+      controller.undo();
+    });
   }
 
   void _selectAll(PksEditActionContext actionContext) {
-    _withCurrentFile(actionContext, (controller) { controller.selectAll(); });
+    _withCurrentFile(actionContext, (controller) {
+      controller.selectAll();
+    });
   }
 
   void _redo(PksEditActionContext actionContext) {
-    _withCurrentFile(actionContext, (controller) { controller.redo(); });
+    _withCurrentFile(actionContext, (controller) {
+      controller.redo();
+    });
   }
 
-  void _openFile(PksEditActionContext actionContext) async {
+  void _exit(PksEditActionContext actionContext) {
+    onWindowClose();
+  }
+
+  Future<void> _openFile(PksEditActionContext actionContext) async {
     final bloc = EditorBloc.of(context);
     final String initialDirectory = File(".").absolute.path;
     final result = await openFile(
-        initialDirectory: initialDirectory, confirmButtonText: "Open");
+        initialDirectory: initialDirectory,
+        acceptedTypeGroups: Languages.singleton.getFileGroups(actionContext.currentFile?.filename ?? ""),
+        confirmButtonText: "Open");
     if (result != null) {
       await _handleCommandResult(await bloc.openFile(result.path));
     }
+  }
+
+  void _cycleWindowForward(PksEditActionContext actionContext) {
+    final bloc = EditorBloc.of(context);
+    bloc.cycleWindow(1);
+  }
+
+  void _cycleWindowBackward(PksEditActionContext actionContext) {
+    final bloc = EditorBloc.of(context);
+    bloc.cycleWindow(-1);
   }
 
   void _saveFile(PksEditActionContext actionContext) async {
@@ -318,62 +357,47 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     _handleCommandResult(await EditorBloc.of(context).newFile("Test.yaml"));
   }
 
+  Future<void> _closeWindows(List<OpenFile> files) async {
+    final bloc = EditorBloc.of(context);
+    // avoid concurrent modification exception.
+    files = [...files];
+    for (final file in files) {
+      if (file.modified) {
+        var result = await ConfirmationDialog.show(context: context, message: "File ${file.filename} was modified.\nShould we save it before closing?",
+          actions: {
+            "Save": "save",
+            "Close without Saving": "close",
+            "Cancel": null
+          });
+        if (result == null) {
+          break;
+        }
+        if (result == "save") {
+          final commandResult = await bloc.saveAllModified();
+          if (!commandResult.success) {
+            _handleCommandResult(commandResult);
+            return;
+          }
+        }
+      }
+      bloc.closeFile(file);
+    }
+  }
+
+  void _closeAllWindows(PksEditActionContext actionContext) {
+    _closeWindows(actionContext.openFileState?.files ?? []);
+  }
+
   void _closeWindow(PksEditActionContext actionContext) {
     var file = actionContext.currentFile;
     if (file == null) {
       return;
     }
-    final bloc = EditorBloc.of(context);
-    if (file.modified) {}
-    bloc.closeFile(file);
+    _closeWindows([file]);
   }
 
-  List<Widget> _buildTabs(OpenFileState state) => state.files
-        .map((e) => Tab(
-              child: Row(children: [
-                Tooltip(message: e.filename, child: Text(e.title)),
-                const SizedBox(width: 4),
-                InkWell(
-                    onTap: () {
-                      _closeWindow(PksEditActionContext(openFileState: state, currentFile: e));
-                    },
-                    child: Icon(
-                      Icons.close,
-                      color: Theme.of(context).dividerColor,
-                    ))
-              ]),
-            ))
-        .toList();
-
-  List<Widget> _buildEditors(List<OpenFile> files) {
-    final bloc = EditorBloc.of(context);
-    return files.map(
-      (e) => CodeEditor(
-          onChanged: e.onChanged,
-          indicatorBuilder:
-              (context, editingController, chunkController, notifier) => Row(
-              children: [
-                DefaultCodeLineNumber(
-                  controller: editingController,
-                  notifier: notifier,
-                ),
-                DefaultCodeChunkIndicator(
-                    width: 20, controller: chunkController, notifier: notifier)
-              ],
-            ),
-          controller: e.controller,
-          style: CodeEditorStyle(
-              fontFamily: bloc.editorConfiguration.defaultFontFace,
-              codeTheme: CodeHighlightTheme(
-                  theme: bloc.editorConfiguration.themeName == "dark" ? atomOneDarkTheme : atomOneLightTheme,
-                  languages: {
-                e.language.name: CodeHighlightThemeMode(mode: e.language.mode)
-              })),
-        ),
-    ).toList();
-  }
-
-  Map<ShortcutActivator, VoidCallback> _buildShortcutMap(List<PksEditAction> actions) {
+  Map<ShortcutActivator, VoidCallback> _buildShortcutMap(
+      List<PksEditAction> actions) {
     final result = <ShortcutActivator, VoidCallback>{};
     for (final action in actions) {
       if (action.shortcut is ShortcutActivator && action.onPressed != null) {
@@ -385,40 +409,144 @@ class _PksEditMainPageState extends State<PksEditMainPage>
 
   @override
   Widget build(BuildContext context) => StreamBuilder(
-        stream: EditorBloc.of(context).openFileStream,
-        builder: (context, snapshot) {
-          var files = snapshot.data;
-          if (files != null) {
-            updateTabs(files);
-          }
-          final myActions = getActions(files);
-          files ??= OpenFileState(files: [], currentIndex: 0);
-          return Scaffold(
-              body: CallbackShortcuts(bindings: _buildShortcutMap(myActions), child: Focus(
-                    autofocus: true,
-                      child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: <Widget>[
-              SizedBox(
-                  width: double.infinity,
-                  child: MenuBarWidget(actions: myActions)),
-              ToolBarWidget(actions: myActions),
-              TabBar(
-                  controller: controller,
-                  tabAlignment: TabAlignment.start,
-                  isScrollable: true,
-                  tabs: _buildTabs(files)),
-              Expanded(
-                  child: TabBarView(
-                controller: controller,
-                children: _buildEditors(files.files),
-              )),
-              StatusBarWidget(fileState: files)
-            ],
-          ))));
-        });
+      stream: EditorBloc.of(context).openFileStream,
+      builder: (context, snapshot) {
+        var files = snapshot.data;
+        final myActions = getActions(files);
+        files ??= OpenFileState(files: [], currentIndex: 0);
+        return CallbackShortcuts(
+                bindings: _buildShortcutMap(myActions),
+                child: Focus(
+                    child: Scaffold(
+                        body: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        SizedBox(
+                            width: double.infinity,
+                            child: MenuBarWidget(actions: myActions)),
+                        ToolBarWidget(actions: myActions),
+                        Expanded(child: EditorDockPanel(state: files, files: files.files, closeFile: (file) {
+                          _closeWindow(PksEditActionContext(openFileState: files, currentFile: file));
+                        })),
+                        StatusBarWidget(fileState: files)
+                      ],
+                    ))));
+      });
 }
+
+///
+/// Represents one "dock" in PKS-Edit displaying a list of files selectable using tabs.
+///
+class EditorDockPanel extends StatefulWidget {
+  final String dockName;
+  final List<OpenFile> files;
+  final OpenFileState state;
+  final void Function(OpenFile) closeFile;
+  const EditorDockPanel({this.dockName = OpenFile.dockNameDefault,
+    required this.state, required this.files, required this.closeFile, super.key});
+
+  @override
+  State<EditorDockPanel> createState() => _EditorDockPanelState();
+}
+
+class _EditorDockPanelState extends State<EditorDockPanel> with TickerProviderStateMixin {
+  late TabController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = TabController(length: 0, vsync: this);
+  }
+
+  ///
+  /// Update the tab controller to reflect a changed number of tabs.
+  ///
+  void updateTabs(List<OpenFile> files) {
+    final newCount = files.length;
+    int idx = controller.index;
+    final selected = widget.state.currentFile;
+    var newIdx = selected == null ? -1 : widget.files.indexOf(selected);
+    if (newIdx < 0) {
+      newIdx = idx;
+    }
+    if (controller.length != newCount) {
+      final oldController = controller;
+      controller = TabController(
+        length: newCount,
+        vsync: this,
+        initialIndex: newIdx,
+      );
+      oldController.dispose();
+      controller.addListener(() {
+        widget.state.currentFile = widget.files[controller.index];
+      });
+    } else {
+      controller.index = newIdx;
+    }
+  }
+
+  List<Widget> _buildTabs() => widget.files
+      .map((e) => Tab(
+    child: Row(children: [
+      Tooltip(message: e.filename, child: Text(e.title)),
+      const SizedBox(width: 4),
+      InkWell(
+          onTap: () {
+            widget.closeFile(e);
+          },
+          child: Icon(
+            Icons.close,
+            color: Theme.of(context).dividerColor,
+          ))
+    ]),
+  ))
+      .toList();
+
+  Widget _buildEditor(OpenFile file) {
+    final bloc = EditorBloc.of(context);
+    return CodeEditor(
+        autofocus: true,
+        onChanged: file.onChanged,
+        indicatorBuilder:
+            (context, editingController, chunkController, notifier) => Row(
+          children: [
+            DefaultCodeLineNumber(
+              controller: editingController,
+              notifier: notifier,
+            ),
+            DefaultCodeChunkIndicator(
+                width: 20, controller: chunkController, notifier: notifier)
+          ],
+        ),
+        controller: file.controller,
+        style: CodeEditorStyle(
+            fontFamily: bloc.editorConfiguration.defaultFontFace,
+            codeTheme: CodeHighlightTheme(
+                theme: bloc.editorConfiguration.themeName == "dark"
+                    ? atomOneDarkTheme
+                    : atomOneLightTheme,
+                languages: {
+                  file.language.name:
+                  CodeHighlightThemeMode(mode: file.language.mode)
+                })));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    updateTabs(widget.files);
+    return Column(children: [
+      TabBar(
+          controller: controller,
+          tabAlignment: TabAlignment.start,
+          isScrollable: true,
+          tabs: _buildTabs()),
+      Expanded(
+          child: widget.files.isEmpty ? const SizedBox() : _buildEditor(widget.files[controller.index])),
+    ],);
+  }
+}
+
 
 ///
 /// Displays a tool bar containing the tool bar triggered actions of PKS EDIT
@@ -430,40 +558,42 @@ class ToolBarWidget extends StatelessWidget {
   const ToolBarWidget(
       {super.key, required this.actions, this.iconColor = Colors.blue});
 
-  Widget _buildButton(PksEditAction action, void Function()? callback) => Tooltip(
-      message: action.description,
-      child: InkWell(
-          onTap: callback,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
-            child: Icon(action.icon,
-                color: callback == null ? Colors.grey : iconColor),
-          )));
+  Widget _buildButton(PksEditAction action, void Function()? callback) =>
+      Tooltip(
+          message: action.description,
+          child: InkWell(
+              onTap: callback,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 3),
+                child: Icon(action.icon,
+                    color: callback == null ? Colors.grey : iconColor),
+              )));
 
-  Iterable<Widget> _buildItemsForGroup(BuildContext context, String group) => actions
-        .where((e) => e.displayInToolbar && e.group == group)
-        .map((e) => _buildButton(e, e.onPressed));
+  Iterable<Widget> _buildItemsForGroup(BuildContext context, String group) =>
+      actions
+          .where((e) => e.displayInToolbar && e.group == group)
+          .map((e) => _buildButton(e, e.onPressed));
 
   List<Widget> _buildToolbarItems(BuildContext context) => [
-      ..._buildItemsForGroup(context, PksEditAction.fileGroup),
-      VerticalDivider(
-        indent: 3,
-        endIndent: 3,
-        color: Theme.of(context).dividerColor,
-      ),
-      ..._buildItemsForGroup(context, PksEditAction.editGroup),
-    ];
+        ..._buildItemsForGroup(context, PksEditAction.fileGroup),
+        VerticalDivider(
+          indent: 3,
+          endIndent: 3,
+          color: Theme.of(context).dividerColor,
+        ),
+        ..._buildItemsForGroup(context, PksEditAction.editGroup),
+      ];
 
   @override
   Widget build(BuildContext context) => IntrinsicHeight(
-          child: Container(
-              color: Theme.of(context).appBarTheme.backgroundColor,
-              padding: const EdgeInsets.all(4),
-              child: Row(
-        mainAxisAlignment: MainAxisAlignment.start,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: _buildToolbarItems(context),
-      )));
+      child: Container(
+          color: Theme.of(context).appBarTheme.backgroundColor,
+          padding: const EdgeInsets.all(4),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: _buildToolbarItems(context),
+          )));
 }
 
 ///
@@ -496,62 +626,66 @@ class MenuBarWidget extends StatelessWidget {
   }
 
   List<Widget> _buildMenuBarChildren(BuildContext context) => [
-      SubmenuButton(
-        menuChildren: _buildFileMenu(context),
-        child: const Text("File"),
-      ),
-      SubmenuButton(
-        menuChildren: _buildMenuForGroup(context, PksEditAction.editGroup),
-        child: const Text("Edit"),
-      ),
-      SubmenuButton(
-        menuChildren: _buildMenuForGroup(context, PksEditAction.findGroup),
-        child: const Text("Find"),
-      ),
-      SubmenuButton(
-        menuChildren: _buildMenuForGroup(context, PksEditAction.functionGroup),
-        child: const Text("Functions"),
-      ),
-      const SubmenuButton(
-        menuChildren: [],
-        child: Text("Macro"),
-      ),
-      const SubmenuButton(
-        menuChildren: [],
-        child: Text("Settings"),
-      ),
-      const SubmenuButton(
-        menuChildren: [],
-        child: Text("Extras"),
-      ),
-      const SubmenuButton(
-        menuChildren: [],
-        child: Text("Window"),
-      ),
-      SubmenuButton(
-        menuChildren: [
-          MenuItemButton(
-              child: const Text("About..."),
-              onPressed: () {
-                _showAbout(context);
-              })
-        ],
-        child: const Text("?"),
-      ),
-    ];
+        SubmenuButton(
+          menuChildren: _buildFileMenu(context),
+          child: const Text("File"),
+        ),
+        SubmenuButton(
+          menuChildren: _buildMenuForGroup(context, PksEditAction.editGroup),
+          child: const Text("Edit"),
+        ),
+        SubmenuButton(
+          menuChildren: _buildMenuForGroup(context, PksEditAction.findGroup),
+          child: const Text("Find"),
+        ),
+        SubmenuButton(
+          menuChildren:
+              _buildMenuForGroup(context, PksEditAction.functionGroup),
+          child: const Text("Functions"),
+        ),
+        const SubmenuButton(
+          menuChildren: [],
+          child: Text("Macro"),
+        ),
+        const SubmenuButton(
+          menuChildren: [],
+          child: Text("Settings"),
+        ),
+        const SubmenuButton(
+          menuChildren: [],
+          child: Text("Extras"),
+        ),
+        SubmenuButton(
+          menuChildren: _buildMenuForGroup(context, PksEditAction.windowGroup),
+          child: const Text("Window"),
+        ),
+        SubmenuButton(
+          menuChildren: [
+            MenuItemButton(
+                child: const Text("About..."),
+                onPressed: () {
+                  _showAbout(context);
+                })
+          ],
+          child: const Text("?"),
+        ),
+      ];
 
   @override
-  Widget build(BuildContext context) => MenuBar(children: _buildMenuBarChildren(context));
+  Widget build(BuildContext context) =>
+      MenuBar(children: _buildMenuBarChildren(context));
 
   List<Widget> _buildMenuForGroup(BuildContext context, String group) {
     final List<Widget> result = [];
-    result.addAll(actions
+    actions
         .where((element) => element.displayInMenu && element.group == group)
-        .map((e) => MenuItemButton(
-              onPressed: e.onPressed,
-              shortcut: e.shortcut,
-              child: Text(e.label),
-            )));
+        .forEach((e) {
+      if (e.separatorBefore) {
+        result.add(const Divider());
+      }
+      result.add(MenuItemButton(
+          onPressed: e.onPressed, shortcut: e.shortcut, child: Text(e.label)));
+    });
     return result;
   }
 
@@ -577,25 +711,26 @@ class StatusBarWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-      var current = fileState.currentFile;
-      var row = (current == null)
-          ? const Row(
-              children: [Text("")],
-            )
-          : IntrinsicHeight(
-              child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(current.filename),
-                Row(children: [
-                  Text(current.encoding.name),
-                  VerticalDivider(color: Theme.of(context).dividerColor, width: 20),
-                  Text(current.language.name)
-                ])
-              ],
-            ));
-      return Container(
-          color: Theme.of(context).appBarTheme.backgroundColor,
-          child: Padding(padding: const EdgeInsets.all(4), child: row));
+    var current = fileState.currentFile;
+    var row = (current == null)
+        ? const Row(
+            children: [Text("")],
+          )
+        : IntrinsicHeight(
+            child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(current.filename),
+              Row(children: [
+                Text(current.encoding.name),
+                VerticalDivider(
+                    color: Theme.of(context).dividerColor, width: 20),
+                Text(current.language.name)
+              ])
+            ],
+          ));
+    return Container(
+        color: Theme.of(context).appBarTheme.backgroundColor,
+        child: Padding(padding: const EdgeInsets.all(4), child: row));
   }
 }

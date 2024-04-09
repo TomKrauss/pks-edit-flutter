@@ -32,6 +32,7 @@ class PksEditAction {
   static const String editGroup = "edit";
   static const String findGroup = "find";
   static const String viewGroup = "view";
+  static const String windowGroup = "window";
   static const String functionGroup = "function";
   static const String defaultGroup = "default";
   final String id;
@@ -39,6 +40,11 @@ class PksEditAction {
   final String group;
   final PksEditActionContext context;
   final MenuSerializableShortcut? shortcut;
+  ///
+  /// Add a separator before creating a button in the toolbar / in a menu before adding
+  /// the button for this action.
+  ///
+  final bool separatorBefore;
   String? text;
   IconData? icon;
   ///
@@ -62,6 +68,7 @@ class PksEditAction {
   PksEditAction({required this.id, this.isEnabled = _alwaysEnabled,
     required this.execute,
     required this.context,
+    this.separatorBefore = false,
     this.shortcut,
     this.group = defaultGroup,
     this.text, this.icon, String? description}) : _description = description;

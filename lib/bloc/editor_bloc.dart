@@ -38,6 +38,7 @@ class OpenFileState {
   int get currentIndex => _currentIndex;
   final void Function()? _currentChanged;
   OpenFile? get _currentFile => currentIndex < 0 || files.length <= currentIndex ? null : files[currentIndex];
+  set currentFile(OpenFile? file) => currentIndex = file == null ? -1 : files.indexOf(file);
   set currentIndex(int idx) {
     if (_currentIndex == idx) {
       return;
@@ -145,6 +146,20 @@ class EditorBloc {
   }
 
   ///
+  /// Can be used to "cycle" through the list of open windows. If [delta] is positive we cycle
+  /// forward, otherwise backward.
+  ///
+  void cycleWindow(int delta) {
+    var newIdx = _openFileState.currentIndex + delta;
+    if (newIdx < 0) {
+      newIdx = _openFileState.files.length-1;
+    } else if (newIdx >= _openFileState.files.length)  {
+      newIdx = 0;
+    }
+    _openFileState.currentIndex = newIdx;
+  }
+
+  ///
   /// Whether there are any editor windows open, which are currently in the state modified.
   ///
   bool get hasChangedWindows => _openFileState.files.where((element) => element.modified).isNotEmpty;
@@ -217,7 +232,6 @@ class EditorBloc {
   void _addOpenFile(OpenFile openFile) {
     _openFileState.files.add(openFile);
     _openFileState.currentIndex = _openFileState.files.length-1;
-    _refreshFiles();
     openFile.addChangeListener((OpenFile file) {
       _refreshFiles();
     });
@@ -288,8 +302,9 @@ class EditorBloc {
     file.removeChangeListener();
     if (_openFileState.currentIndex >= _openFileState.files.length) {
       _openFileState.currentIndex = _openFileState.files.length-1;
+    } else {
+      _refreshFiles();
     }
-    _refreshFiles();
   }
 
   Future<void> initWindowOptions(PksEditSession session) async {
