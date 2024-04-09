@@ -253,8 +253,76 @@ class EditorBloc {
     return CommandResult(success: true);
   }
 
+  Encoding _parseBytesToDetectEncoding(List<int> pData) {
+    var i = 0;
+    final end = pData.length;
+    int nLength;
+    while (i < end) {
+      int byte = pData[i++];
+      if (byte <= 0x7F || i >= end) {
+        /* 1 byte sequence: U+0000..U+007F */
+        continue;
+      }
+      if (0xC2 <= byte && byte <= 0xDF) {
+        nLength = 1;
+      } else if (0xE0 <= byte && byte <= 0xEF) {
+        nLength = 2;
+      } else if (0xF0 <= byte && byte <= 0xF4) {
+        nLength = 3;
+      } else {
+        continue;
+      }
+      if (i + nLength >= end) {
+        /* truncated string or invalid byte sequence */
+        return latin1;
+      }
+
+      /* Check continuation bytes: bit 7 should be set, bit 6 should be unset (b10xxxxxx). */
+      for (i = 0; i < nLength; i++) {
+        if ((pData[i] & 0xC0) != 0x80) {
+          return latin1;
+        }
+        if (nLength == 1) {
+          return utf8;
+        } else if (nLength == 2) {
+          /* 3 bytes sequence: U+0800..U+FFFF */
+          int ch = ((pData[0] & 0x0f) << 12) + ((pData[1] & 0x3f) << 6) +
+              (pData[2] & 0x3f);
+          /* (0xff & 0x0f) << 12 | (0xff & 0x3f) << 6 | (0xff & 0x3f) = 0xffff, so ch <= 0xffff */
+          if (ch < 0x0800) {
+            return latin1;
+          }
+          /* surrogates (U+D800-U+DFFF) are invalid in UTF-8: test if (0xD800 <= ch && ch <= 0xDFFF) */
+          if ((ch >> 11) == 0x1b) {
+            return latin1;
+          }
+          return utf8;
+        } else if (nLength == 3) {
+          /* 4 bytes sequence: U+10000..U+10FFFF */
+          int ch = ((pData[0] & 0x07) << 18) + ((pData[1] & 0x3f) << 12) +
+              ((pData[2] & 0x3f) << 6) + (pData[3] & 0x3f);
+          if ((ch < 0x10000) || (0x10FFFF < ch)) {
+            return latin1;
+          }
+          return utf8;
+        }
+        i += nLength;
+      }
+    }
+    return latin1;
+  }
+
+
+  Future<Encoding> _detectEncoding(File file) async {
+    final size = min(4096, await file.length());
+    final tester = file.openRead(0, size);
+    return _parseBytesToDetectEncoding(await tester.first);
+  }
+
   ///
-  /// Open a file with the given [filename]. If a
+  /// Open a file with the given [filename]. If a [dockName] is passed, the file is opened
+  /// in the corresponding dock on the screen otherwise on the default dock.
+  ///
   Future<CommandResult> openFile(String filename, {String? dockName}) async {
     filename = _makeAbsolute(filename);
     if (_selectFile(filename)) {
@@ -263,14 +331,12 @@ class EditorBloc {
     try {
       final file = File.fromUri(
           Uri.file(filename, windows: Platform.isWindows));
-      Encoding encoding = utf8;
-      String? text;
-      try {
-        text = file.readAsStringSync();
-      } catch (ex) {
-        // TODO: add encoding detection
-        encoding = latin1;
-        text = file.readAsStringSync(encoding: encoding);
+      Encoding encoding = await _detectEncoding(file);
+      String? text = file.readAsStringSync(encoding: encoding);
+      openFiles.remove(filename);
+      openFiles.insert(0, filename);
+      if (openFiles.length > 10) {
+        openFiles.removeRange(10, openFiles.length);
       }
       _addOpenFile(OpenFile(
           filename: filename, isNew: false, text: text, encoding: encoding, dock: dockName ?? OpenFile.dockNameDefault));
@@ -324,7 +390,7 @@ class EditorBloc {
         skipTaskbar: false,
         fullScreen: null);
     if (p.show == MainWindowPlacement.swShowMaximized) {
-      WidgetsBinding.instance.addPersistentFrameCallback((timeStamp) {
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
         windowManager.maximize();
       });
     } else {

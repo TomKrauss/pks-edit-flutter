@@ -19,6 +19,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/model/languages.dart';
 import 'package:pks_edit_flutter/ui/actions.dart';
@@ -89,6 +90,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           shortcut:
           const SingleActivator(LogicalKeyboardKey.keyW, control: true, shift: true),
           context: context,
+          icon: Icons.done_all,
           description: "Closes all editor windows",
           group: PksEditAction.fileGroup),
       PksEditAction(
@@ -97,6 +99,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           text: "Exit",
           shortcut: const SingleActivator(LogicalKeyboardKey.f4, alt: true),
           context: context,
+          icon: Icons.exit_to_app,
           description: "Exit PKS Edit",
           separatorBefore: true,
           group: PksEditAction.fileGroup),
@@ -157,15 +160,16 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           isEnabled: _hasFile,
           shortcut: const SingleActivator(LogicalKeyboardKey.keyA, control: true),
           context: context,
+          icon: Icons.select_all,
           separatorBefore: true,
           text: "Select All",
           group: PksEditAction.editGroup),
       PksEditAction(
           id: "cycle-window-forward",
           execute: _cycleWindowForward,
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.tab, control: true),
+          shortcut: const SingleActivator(LogicalKeyboardKey.tab, control: true),
           context: context,
+          icon: Icons.rotate_left,
           text: "Cycle window forward",
           group: PksEditAction.windowGroup),
       PksEditAction(
@@ -174,6 +178,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           shortcut:
           const SingleActivator(LogicalKeyboardKey.tab, control: true, shift: true),
           context: context,
+          icon: Icons.rotate_right,
           text: "Cycle window backward",
           group: PksEditAction.windowGroup),
     ];
@@ -661,9 +666,8 @@ class MenuBarWidget extends StatelessWidget {
         ),
         SubmenuButton(
           menuChildren: [
-            MenuItemButton(
-                child: const Text("About..."),
-                onPressed: () {
+            _createMenuButton(
+                context, "About...", null, null, () {
                   _showAbout(context);
                 })
           ],
@@ -675,6 +679,14 @@ class MenuBarWidget extends StatelessWidget {
   Widget build(BuildContext context) =>
       MenuBar(children: _buildMenuBarChildren(context));
 
+  MenuItemButton _createMenuButton(BuildContext context, String label, IconData? icon,
+        MenuSerializableShortcut? shortcut, void Function()? onPressed) =>
+    MenuItemButton(
+        leadingIcon: icon == null ?
+          SizedBox(width: Theme.of(context).menuButtonTheme.style?.iconSize?.resolve({MaterialState.selected}) ?? 24) :
+        Icon(icon),
+        onPressed: onPressed, shortcut: shortcut, child: Text(label));
+
   List<Widget> _buildMenuForGroup(BuildContext context, String group) {
     final List<Widget> result = [];
     actions
@@ -683,10 +695,20 @@ class MenuBarWidget extends StatelessWidget {
       if (e.separatorBefore) {
         result.add(const Divider());
       }
-      result.add(MenuItemButton(
-          onPressed: e.onPressed, shortcut: e.shortcut, child: Text(e.label)));
+      result.add(_createMenuButton(context, e.label, e.icon, e.shortcut, e.onPressed));
     });
     return result;
+  }
+
+  String _shortenFileName(String filename) {
+    if (filename.length < 40) {
+      return filename;
+    }
+    var segments = path.split(filename);
+    if (segments.length < 4) {
+      return filename;
+    }
+    return path.join(segments.first, segments[1], "...", segments[segments.length-2], segments.last);
   }
 
   List<Widget> _buildFileMenu(BuildContext context) {
@@ -695,16 +717,17 @@ class MenuBarWidget extends StatelessWidget {
     result.add(const Divider());
     final bloc = EditorBloc.of(context);
     for (var of in bloc.openFiles) {
-      result.add(MenuItemButton(
-          onPressed: () {
+      result.add(_createMenuButton(context, _shortenFileName(of), null, null,  () {
             bloc.openFile(of);
-          },
-          child: Text(of)));
+          }));
     }
     return result;
   }
 }
 
+///
+/// A widget displaying status information about the currently active file.
+///
 class StatusBarWidget extends StatelessWidget {
   final OpenFileState fileState;
   const StatusBarWidget({super.key, required this.fileState});
