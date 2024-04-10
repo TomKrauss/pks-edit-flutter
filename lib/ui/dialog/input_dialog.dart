@@ -12,6 +12,7 @@
 //
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pks_edit_flutter/ui/actions.dart';
 
 ///
@@ -25,11 +26,13 @@ class InputDialogArguments {
   final Map<String,bool> options;
   final String inputLabel;
   final String title;
+  final TextInputType keyboardType;
 
   InputDialogArguments(
       {required this.context,
       required this.title,
       required this.inputLabel,
+        this.keyboardType = TextInputType.text,
         this.options = const {},
       this.initialValue});
 }
@@ -99,6 +102,12 @@ class _InputDialogState extends State<InputDialog> {
     return result;
   }
 
+  List<TextInputFormatter>? get inputFormatters {
+    if (widget.arguments.keyboardType == TextInputType.number) {
+      return [ FilteringTextInputFormatter.digitsOnly ];
+    }
+    return null;
+  }
   @override
   Widget build(BuildContext context) => SimpleDialog(
           title: Text(widget.arguments.title),
@@ -112,7 +121,10 @@ class _InputDialogState extends State<InputDialog> {
                   child: ConstrainedBox(
                       constraints: const BoxConstraints(minWidth: 300),
                       child:
-                          TextField(controller: controller, autofocus: true)))
+                          TextField(controller: controller, autofocus: true,
+                            keyboardType: widget.arguments.keyboardType,
+                            inputFormatters: inputFormatters,
+                          )))
             ]),
             const SizedBox(height: 10),
             ...buildOptions(),

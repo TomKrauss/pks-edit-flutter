@@ -202,6 +202,16 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           icon: Icons.rotate_right,
           text: "Cycle window backward",
           group: PksEditAction.windowGroup),
+      PksEditAction(
+          id: "goto-line",
+          execute: _gotoLine,
+          isEnabled: _hasFile,
+          shortcut:
+          const SingleActivator(LogicalKeyboardKey.keyG, control: true),
+          context: context,
+          icon: Icons.numbers_sharp,
+          text: "Goto line",
+          group: PksEditAction.findGroup),
     ];
   }
 
@@ -392,6 +402,33 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     final bloc = EditorBloc.of(context);
     _handleCommandResult(await bloc.saveActiveFile());
   }
+
+  void _gotoLine(PksEditActionContext actionContext) async {
+    var controller = actionContext.currentFile?.controller;
+    if (controller == null) {
+      return;
+    }
+    final result = await InputDialog.show(context: context, arguments:
+      InputDialogArguments(context: actionContext, title: "Goto Line",
+          keyboardType: TextInputType.number,
+          inputLabel: "Line number", initialValue: "${controller.selection.start.index+1}"));
+    if (result != null) {
+      var newLine = int.tryParse(result.selectedText);
+      if (newLine != null) {
+        if (newLine < 0 || newLine >= controller.lineCount) {
+          _handleCommandResult(CommandResult(success: true, message: "Line number of of range (0 - ${controller.lineCount})"));
+          return;
+        }
+        controller.selection = controller.selection.copyWith(
+          baseIndex: newLine-1,
+          baseOffset: 0,
+          extentIndex: newLine-1,
+          extentOffset: 0,
+        );
+        controller.makeCursorCenterIfInvisible();
+      }
+    }
+   }
 
   void _newFile(PksEditActionContext actionContext) async {
     final bloc = EditorBloc.of(context);
@@ -653,15 +690,24 @@ class ToolBarWidget extends StatelessWidget {
           .where((e) => e.displayInToolbar && e.group == group)
           .map((e) => _buildButton(e, e.onPressed));
 
-  List<Widget> _buildToolbarItems(BuildContext context) => [
-        ..._buildItemsForGroup(context, PksEditAction.fileGroup),
-        VerticalDivider(
-          indent: 3,
-          endIndent: 3,
-          color: Theme.of(context).dividerColor,
-        ),
-        ..._buildItemsForGroup(context, PksEditAction.editGroup),
-      ];
+  List<Widget> _buildToolbarItems(BuildContext context) {
+    var result = <Widget>[];
+    for (var group in [PksEditAction.fileGroup, PksEditAction.editGroup, PksEditAction.findGroup,
+        PksEditAction.functionGroup, PksEditAction.windowGroup, PksEditAction.viewGroup]) {
+      var items = _buildItemsForGroup(context, group);
+      if (items.isNotEmpty) {
+        if (result.isNotEmpty) {
+          result.add(VerticalDivider(
+            indent: 3,
+            endIndent: 3,
+            color: Theme.of(context).dividerColor,
+          ));
+        }
+        result.addAll(items);
+      }
+    }
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) => IntrinsicHeight(

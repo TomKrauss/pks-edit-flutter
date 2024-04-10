@@ -54,7 +54,7 @@ class PksEditAction {
   ///
   /// Returns the text to be displayed as a description (tooltip) for this action
   ///
-  String get description => _description ?? label;
+  String get description => "${_description ?? label}${shortcut == null ? '' : '- ${shortcut!.debugDescribeKeys()}'}";
   final bool Function(PksEditActionContext context) isEnabled;
   final void Function(PksEditActionContext context) execute;
 
