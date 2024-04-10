@@ -23,7 +23,8 @@ import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/model/languages.dart';
 import 'package:pks_edit_flutter/ui/actions.dart';
-import 'package:pks_edit_flutter/ui/confirmation_dialog.dart';
+import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
+import 'package:pks_edit_flutter/ui/dialog/input_dialog.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:window_manager/window_manager.dart';
@@ -75,6 +76,15 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           group: PksEditAction.fileGroup,
           icon: Icons.save),
       PksEditAction(
+          id: "save-file-as",
+          execute: _saveFileAs,
+          isEnabled: _hasFile,
+          text: "Save File As...",
+          context: context,
+          description: "Save current file under new name",
+          group: PksEditAction.fileGroup,
+          icon: Icons.save_as),
+      PksEditAction(
           id: "close-window",
           execute: _closeWindow,
           text: "Close Window",
@@ -93,6 +103,16 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           context: context,
           icon: Icons.done_all,
           description: "Closes all editor windows",
+          group: PksEditAction.fileGroup),
+      PksEditAction(
+          id: "close-all-but-active",
+          execute: _closeAllButActive,
+          text: "Close All other Windows",
+          shortcut:
+          const SingleActivator(LogicalKeyboardKey.keyW, control: true, alt: true),
+          context: context,
+          icon: Icons.clear_all,
+          description: "Closes all other editor windows but current",
           group: PksEditAction.fileGroup),
       PksEditAction(
           id: "exit",
@@ -354,13 +374,35 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     bloc.cycleWindow(-1);
   }
 
+  void _saveFileAs(PksEditActionContext actionContext) async {
+    final bloc = EditorBloc.of(context);
+    final filename = bloc.suggestNewFilename(actionContext.currentFile!.filename);
+    final String initialDirectory = path.dirname(filename);
+    final result = await getSaveLocation(
+        initialDirectory: initialDirectory,
+        suggestedName: path.basename(filename),
+        acceptedTypeGroups: Languages.singleton.getFileGroups(filename),
+        confirmButtonText: "Save");
+    if (result != null) {
+      _handleCommandResult(await bloc.saveActiveFile(filename: result.path));
+    }
+  }
+
   void _saveFile(PksEditActionContext actionContext) async {
     final bloc = EditorBloc.of(context);
     _handleCommandResult(await bloc.saveActiveFile());
   }
 
   void _newFile(PksEditActionContext actionContext) async {
-    _handleCommandResult(await EditorBloc.of(context).newFile("Test.yaml"));
+    final bloc = EditorBloc.of(context);
+    final newFilename = bloc.suggestNewFilename(actionContext.currentFile?.filename);
+    final result = await InputDialog.show(context: context, arguments:
+        InputDialogArguments(context: actionContext, title: "New File", inputLabel: "File name",
+            options: {"Initialize with Template": true},
+            initialValue: path.basename(newFilename)));
+    if (result != null) {
+      _handleCommandResult(await bloc.newFile(path.join(path.dirname(newFilename), result.selectedText), insertTemplate: result.firstOptionSelected));
+    }
   }
 
   Future<void> _closeWindows(List<OpenFile> files) async {
@@ -387,6 +429,16 @@ class _PksEditMainPageState extends State<PksEditMainPage>
         }
       }
       bloc.closeFile(file);
+    }
+  }
+
+  ///
+  /// Close all windows but the active one.
+  ///
+  void _closeAllButActive(PksEditActionContext actionContext) {
+    var files = actionContext.openFileState?.files.where((element) => element != actionContext.openFileState?.currentFile).toList();
+    if (files != null) {
+      _closeWindows(files);
     }
   }
 
@@ -531,6 +583,7 @@ class _EditorDockPanelState extends State<EditorDockPanel> with TickerProviderSt
 
   Widget _buildEditor(OpenFile file) {
     final bloc = EditorBloc.of(context);
+    file.adjustCaret();
     return CodeEditor(
         autofocus: true,
         onChanged: file.onChanged,

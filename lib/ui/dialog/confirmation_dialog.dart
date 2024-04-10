@@ -11,6 +11,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 
+
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 
@@ -53,10 +54,9 @@ class ConfirmationDialog extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) =>
-      SimpleDialog(title: Text(title), children: [
-        Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(children: [
+      SimpleDialog(title: Text(title),
+          contentPadding: const EdgeInsets.all(25),
+          children: [
               Row(children: [
                 if (icon != null)
                   Padding(
@@ -81,6 +81,5 @@ class ConfirmationDialog extends StatelessWidget {
                           autofocus: idx == 0,
                           child: Text(e.key)))
                       .toList())
-            ]))
       ]);
 }

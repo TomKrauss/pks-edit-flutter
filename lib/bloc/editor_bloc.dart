@@ -18,7 +18,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import 'package:path/path.dart';
+import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
 import 'package:pks_edit_flutter/bloc/templates.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
@@ -61,7 +61,7 @@ class OpenFile {
   static const String dockNameDefault = "default";
   static const String dockNameRight = "rightSlot";
   static const String dockNameBottom = "bottomSlot";
-  final String filename;
+  String filename;
   final String text;
   ///
   /// The "dock", where this file is placed.
@@ -71,9 +71,10 @@ class OpenFile {
   final Encoding encoding;
   bool isNew;
   bool modified;
+  bool needsCaretAdjustment = false;
   late final CodeLineEditingController controller;
   String get title {
-    var name = basename(filename);
+    var name = path.basename(filename);
     return modified ? "* $name" : name;
   }
   late final Language language;
@@ -96,14 +97,30 @@ class OpenFile {
     modified = newModified;
     if (_changedListener != null && oldModified != newModified) {
       _changedListener!(this);
+      needsCaretAdjustment = true;
+    }
+  }
+
+  ///
+  /// Must be invoked, if the caret was moved, but not yet made visible.
+  ///
+  void adjustCaret() {
+    if (needsCaretAdjustment) {
+      needsCaretAdjustment = false;
+      WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
+        controller.makeCursorCenterIfInvisible();
+      });
     }
   }
 
   OpenFile({required this.filename, required this.text, this.dock = dockNameDefault,
-    this.modified = false, this.encoding = utf8, required this.isNew}) {
+    this.modified = false, this.encoding = utf8, required this.isNew, int? initialLineNumber}) {
     language = Languages.singleton.modeForFilename(filename);
     _lastSavedText = text;
     controller = CodeLineEditingController.fromText(text);
+    if (initialLineNumber != null) {
+      controller.selection = CodeLineSelection.fromPosition(position: CodeLinePosition(index: initialLineNumber, offset: 0));
+    }
   }
 
   ///
@@ -199,14 +216,32 @@ class EditorBloc {
   }
 
   ///
-  /// Save the current active file.
+  /// Suggest a new file name given an existing [filename].
+  /// The filename is returned including the complete path.
   ///
-  Future<CommandResult> saveActiveFile() async {
+  String suggestNewFilename(String? filename) {
+    final String extension = filename != null ? path.extension(filename) : ".txt";
+    final String dir = filename != null ? path.dirname(filename) : ".";
+    return path.absolute(dir, "newfile$extension");
+  }
+
+  ///
+  /// Save the current active file. If a [filename] is passed, use
+  /// it rather than the original file name.
+  ///
+  Future<CommandResult> saveActiveFile({String? filename}) async {
     final f = _openFileState._currentFile;
     if (f == null) {
       return CommandResult(success: true, message: "No current file");
     }
-    return await _saveFile(f);
+    if (filename != null) {
+      f.filename = filename;
+    }
+    var result = await _saveFile(f);
+    if (filename != null) {
+      _refreshFiles();
+    }
+    return result;
   }
 
   ///
@@ -241,7 +276,7 @@ class EditorBloc {
   /// Create a new file with the given  [filename]. If that is specified using a relative
   /// name convert it relative to the "current directory" to an absolute filename.
   ///
-  Future<CommandResult> newFile(String filename) async {
+  Future<CommandResult> newFile(String filename, {bool insertTemplate = true}) async {
     filename = _makeAbsolute(filename);
     if (_selectFile(filename)) {
       return CommandResult(success: true, message: "File with the given name was open already.");
@@ -249,7 +284,8 @@ class EditorBloc {
     if (File(filename).existsSync()) {
       return await openFile(filename);
     }
-    _addOpenFile(OpenFile(filename: filename, isNew: true, text: Templates.singleton.generateInitialContent(filename)));
+    _addOpenFile(OpenFile(filename: filename, isNew: true,
+        text: insertTemplate ? Templates.singleton.generateInitialContent(filename) : ""));
     return CommandResult(success: true);
   }
 
@@ -323,7 +359,7 @@ class EditorBloc {
   /// Open a file with the given [filename]. If a [dockName] is passed, the file is opened
   /// in the corresponding dock on the screen otherwise on the default dock.
   ///
-  Future<CommandResult> openFile(String filename, {String? dockName}) async {
+  Future<CommandResult> openFile(String filename, {String? dockName, int? lineNumber}) async {
     filename = _makeAbsolute(filename);
     if (_selectFile(filename)) {
       return CommandResult(success: true, message: "File with the given name was open already.");
@@ -339,7 +375,9 @@ class EditorBloc {
         openFiles.removeRange(10, openFiles.length);
       }
       _addOpenFile(OpenFile(
-          filename: filename, isNew: false, text: text, encoding: encoding, dock: dockName ?? OpenFile.dockNameDefault));
+          filename: filename, isNew: false, text: text, encoding: encoding,
+          initialLineNumber: lineNumber,
+          dock: dockName ?? OpenFile.dockNameDefault));
     } catch(ex) {
       return CommandResult(success: false, message: ex.toString());
     }
@@ -423,7 +461,7 @@ class EditorBloc {
         active = idx;
       }
       idx++;
-      await openFile(f.path, dockName: f.dockName);
+      await openFile(f.path, dockName: f.dockName, lineNumber: f.lineNumber < 0 ? null : f.lineNumber);
     }
     if (active != null) {
       _openFileState.currentIndex = active;
