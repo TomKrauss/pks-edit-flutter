@@ -18,9 +18,11 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:logger/logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
 import 'package:pks_edit_flutter/bloc/templates.dart';
+import 'package:pks_edit_flutter/config/editing_configuration.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/config/pks_sys.dart';
 import 'package:pks_edit_flutter/model/languages.dart';
@@ -61,23 +63,45 @@ class OpenFile {
   static const String dockNameDefault = "default";
   static const String dockNameRight = "rightSlot";
   static const String dockNameBottom = "bottomSlot";
+  ///
+  /// The absolute path name of the file edited.
+  ///
   String filename;
+  ///
+  /// The initial contents of the file to edit.
+  ///
   final String text;
   ///
   /// The "dock", where this file is placed.
   ///
   final String dock;
-  late String _lastSavedText;
+  ///
+  /// The character encoding.
+  ///
   final Encoding encoding;
+  ///
+  /// Whether this is a new file.
+  ///
   bool isNew;
+  ///
+  /// Whether the file was edited by the user but not yet saved.
+  ///
   bool modified;
   bool needsCaretAdjustment = false;
+  ///
+  /// The controller for performing the editing operations on the file.
+  ///
   late final CodeLineEditingController controller;
+
+  EditingConfiguration editingConfiguration;
+
   String get title {
     var name = path.basename(filename);
     return modified ? "* $name" : name;
   }
   late final Language language;
+
+  late String _lastSavedText;
   void Function(OpenFile file)? _changedListener;
 
   void saved() {
@@ -114,10 +138,11 @@ class OpenFile {
   }
 
   OpenFile({required this.filename, required this.text, this.dock = dockNameDefault,
+    required this.editingConfiguration,
     this.modified = false, this.encoding = utf8, required this.isNew, int? initialLineNumber}) {
     language = Languages.singleton.modeForFilename(filename);
     _lastSavedText = text;
-    controller = CodeLineEditingController.fromText(text);
+    controller = CodeLineEditingController.fromText(text, CodeLineOptions(indentSize: editingConfiguration.tabSize));
     if (initialLineNumber != null) {
       controller.selection = CodeLineSelection.fromPosition(position: CodeLinePosition(index: initialLineNumber, offset: 0));
     }
@@ -152,8 +177,10 @@ class CommandResult {
 ///
 class EditorBloc {
   static EditorBloc of(BuildContext context) => SimpleBlocProvider.of(context);
+  final Logger _logger = Logger(printer: SimplePrinter(printTime: true, colors: false));
   late final OpenFileState _openFileState;
-  late final EditorConfiguration editorConfiguration;
+  late final ApplicationConfiguration applicationConfiguration;
+  late final EditingConfigurations editingConfigurations;
   final StreamController<OpenFileState> _openFileSubject = BehaviorSubject.seeded(OpenFileState(files: const [], currentIndex: -1));
   Stream<OpenFileState> get openFileStream => _openFileSubject.stream;
   final List<String> openFiles = [];
@@ -285,6 +312,7 @@ class EditorBloc {
       return await openFile(filename);
     }
     _addOpenFile(OpenFile(filename: filename, isNew: true,
+        editingConfiguration: editingConfigurations.forFile(filename),
         text: insertTemplate ? Templates.singleton.generateInitialContent(filename) : ""));
     return CommandResult(success: true);
   }
@@ -356,15 +384,16 @@ class EditorBloc {
   }
 
   ///
-  /// Open a file with the given [filename]. If a [dockName] is passed, the file is opened
+  /// Open a file with the given [filename]. If a [dock] is passed, the file is opened
   /// in the corresponding dock on the screen otherwise on the default dock.
   ///
-  Future<CommandResult> openFile(String filename, {String? dockName, int? lineNumber}) async {
+  Future<CommandResult> openFile(String filename, {String? dock, int? lineNumber}) async {
     filename = _makeAbsolute(filename);
     if (_selectFile(filename)) {
       return CommandResult(success: true, message: "File with the given name was open already.");
     }
     try {
+      final ec = editingConfigurations.forFile(filename);
       final file = File.fromUri(
           Uri.file(filename, windows: Platform.isWindows));
       Encoding encoding = await _detectEncoding(file);
@@ -375,10 +404,13 @@ class EditorBloc {
         openFiles.removeRange(10, openFiles.length);
       }
       _addOpenFile(OpenFile(
+          editingConfiguration: ec,
           filename: filename, isNew: false, text: text, encoding: encoding,
           initialLineNumber: lineNumber,
-          dock: dockName ?? OpenFile.dockNameDefault));
+          dock: dock ?? OpenFile.dockNameDefault));
+      _logger.i("Opened file $filename");
     } catch(ex) {
+      _logger.e("Failure opening file $filename: $ex");
       return CommandResult(success: false, message: ex.toString());
     }
     return CommandResult(success: true);
@@ -453,18 +485,23 @@ class EditorBloc {
       }
     }
     var session = await PksConfiguration.singleton.currentSession;
-    editorConfiguration = await PksConfiguration.singleton.configuration;
+    editingConfigurations = await PksConfiguration.singleton.editingConfigurations;
+    applicationConfiguration = await PksConfiguration.singleton.configuration;
     int? active;
     int idx = 0;
-    for (var f in session.openEditors) {
-      if (f.active) {
-        active = idx;
+    if (applicationConfiguration.preserveHistory) {
+      _logger.i("Restoring file from previous session...");
+      for (var f in session.openEditors) {
+        if (f.active) {
+          active = idx;
+        }
+        idx++;
+        await openFile(f.path, dock: f.dock,
+            lineNumber: f.lineNumber < 0 ? null : f.lineNumber);
       }
-      idx++;
-      await openFile(f.path, dockName: f.dockName, lineNumber: f.lineNumber < 0 ? null : f.lineNumber);
-    }
-    if (active != null) {
-      _openFileState.currentIndex = active;
+      if (active != null) {
+        _openFileState.currentIndex = active;
+      }
     }
     openFiles.addAll(session.openFiles);
     await initWindowOptions(session);
@@ -472,5 +509,27 @@ class EditorBloc {
 
   Future<void> dispose() async {
     _openFileSubject.close();
+  }
+
+  ///
+  /// Save the current PKS EDIT session.
+  ///
+  Future<void> _saveSession(BuildContext context) async {
+    var current = await PksConfiguration.singleton.currentSession;
+    if (!context.mounted) {
+      _logger.e("Cannot save session. Context not mounted any more.");
+      return;
+    }
+    final session = await current.prepareSave(context: context, state: _openFileState);
+    _logger.e("Saving current session.");
+    PksConfiguration.singleton.saveSession(session);
+  }
+
+  ///
+  /// Exit the PKS EDIT application saving the current session before.
+  ///
+  Future<void> exitApp(BuildContext context) async {
+    await _saveSession(context);
+    windowManager.destroy();
   }
 }

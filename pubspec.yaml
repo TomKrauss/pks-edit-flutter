@@ -8,6 +8,7 @@ environment:
   sdk: '>=3.3.2 <4.0.0'
 
 dependencies:
+  json_annotation: ^4.8.1
   rxdart: ^0.27.4
   package_info_plus: ^6.0.0
   re_editor: ^0.1.0
@@ -27,6 +28,8 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.0
+  json_serializable: ^6.7.1
+  build_runner: ^2.3.3
 
 flutter:
   uses-material-design: true

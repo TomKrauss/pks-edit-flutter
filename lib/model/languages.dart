@@ -11,8 +11,6 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 
-import 'package:file_selector/file_selector.dart';
-import 'package:path/path.dart';
 import 'package:re_highlight/languages/asciidoc.dart';
 import 'package:re_highlight/languages/bash.dart';
 import 'package:re_highlight/languages/basic.dart';
@@ -41,9 +39,7 @@ import 'package:re_highlight/re_highlight.dart';
 class Language {
   final Mode mode;
   final String name;
-  final String? description;
-  final List<String> extensions;
-  const Language({required this.name, required this.mode, this.description, this.extensions = const[]});
+  const Language({required this.name, required this.mode});
 }
 
 ///
@@ -53,22 +49,22 @@ class Languages {
   static final Languages singleton = Languages._();
   Languages._();
   final Map<RegExp, Language> _languageMappings = {
-    RegExp(r".*\.java"): Language(name: "java", mode: langJava, extensions: ["java"], description: "Java Files"),
-    RegExp(r".*\.dart"): Language(name: "dart", mode: langDart, extensions: ["dart"], description: "Dart Files"),
-    RegExp(r".*\.go"): Language(name: "go", mode: langGo, extensions: ["go"]),
-    RegExp(r".*\.protobuf"): Language(name: "protobuf", mode: langProtobuf, extensions: ["protobuf"]),
+    RegExp(r".*\.java"): Language(name: "java", mode: langJava),
+    RegExp(r".*\.dart"): Language(name: "dart", mode: langDart),
+    RegExp(r".*\.go"): Language(name: "go", mode: langGo),
+    RegExp(r".*\.protobuf"): Language(name: "protobuf", mode: langProtobuf),
     RegExp(r".*\.ini"): Language(name: "ini", mode: langIni),
     RegExp(r".*\.(properties|prop)"): Language(name: "properties", mode: langProperties),
-    RegExp(r".*\.(json|jsonx)"): Language(name: "json", mode: langJson, extensions: ["json", "jsonx"]),
-    RegExp(r".*\.(yaml|yml)"): Language(name: "yaml", mode: langYaml, extensions: ["yaml", "yml"]),
+    RegExp(r".*\.(json|jsonx)"): Language(name: "json", mode: langJson),
+    RegExp(r".*\.(yaml|yml)"): Language(name: "yaml", mode: langYaml),
     RegExp(r".*\.adoc"): Language(name: "adoc", mode: langAsciidoc),
     RegExp(r"Dockerfile"): Language(name: "docker", mode: langDockerfile),
-    RegExp(r".*\.js"): Language(name: "javascript", mode: langJavascript, extensions: ["js"], description: "JavaScript Files"),
-    RegExp(r".*\.ts"): Language(name: "typescript", mode: langTypescript, extensions: ["ts"], description: "TypeScript Files"),
+    RegExp(r".*\.js"): Language(name: "javascript", mode: langJavascript),
+    RegExp(r".*\.ts"): Language(name: "typescript", mode: langTypescript),
     RegExp(r".*\.css"): Language(name: "css", mode: langCss),
     RegExp(r".*\.csv"): Language(name: "csv", mode: langExcel),
-    RegExp(r".*\.c"): Language(name: "c", mode: langC, extensions: ["c"]),
-    RegExp(r".*\.(c\+\+|cpp)"): Language(name: "c++", mode: langCpp, extensions: ["cpp"]),
+    RegExp(r".*\.c"): Language(name: "c", mode: langC),
+    RegExp(r".*\.(c\+\+|cpp)"): Language(name: "c++", mode: langCpp),
     RegExp(r".*\.(html|xhtml|htm)"): Language(name: "html", mode: langXml),
     RegExp(r".*\.md"): Language(name: "markdown", mode: langMarkdown),
     RegExp(r".*\.bat"): Language(name: "batch", mode: langDos),
@@ -88,30 +84,4 @@ class Languages {
     return defaultLanguage;
   }
 
-  List<XTypeGroup> getFileGroups(String currentFile) {
-    final result = <XTypeGroup>[];
-    var ext = extension(currentFile);
-    if (ext.startsWith(".")) {
-      ext = ext.substring(1);
-    }
-    bool extFound = false;
-    for (var e in _languageMappings.entries) {
-      if (e.value.extensions.isNotEmpty) {
-        final group = XTypeGroup(label: e.value.description ?? e.value.name, extensions: e.value.extensions);
-        if (e.value.extensions.contains(ext)) {
-          result.insert(0, group);
-          extFound = true;
-        } else {
-          result.add(group);
-        }
-      }
-    }
-    const group = XTypeGroup(label: "Other files", extensions: ["*"]);
-    if (extFound) {
-      result.add(group);
-    } else {
-      result.insert(0, group);
-    }
-    return result;
-  }
 }

@@ -21,7 +21,6 @@ import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
-import 'package:pks_edit_flutter/model/languages.dart';
 import 'package:pks_edit_flutter/ui/actions.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/input_dialog.dart';
@@ -42,6 +41,7 @@ class PksEditMainPage extends StatefulWidget {
 
 class _PksEditMainPageState extends State<PksEditMainPage>
     with TickerProviderStateMixin, WindowListener {
+  late EditorBloc bloc;
 
   List<PksEditAction> getActions(OpenFileState? fileState) {
     final context = PksEditActionContext(openFileState: fileState);
@@ -216,9 +216,22 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    bloc = EditorBloc.of(context);
+  }
+
+  @override
   void initState() {
     windowManager.addListener(this);
     super.initState();
+  }
+
+
+  @override
+  void dispose() {
+    super.dispose();
+    windowManager.removeListener(this);
   }
 
   @override
@@ -226,7 +239,6 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     if (!mounted) {
       return;
     }
-    final bloc = EditorBloc.of(context);
     if (bloc.hasChangedWindows) {
       var result = await ConfirmationDialog.show(
           context: context,
@@ -249,13 +261,9 @@ class _PksEditMainPageState extends State<PksEditMainPage>
         }
       }
     }
-    windowManager.destroy();
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    windowManager.removeListener(this);
+    if (mounted) {
+      bloc.exitApp(context);
+    }
   }
 
   ///
@@ -363,11 +371,10 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   }
 
   Future<void> _openFile(PksEditActionContext actionContext) async {
-    final bloc = EditorBloc.of(context);
     final String initialDirectory = File(".").absolute.path;
     final result = await openFile(
         initialDirectory: initialDirectory,
-        acceptedTypeGroups: Languages.singleton.getFileGroups(actionContext.currentFile?.filename ?? ""),
+        acceptedTypeGroups: bloc.editingConfigurations.getFileGroups(actionContext.currentFile?.filename ?? ""),
         confirmButtonText: "Open");
     if (result != null) {
       await _handleCommandResult(await bloc.openFile(result.path));
@@ -375,23 +382,20 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   }
 
   void _cycleWindowForward(PksEditActionContext actionContext) {
-    final bloc = EditorBloc.of(context);
     bloc.cycleWindow(1);
   }
 
   void _cycleWindowBackward(PksEditActionContext actionContext) {
-    final bloc = EditorBloc.of(context);
     bloc.cycleWindow(-1);
   }
 
   void _saveFileAs(PksEditActionContext actionContext) async {
-    final bloc = EditorBloc.of(context);
     final filename = bloc.suggestNewFilename(actionContext.currentFile!.filename);
     final String initialDirectory = path.dirname(filename);
     final result = await getSaveLocation(
         initialDirectory: initialDirectory,
         suggestedName: path.basename(filename),
-        acceptedTypeGroups: Languages.singleton.getFileGroups(filename),
+        acceptedTypeGroups: bloc.editingConfigurations.getFileGroups(filename),
         confirmButtonText: "Save");
     if (result != null) {
       _handleCommandResult(await bloc.saveActiveFile(filename: result.path));
@@ -399,7 +403,6 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   }
 
   void _saveFile(PksEditActionContext actionContext) async {
-    final bloc = EditorBloc.of(context);
     _handleCommandResult(await bloc.saveActiveFile());
   }
 
@@ -431,7 +434,6 @@ class _PksEditMainPageState extends State<PksEditMainPage>
    }
 
   void _newFile(PksEditActionContext actionContext) async {
-    final bloc = EditorBloc.of(context);
     final newFilename = bloc.suggestNewFilename(actionContext.currentFile?.filename);
     final result = await InputDialog.show(context: context, arguments:
         InputDialogArguments(context: actionContext, title: "New File", inputLabel: "File name",
@@ -443,7 +445,6 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   }
 
   Future<void> _closeWindows(List<OpenFile> files) async {
-    final bloc = EditorBloc.of(context);
     // avoid concurrent modification exception.
     files = [...files];
     for (final file in files) {
@@ -505,7 +506,6 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   DropOperation _onDropOver(DropOverEvent event) => event.session.allowedOperations.firstOrNull ?? DropOperation.none;
 
   Future<void> _onPerformDrop(PerformDropEvent event) async {
-    final bloc = EditorBloc.of(context);
     await Future.wait(
       event.session.items.map(
             (e) async {
@@ -521,7 +521,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
 
   @override
   Widget build(BuildContext context) => StreamBuilder(
-      stream: EditorBloc.of(context).openFileStream,
+      stream: bloc.openFileStream,
       builder: (context, snapshot) {
         var files = snapshot.data;
         final myActions = getActions(files);
@@ -540,10 +540,12 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                         SizedBox(
                             width: double.infinity,
                             child: MenuBarWidget(actions: myActions)),
+                        if (bloc.applicationConfiguration.showToolbar)
                         ToolBarWidget(actions: myActions),
                         Expanded(child: EditorDockPanel(state: files, files: files.files, closeFile: (file) {
                           _closeWindow(PksEditActionContext(openFileState: files, currentFile: file));
                         })),
+                        if (bloc.applicationConfiguration.showStatusbar)
                         StatusBarWidget(fileState: files)
                       ],
                     )))));
@@ -637,9 +639,9 @@ class _EditorDockPanelState extends State<EditorDockPanel> with TickerProviderSt
         ),
         controller: file.controller,
         style: CodeEditorStyle(
-            fontFamily: bloc.editorConfiguration.defaultFontFace,
+            fontFamily: bloc.applicationConfiguration.defaultFont,
             codeTheme: CodeHighlightTheme(
-                theme: bloc.editorConfiguration.themeName == "dark"
+                theme: bloc.applicationConfiguration.theme == "dark"
                     ? atomOneDarkTheme
                     : atomOneLightTheme,
                 languages: {

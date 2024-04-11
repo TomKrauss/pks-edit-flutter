@@ -37,7 +37,7 @@ class PksEditApplication extends StatelessWidget {
 
   ThemeData _createTheme(BuildContext context) {
     final bloc = EditorBloc.of(context);
-    var themeName = bloc.editorConfiguration.themeName;
+    var themeName = bloc.applicationConfiguration.theme;
     if (themeName == "dark") {
       return ThemeData(
           colorScheme: const ColorScheme.dark(),

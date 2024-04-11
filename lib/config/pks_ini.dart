@@ -13,46 +13,86 @@
 
 import 'dart:io';
 
+import 'package:json_annotation/json_annotation.dart';
+import 'package:pks_edit_flutter/util/platform_extension.dart';
+
+part 'pks_ini.g.dart';
+
 ///
-/// Represents the configuration as defined in file $PKS_SYS/pkseditini.json
+/// Represents the configuration as defined in file $PKS_SYS/pkseditini.json.
 ///
-class EditorConfiguration {
-  final String themeName;
-  final List<String> includes;
-  final String defaultLanguage;
-  final String defaultFontFace;
+@JsonSerializable(includeIfNull: false)
+class ApplicationConfiguration {
+  /// The application theme (colors etc...)
+  final String theme;
+  /// Used for include searches, when editing c-/c++ files.
+  List<String> get includes => includePath.split(PlatformExtension.filePathSeparator);
+  @JsonKey(name: "include-path")
+  final String includePath;
+  /// The application language (German, English)
+  final String language;
+  /// The default font used in editors.
+  @JsonKey(name: "default-font")
+  final String defaultFont;
+  /// The default search engine for performing a search for editor words.
+  @JsonKey(name: "search-engine")
   final String searchEngine;
+  /// The maximum number of open windows before starting to close windows automatically. If <= 0 - not limit.
+  @JsonKey(name: "maximum-open-windows")
   final int maximumOpenWindows;
+  /// Whether the status bar will be displayed.
+  @JsonKey(name: "show-statusbar")
+  final bool showStatusbar;
+  /// Whether the function key bar will be displayed.
+  @JsonKey(name: "show-functionkeys")
+  final bool showFunctionKeys;
+  /// Whether the option bar will be displayed.
+  @JsonKey(name: "show-optionbar")
+  final bool showOptionBar;
+  /// Whether the tool bar will be displayed.
+  @JsonKey(name: "show-toolbar")
+  final bool showToolbar;
+  @JsonKey(name: "autosave-to-temp")
+  final bool autoSaveToTemp;
+  /// Automatically save changed files when closing editor / exiting PKS-Edit.
+  @JsonKey(name: "autosave-on-exit")
+  final bool autoSaveOnExit;
+  /// Restore previously opened files.
+  @JsonKey(name: "preserve-history")
+  final bool preserveHistory;
+  @JsonKey(name: "create-back-in-temp-path")
+  final bool createBackInTempPath;
+  /// Whether opened files will be locked.
+  @JsonKey(name: "lock-files-for-edit")
+  final bool lockFilesForEdit;
+  /// Whether we should enforce to re-use the single running instance of PKS-Edit
+  @JsonKey(name: "reuse-application-running-instance")
+  final bool reuseApplicationRunningInstance;
 
-  EditorConfiguration({
-    required this.themeName,
-    required this.includes,
-    required this.defaultLanguage,
-    required this.maximumOpenWindows,
-    required this.defaultFontFace, required this.searchEngine});
+  ApplicationConfiguration({
+    this.theme = "dark",
+    this.includePath = "includes;inc",
+    this.language = "English",
+    this.maximumOpenWindows = -1,
+    this.showStatusbar = true,
+    this.showToolbar = true,
+    this.showFunctionKeys = true,
+    this.showOptionBar = true,
+    this.autoSaveOnExit = false,
+    this.autoSaveToTemp = false,
+    this.preserveHistory = true,
+    this.createBackInTempPath = true,
+    this.lockFilesForEdit = false,
+    this.reuseApplicationRunningInstance = true,
+    String? defaultFont,
+    this.searchEngine = "Google"}) :
+      defaultFont = defaultFont ?? (Platform.isWindows ? "Consolas" : "Courier New")
+  ;
 
-  static EditorConfiguration get defaultConfiguration => EditorConfiguration(
-    defaultFontFace: Platform.isWindows ? "Consolas" : "Courier",
-    searchEngine: "Google",
-    includes: [],
-    maximumOpenWindows: 10,
-    themeName: "default",
-    defaultLanguage: "English"
-  );
+  static ApplicationConfiguration get defaultConfiguration => ApplicationConfiguration();
 
-  static EditorConfiguration from(Map<String, dynamic> json) {
-    String path = json["include-path"] ?? "include;inc";
-    var defaultConfig = defaultConfiguration;
-    var nested = json["configuration"];
-    if (nested is Map) {
-      json = Map<String,dynamic>.from(nested);
-    } else {
-      return defaultConfig;
-    }
-    return EditorConfiguration(themeName: json["theme"] ?? defaultConfig.themeName, includes: path.split(";"),
-        defaultLanguage: json["language"] ?? defaultConfig.defaultLanguage,
-        maximumOpenWindows: json["maximum-open-windows"] ?? defaultConfig.maximumOpenWindows,
-        defaultFontFace: json["default-font"] ?? defaultConfig.defaultFontFace,
-        searchEngine: json["search-engine"] ?? defaultConfig.searchEngine);
-  }
+  static ApplicationConfiguration fromJson(Map<String, dynamic> map) =>
+      _$EditorConfigurationFromJson(map);
+  Map<String, dynamic> toJson() => _$EditorConfigurationToJson(this);
+
 }

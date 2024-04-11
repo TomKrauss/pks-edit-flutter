@@ -1,0 +1,143 @@
+//
+// editing_configuration.dart
+//
+// PKS-EDIT - Flutter
+//
+// Last modified: 2024
+// Author: Tom Krauß
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+
+import 'package:file_selector/file_selector.dart';
+import 'package:json_annotation/json_annotation.dart';
+import 'package:path/path.dart' as path;
+import 'package:pks_edit_flutter/util/platform_extension.dart';
+
+part 'editing_configuration.g.dart';
+
+///
+/// A configuration to be applied to files opened defining modes, how the files are edited.
+///
+@JsonSerializable(includeIfNull: false)
+class EditingConfiguration {
+  /// Configuration name - multiple configurations may exist and may be associated with different file types.
+  final String name;
+  /// left and right margins (used e.g. for wrapping and formatting text).
+  final int leftMargin;
+  final int rightMargin;
+  /// Number of columns for the tab character
+  final int tabSize;
+  /// When inserting a tabulator - replace with this (fill character). If null - tabs are not expanded.
+  final String? expandTabsWith;
+
+  const EditingConfiguration({this.name = "default", this.leftMargin = 0, this.rightMargin = 80, this.tabSize = 4, this.expandTabsWith});
+
+  static const EditingConfiguration defaultConfiguration = EditingConfiguration(name: "default");
+
+  static EditingConfiguration fromJson(Map<String, dynamic> map) =>
+      _$EditingConfigurationFromJson(map);
+  Map<String, dynamic> toJson() => _$EditingConfigurationToJson(this);
+}
+
+///
+/// Describes various types of documents, which can be edited with PKS EDIT.
+///
+@JsonSerializable(includeIfNull: false)
+class DocumentType {
+  /// The name of this document type.
+  final String name;
+  /// Name of the grammar associated with this file type - is also used as primary language name.
+  final String grammar;
+  /// The list of alternative language names - if any.
+  final List<String> languages;
+  /// Description for the file selector.
+  final String? description;
+  /// File name pattern to match
+  final String filenamePatterns;
+  ///
+  /// File name patterns as a list.
+  ///
+  List<String> get filePatterns => filenamePatterns.split(PlatformExtension.filePathSeparator);
+
+  /// Name of the editing configuration to use for this document type.
+  final String editorConfiguration;
+  /// Can be used to match a file type by parsing the 1st line contained in that file rather than by filename pattern.
+  final String? firstLineMatch;
+  const DocumentType({required this.name, this.grammar = "default", this.languages = const [], this.description, this.editorConfiguration = "default",
+    required this.filenamePatterns, this.firstLineMatch});
+
+  static const DocumentType defaultConfiguration = DocumentType(name: "default", filenamePatterns: "*.*");
+
+  static DocumentType fromJson(Map<String, dynamic> map) =>
+      _$DocumentTypeFromJson(map);
+  Map<String, dynamic> toJson() => _$DocumentTypeToJson(this);
+
+}
+
+///
+/// The configurations with the document types and editor configurations available.
+///
+@JsonSerializable(includeIfNull: false)
+class EditingConfigurations {
+  final List<DocumentType> documentTypes;
+  final List<EditingConfiguration> editorConfigurations;
+  late final Map<String,EditingConfiguration> _editingConfigLookup;
+  late final Map<String,DocumentType> _documentTypeByExtensionLookup;
+  EditingConfigurations({this.documentTypes = const [ DocumentType.defaultConfiguration], this.editorConfigurations = const[ EditingConfiguration.defaultConfiguration]}) {
+    _editingConfigLookup = {};
+    for (var e in editorConfigurations) {
+      _editingConfigLookup[e.name] = e;
+    }
+    _documentTypeByExtensionLookup = {};
+    for (final dt in documentTypes) {
+      for (var ext in dt.filePatterns) {
+        ext = path.extension(ext);
+        if (ext.isNotEmpty) {
+          _documentTypeByExtensionLookup[ext] = dt;
+        }
+      }
+    }
+  }
+
+  static EditingConfigurations fromJson(Map<String, dynamic> map) =>
+      _$EditingConfigurationsFromJson(map);
+  Map<String, dynamic> toJson() => _$EditingConfigurationsToJson(this);
+
+  ///
+  /// Return the editing configuration to use for a file with the given [filename].
+  ///
+  EditingConfiguration forFile(String filename) {
+    var extension = path.extension(filename);
+    // try a quick extension lookup first
+    final documentType = _documentTypeByExtensionLookup[extension] ?? _findDocumentType(filename);
+    return _editingConfigLookup[documentType.editorConfiguration] ?? EditingConfiguration.defaultConfiguration;
+  }
+
+  /// todo: perform a match over all document types.
+  DocumentType _findDocumentType(filename) =>  DocumentType.defaultConfiguration;
+
+  ///
+  /// The file groups to display in file selectors, when selecting a file.
+  ///
+  List<XTypeGroup> getFileGroups(String currentFile) {
+    final result = <XTypeGroup>[];
+    var ext = path.extension(currentFile);
+    if (ext.startsWith(".")) {
+      ext = ext.substring(1);
+    }
+    for (var e in documentTypes) {
+      if (e.filePatterns.isNotEmpty) {
+        final group = XTypeGroup(label: e.description ?? e.name, extensions: e.filePatterns);
+        if (e.filePatterns.contains(ext)) {
+          result.insert(0, group);
+        } else {
+          result.add(group);
+        }
+      }
+    }
+    return result;
+  }
+}
