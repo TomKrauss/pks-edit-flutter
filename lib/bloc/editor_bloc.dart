@@ -18,6 +18,7 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
@@ -26,6 +27,7 @@ import 'package:pks_edit_flutter/config/editing_configuration.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/config/pks_sys.dart';
 import 'package:pks_edit_flutter/model/languages.dart';
+import 'package:pks_edit_flutter/util/file_stat_extension.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:window_manager/window_manager.dart';
@@ -56,6 +58,39 @@ class OpenFileState {
   ;
 }
 
+class FileIcons {
+  static FileIcons singleton = FileIcons._();
+  final Map<String,IconData> _iconsByExtension = {
+    "txt": FontAwesomeIcons.fileLines,
+    "md": FontAwesomeIcons.markdown,
+    "pdf": FontAwesomeIcons.filePdf,
+    "html": FontAwesomeIcons.html5,
+    "doc": FontAwesomeIcons.fileWord,
+    "docx": FontAwesomeIcons.fileWord,
+    "py": FontAwesomeIcons.python,
+    "pas": FontAwesomeIcons.fileCode,
+    "cpp": FontAwesomeIcons.c,
+    "c": FontAwesomeIcons.c,
+    "gradle": FontAwesomeIcons.fileCode,
+    "groovy": FontAwesomeIcons.fileCode,
+    "dart": FontAwesomeIcons.fileCode,
+    "java": FontAwesomeIcons.java,
+    "csv": FontAwesomeIcons.fileCsv,
+    "js": FontAwesomeIcons.squareJs,
+    "json": FontAwesomeIcons.fileImport,
+    "css": FontAwesomeIcons.css3
+  };
+  FileIcons._();
+
+  IconData getIcon(String filename) {
+    var ext = path.extension(filename);
+    if (ext.startsWith(".")) {
+      ext = ext.substring(1);
+    }
+    return _iconsByExtension[ext] ?? FontAwesomeIcons.file;
+  }
+}
+
 ///
 /// Represents one open file.
 ///
@@ -79,6 +114,12 @@ class OpenFile {
   /// The character encoding.
   ///
   final Encoding encoding;
+
+  ///
+  /// The icon to represent this file.
+  ///
+  IconData get icon => FileIcons.singleton.getIcon(filename);
+
   ///
   /// Whether this is a new file.
   ///
@@ -87,6 +128,12 @@ class OpenFile {
   /// Whether the file was edited by the user but not yet saved.
   ///
   bool modified;
+
+  bool readOnly;
+
+  ///
+  /// Internal flag, if the caret must be repositioned asynchronously
+  ///
   bool needsCaretAdjustment = false;
   ///
   /// The controller for performing the editing operations on the file.
@@ -139,6 +186,7 @@ class OpenFile {
 
   OpenFile({required this.filename, required this.text, this.dock = dockNameDefault,
     required this.editingConfiguration,
+    this.readOnly = false,
     this.modified = false, this.encoding = utf8, required this.isNew, int? initialLineNumber}) {
     language = Languages.singleton.modeForFilename(filename);
     _lastSavedText = text;
@@ -312,7 +360,7 @@ class EditorBloc {
       return await openFile(filename);
     }
     _addOpenFile(OpenFile(filename: filename, isNew: true,
-        editingConfiguration: editingConfigurations.forFile(filename),
+        editingConfiguration: await editingConfigurations.forFile(filename),
         text: insertTemplate ? Templates.singleton.generateInitialContent(filename) : ""));
     return CommandResult(success: true);
   }
@@ -393,9 +441,10 @@ class EditorBloc {
       return CommandResult(success: true, message: "File with the given name was open already.");
     }
     try {
-      final ec = editingConfigurations.forFile(filename);
+      final ec = await editingConfigurations.forFile(filename);
       final file = File.fromUri(
           Uri.file(filename, windows: Platform.isWindows));
+      final readOnly = file.statSync().readOnly;
       Encoding encoding = await _detectEncoding(file);
       String? text = file.readAsStringSync(encoding: encoding);
       openFiles.remove(filename);
@@ -404,6 +453,7 @@ class EditorBloc {
         openFiles.removeRange(10, openFiles.length);
       }
       _addOpenFile(OpenFile(
+          readOnly: readOnly,
           editingConfiguration: ec,
           filename: filename, isNew: false, text: text, encoding: encoding,
           initialLineNumber: lineNumber,

@@ -11,6 +11,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:file_selector/file_selector.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:path/path.dart' as path;
@@ -93,9 +96,12 @@ class EditingConfigurations {
     }
     _documentTypeByExtensionLookup = {};
     for (final dt in documentTypes) {
+      if (dt.firstLineMatch != null) {
+        continue;
+      }
       for (var ext in dt.filePatterns) {
         ext = path.extension(ext);
-        if (ext.isNotEmpty) {
+        if (ext.isNotEmpty && ext != "*") {
           _documentTypeByExtensionLookup[ext] = dt;
         }
       }
@@ -109,15 +115,30 @@ class EditingConfigurations {
   ///
   /// Return the editing configuration to use for a file with the given [filename].
   ///
-  EditingConfiguration forFile(String filename) {
+  Future<EditingConfiguration> forFile(String filename) async {
     var extension = path.extension(filename);
     // try a quick extension lookup first
-    final documentType = _documentTypeByExtensionLookup[extension] ?? _findDocumentType(filename);
+    final documentType = _documentTypeByExtensionLookup[extension] ?? await _findDocumentType(filename);
     return _editingConfigLookup[documentType.editorConfiguration] ?? EditingConfiguration.defaultConfiguration;
   }
 
-  /// todo: perform a match over all document types.
-  DocumentType _findDocumentType(filename) =>  DocumentType.defaultConfiguration;
+  Future<DocumentType> _findDocumentType(String filename) async {
+    for (var dt in documentTypes) {
+      if (dt.firstLineMatch != null) {
+        final s = await File(filename).openRead().transform(utf8.decoder).transform(const LineSplitter()).first;
+        if (RegExp(dt.firstLineMatch!).hasMatch(s)) {
+          return dt;
+        }
+      }
+      for (var pattern in dt.filePatterns) {
+        /// todo: implement complete file name match.
+        if ((pattern == "*" && path.extension(filename).isEmpty) || pattern == "*.*") {
+          return dt;
+        }
+      }
+    }
+    return DocumentType.defaultConfiguration;
+  }
 
   ///
   /// The file groups to display in file selectors, when selecting a file.
@@ -130,7 +151,11 @@ class EditingConfigurations {
     }
     for (var e in documentTypes) {
       if (e.filePatterns.isNotEmpty) {
-        final group = XTypeGroup(label: e.description ?? e.name, extensions: e.filePatterns);
+        var patterns = e.filePatterns;
+        if (patterns.contains("*.*")) {
+          patterns = [...patterns, "*"];
+        }
+        final group = XTypeGroup(label: e.description ?? e.name, extensions: patterns);
         if (e.filePatterns.contains(ext)) {
           result.insert(0, group);
         } else {

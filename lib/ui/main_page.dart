@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
@@ -158,7 +159,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
       PksEditAction(
           id: "cut",
           execute: _cut,
-          isEnabled: _hasFile,
+          isEnabled: _hasWriteableFile,
           shortcut:
               const SingleActivator(LogicalKeyboardKey.keyX, control: true),
           context: context,
@@ -168,7 +169,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
       PksEditAction(
           id: "paste",
           execute: _paste,
-          isEnabled: _hasFile,
+          isEnabled: _hasWriteableFile,
           shortcut:
               const SingleActivator(LogicalKeyboardKey.keyV, control: true),
           context: context,
@@ -313,6 +314,9 @@ class _PksEditMainPageState extends State<PksEditMainPage>
 
   bool _hasFile(PksEditActionContext actionContext) =>
       actionContext.currentFile != null;
+
+  bool _hasWriteableFile(PksEditActionContext actionContext) =>
+      actionContext.currentFile != null && actionContext.currentFile?.readOnly != true;
 
   bool _canRedo(PksEditActionContext actionContext) {
     var f = actionContext.currentFile;
@@ -606,6 +610,8 @@ class _EditorDockPanelState extends State<EditorDockPanel> with TickerProviderSt
   List<Widget> _buildTabs() => widget.files
       .map((e) => Tab(
     child: Row(children: [
+      FaIcon(e.icon, size: 16),
+      const SizedBox(width: 4),
       Tooltip(message: e.filename, child: Text(e.title)),
       const SizedBox(width: 4),
       InkWell(
@@ -625,6 +631,7 @@ class _EditorDockPanelState extends State<EditorDockPanel> with TickerProviderSt
     file.adjustCaret();
     return CodeEditor(
         autofocus: true,
+        readOnly: file.readOnly,
         onChanged: file.onChanged,
         indicatorBuilder:
             (context, editingController, chunkController, notifier) => Row(
@@ -857,6 +864,8 @@ class StatusBarWidget extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     var current = fileState.currentFile;
+    final divider = VerticalDivider(
+        color: Theme.of(context).dividerColor, width: 20);
     var row = (current == null)
         ? const Row(
             children: [Text("")],
@@ -867,10 +876,12 @@ class StatusBarWidget extends StatelessWidget {
             children: [
               Text(current.filename),
               Row(children: [
+                divider,
+                Tooltip(message: current.readOnly ? "Read-only" : "Writeable", child: Icon(current.readOnly ? Icons.lock_outline : Icons.lock_open, size: 16)),
+                divider,
                 Text(current.encoding.name),
-                VerticalDivider(
-                    color: Theme.of(context).dividerColor, width: 20),
-                Text(current.language.name)
+                divider,
+                Tooltip(message: "Used Grammar", child: Text(current.language.name))
               ])
             ],
           ));
