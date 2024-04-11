@@ -21,6 +21,7 @@ import 'package:path/path.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/editing_configuration.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
+import 'package:pks_edit_flutter/config/theme_configuration.dart';
 import 'package:window_manager/window_manager.dart';
 
 part 'pks_sys.g.dart';
@@ -247,6 +248,7 @@ class PksConfiguration {
   PksConfiguration._();
   static const sessionFilename = "pkssession.json";
   static const defaultConfigFilename = "pkseditini.json";
+  static const defaultThemeFilename = "themeconfig.json";
   static const defaultEditingConfigurationFilename = "pkseditconfig.json";
   static const pksSysVariable = "PKS_SYS";
   static PksConfiguration singleton = PksConfiguration._();
@@ -254,8 +256,9 @@ class PksConfiguration {
       Logger(printer: SimplePrinter(printTime: true, colors: false));
   String? _pksSysDirectory;
   PksEditSession? _pksEditSession;
-  ApplicationConfiguration? _applicationConfiguration;
+  PksIniConfiguration? _pksIniConfiguration;
   EditingConfigurations? _editingConfigurations;
+  Themes? _themes;
 
   set pksSysDirectory(String newDir) {
     _logger.i("Assigning new PKS_SYS directory to $newDir");
@@ -303,14 +306,31 @@ class PksConfiguration {
   }
 
   ///
+  /// Returns and reads the themes
+  /// 
+  Future<Themes> get themes async {
+    if (_themes == null) {
+      var themeFile = File(join(pksSysDirectory, defaultThemeFilename));
+      if (themeFile.existsSync()) {
+        _logger.i("Reading theme configuration file ${themeFile.path}.");
+        var string = themeFile.readAsStringSync();
+        _themes = Themes.fromJson(jsonDecode(string));
+      } else {
+        _themes = Themes(themes: [ThemeConfiguration(name: "default")]);
+      }
+    }
+    return _themes!;
+  }
+  
+  ///
   /// Returns the current editing configuration.
   ///
   Future<EditingConfigurations> get editingConfigurations async {
     if (_editingConfigurations == null) {
-      var sessionFile = File(join(pksSysDirectory, defaultEditingConfigurationFilename));
-      if (sessionFile.existsSync()) {
-        _logger.i("Reading editing configuration file ${sessionFile.path}.");
-        var string = sessionFile.readAsStringSync();
+      var configFile = File(join(pksSysDirectory, defaultEditingConfigurationFilename));
+      if (configFile.existsSync()) {
+        _logger.i("Reading editing configuration file ${configFile.path}.");
+        var string = configFile.readAsStringSync();
         _editingConfigurations = EditingConfigurations.fromJson(jsonDecode(string));
       } else {
         _editingConfigurations = EditingConfigurations();
@@ -323,18 +343,19 @@ class PksConfiguration {
   ///
   /// Returns the current application configuration.
   ///
-  Future<ApplicationConfiguration> get configuration async {
-    if (_applicationConfiguration == null) {
-      var sessionFile = File(join(pksSysDirectory, defaultConfigFilename));
-      if (sessionFile.existsSync()) {
-        _logger.i("Reading configuration file ${sessionFile.path}.");
-        var string = sessionFile.readAsStringSync();
-        _applicationConfiguration = ApplicationConfiguration.fromJson(jsonDecode(string));
+  Future<PksIniConfiguration> get configuration async {
+    if (_pksIniConfiguration == null) {
+      var configFile = File(join(pksSysDirectory, defaultConfigFilename));
+      if (configFile.existsSync()) {
+        _logger.i("Reading application configuration file ${configFile.path}.");
+        var string = configFile.readAsStringSync();
+        _pksIniConfiguration = PksIniConfiguration.fromJson(jsonDecode(string));
       } else {
-        _applicationConfiguration = ApplicationConfiguration.defaultConfiguration;
+        _pksIniConfiguration = PksIniConfiguration(configuration: ApplicationConfiguration.defaultConfiguration,
+            printConfiguration: PrintConfiguration(wrap: true));
       }
     }
-    return _applicationConfiguration!;
+    return _pksIniConfiguration!;
   }
 
   ///

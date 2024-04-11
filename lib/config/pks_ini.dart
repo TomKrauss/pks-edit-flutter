@@ -19,7 +19,7 @@ import 'package:pks_edit_flutter/util/platform_extension.dart';
 part 'pks_ini.g.dart';
 
 ///
-/// Represents the configuration as defined in file $PKS_SYS/pkseditini.json.
+/// Represents the UI configuration port of $PKS_SYS/pkseditini.json.
 ///
 @JsonSerializable(includeIfNull: false)
 class ApplicationConfiguration {
@@ -34,6 +34,19 @@ class ApplicationConfiguration {
   /// The default font used in editors.
   @JsonKey(name: "default-font")
   final String defaultFont;
+  /// The size of the icons (small, medium, big, large)
+  @JsonKey(name: "icon-size")
+  final String iconSizeName;
+  ///
+  /// The size of the icons in the toolbar.
+  ///
+  int get iconSize => switch(iconSizeName) {
+    "medium" => 48,
+    "big" => 60,
+    "large" => 72,
+    _ => 32
+  };
+
   /// The default search engine for performing a search for editor words.
   @JsonKey(name: "search-engine")
   final String searchEngine;
@@ -68,12 +81,17 @@ class ApplicationConfiguration {
   /// Whether we should enforce to re-use the single running instance of PKS-Edit
   @JsonKey(name: "reuse-application-running-instance")
   final bool reuseApplicationRunningInstance;
+  /// The time in seconds after which changed files are automatically saved.
+  @JsonKey(name: "autosave-time")
+  final int? autosaveTimeSeconds;
 
   ApplicationConfiguration({
     this.theme = "dark",
     this.includePath = "includes;inc",
     this.language = "English",
     this.maximumOpenWindows = -1,
+    this.iconSizeName = "small",
+    this.autosaveTimeSeconds,
     this.showStatusbar = true,
     this.showToolbar = true,
     this.showFunctionKeys = true,
@@ -92,7 +110,35 @@ class ApplicationConfiguration {
   static ApplicationConfiguration get defaultConfiguration => ApplicationConfiguration();
 
   static ApplicationConfiguration fromJson(Map<String, dynamic> map) =>
-      _$EditorConfigurationFromJson(map);
-  Map<String, dynamic> toJson() => _$EditorConfigurationToJson(this);
+      _$ApplicationConfigurationFromJson(map);
+  Map<String, dynamic> toJson() => _$ApplicationConfigurationToJson(this);
+}
 
+///
+/// Represents the print configuration port of file $PKS_SYS/pkseditini.json.
+///
+@JsonSerializable(includeIfNull: false)
+class PrintConfiguration {
+  final bool wrap;
+  PrintConfiguration({required this.wrap});
+
+  static PrintConfiguration fromJson(Map<String, dynamic> map) =>
+      _$PrintConfigurationFromJson(map);
+  Map<String, dynamic> toJson() => _$PrintConfigurationToJson(this);
+}
+
+///
+/// Represents the configuration as defined in file $PKS_SYS/pkseditini.json.
+///
+@JsonSerializable(includeIfNull: false)
+class PksIniConfiguration {
+  final ApplicationConfiguration configuration;
+  @JsonKey(name: "print-configuration")
+  final PrintConfiguration printConfiguration;
+
+  PksIniConfiguration({required this.configuration, required this.printConfiguration});
+
+  static PksIniConfiguration fromJson(Map<String, dynamic> map) =>
+      _$PksIniConfigurationFromJson(map);
+  Map<String, dynamic> toJson() => _$PksIniConfigurationToJson(this);
 }

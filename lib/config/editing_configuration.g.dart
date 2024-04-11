@@ -74,12 +74,12 @@ EditingConfigurations _$EditingConfigurationsFromJson(
       documentTypes: (json['documentTypes'] as List<dynamic>?)
               ?.map((e) => DocumentType.fromJson(e as Map<String, dynamic>))
               .toList() ??
-          const [],
+          const [DocumentType.defaultConfiguration],
       editorConfigurations: (json['editorConfigurations'] as List<dynamic>?)
               ?.map((e) =>
                   EditingConfiguration.fromJson(e as Map<String, dynamic>))
               .toList() ??
-          const [],
+          const [EditingConfiguration.defaultConfiguration],
     );
 
 Map<String, dynamic> _$EditingConfigurationsToJson(

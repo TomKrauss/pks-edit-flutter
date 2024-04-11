@@ -22,6 +22,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
+import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/ui/actions.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/input_dialog.dart';
@@ -544,8 +545,8 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                         SizedBox(
                             width: double.infinity,
                             child: MenuBarWidget(actions: myActions)),
-                        if (bloc.applicationConfiguration.showToolbar)
-                        ToolBarWidget(actions: myActions),
+                        if (bloc.pksIniConfiguration.configuration.showToolbar)
+                        ToolBarWidget(actions: myActions, iconColor: bloc.themes.currentTheme.iconColor,),
                         Expanded(child: EditorDockPanel(state: files, files: files.files, closeFile: (file) {
                           _closeWindow(PksEditActionContext(openFileState: files, currentFile: file));
                         })),
@@ -681,9 +682,9 @@ class ToolBarWidget extends StatelessWidget {
   final Color iconColor;
 
   const ToolBarWidget(
-      {super.key, required this.actions, this.iconColor = Colors.blue});
+      {super.key, required this.actions, required this.iconColor});
 
-  Widget _buildButton(PksEditAction action, void Function()? callback) =>
+  Widget _buildButton(PksEditAction action, ApplicationConfiguration config, void Function()? callback) =>
       Tooltip(
           message: action.description,
           child: InkWell(
@@ -691,19 +692,21 @@ class ToolBarWidget extends StatelessWidget {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 3),
                 child: Icon(action.icon,
+                    size: config.iconSize.toDouble(),
                     color: callback == null ? Colors.grey : iconColor),
               )));
 
-  Iterable<Widget> _buildItemsForGroup(BuildContext context, String group) =>
+  Iterable<Widget> _buildItemsForGroup(BuildContext context, ApplicationConfiguration config, String group) =>
       actions
           .where((e) => e.displayInToolbar && e.group == group)
-          .map((e) => _buildButton(e, e.onPressed));
+          .map((e) => _buildButton(e, config, e.onPressed));
 
   List<Widget> _buildToolbarItems(BuildContext context) {
     var result = <Widget>[];
+    final config = EditorBloc.of(context).applicationConfiguration;
     for (var group in [PksEditAction.fileGroup, PksEditAction.editGroup, PksEditAction.findGroup,
         PksEditAction.functionGroup, PksEditAction.windowGroup, PksEditAction.viewGroup]) {
-      var items = _buildItemsForGroup(context, group);
+      var items = _buildItemsForGroup(context, config, group);
       if (items.isNotEmpty) {
         if (result.isNotEmpty) {
           result.add(VerticalDivider(

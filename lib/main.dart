@@ -37,29 +37,11 @@ class PksEditApplication extends StatelessWidget {
 
   ThemeData _createTheme(BuildContext context) {
     final bloc = EditorBloc.of(context);
-    var themeName = bloc.applicationConfiguration.theme;
-    if (themeName == "dark") {
-      return ThemeData(
-          colorScheme: const ColorScheme.dark(),
-          dividerColor: Colors.white24,
-          appBarTheme: const AppBarTheme(backgroundColor: Colors.white10));
-    }
-    if (themeName == "spring") {
-      return ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.greenAccent),
-          dividerColor: Colors.green.shade200,
-          appBarTheme: AppBarTheme(backgroundColor: Colors.green.shade50));
-    }
-    if (themeName == "pink") {
-      return ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.pinkAccent),
-          dividerColor: Colors.pink.shade200,
-          appBarTheme: AppBarTheme(backgroundColor: Colors.pink.shade50));
-    }
+    var theme = bloc.themes.currentTheme;
     return ThemeData(
-        colorScheme: const ColorScheme.light(),
-        dividerColor: Colors.black26,
-        appBarTheme: const AppBarTheme(backgroundColor: Colors.black12));
+        colorScheme: theme.isDark ? const ColorScheme.dark() : ColorScheme.fromSeed(seedColor: theme.backgroundColor),
+        dividerColor: theme.dialogBorder,
+        appBarTheme: AppBarTheme(backgroundColor: theme.dialogBackground));
   }
 
   // This widget is the root of your application.

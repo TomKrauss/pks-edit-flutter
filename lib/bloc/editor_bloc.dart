@@ -26,6 +26,7 @@ import 'package:pks_edit_flutter/bloc/templates.dart';
 import 'package:pks_edit_flutter/config/editing_configuration.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/config/pks_sys.dart';
+import 'package:pks_edit_flutter/config/theme_configuration.dart';
 import 'package:pks_edit_flutter/model/languages.dart';
 import 'package:pks_edit_flutter/util/file_stat_extension.dart';
 import 'package:re_editor/re_editor.dart';
@@ -227,8 +228,10 @@ class EditorBloc {
   static EditorBloc of(BuildContext context) => SimpleBlocProvider.of(context);
   final Logger _logger = Logger(printer: SimplePrinter(printTime: true, colors: false));
   late final OpenFileState _openFileState;
-  late final ApplicationConfiguration applicationConfiguration;
+  late final PksIniConfiguration pksIniConfiguration;
+  ApplicationConfiguration get applicationConfiguration => pksIniConfiguration.configuration;
   late final EditingConfigurations editingConfigurations;
+  late final Themes themes;
   final StreamController<OpenFileState> _openFileSubject = BehaviorSubject.seeded(OpenFileState(files: const [], currentIndex: -1));
   Stream<OpenFileState> get openFileStream => _openFileSubject.stream;
   final List<String> openFiles = [];
@@ -535,8 +538,10 @@ class EditorBloc {
       }
     }
     var session = await PksConfiguration.singleton.currentSession;
+    themes = await PksConfiguration.singleton.themes;
     editingConfigurations = await PksConfiguration.singleton.editingConfigurations;
-    applicationConfiguration = await PksConfiguration.singleton.configuration;
+    pksIniConfiguration = await PksConfiguration.singleton.configuration;
+    themes.selectTheme(applicationConfiguration.theme);
     int? active;
     int idx = 0;
     if (applicationConfiguration.preserveHistory) {
