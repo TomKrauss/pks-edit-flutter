@@ -394,4 +394,13 @@ class PksConfiguration {
     sessionFile.writeAsStringSync(
         const JsonEncoder.withIndent("  ").convert(session.toJson()));
   }
+
+  ///
+  /// Save the current PKS EDIT settings.
+  ///
+  Future<void> saveSettings(PksIniConfiguration configuration) async {
+    var settingsFile = File(join(pksSysDirectory, defaultConfigFilename));
+    settingsFile.writeAsStringSync(
+        const JsonEncoder.withIndent("  ").convert(configuration.toJson()));
+  }
 }

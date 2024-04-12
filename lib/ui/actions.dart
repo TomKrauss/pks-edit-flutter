@@ -33,8 +33,11 @@ class PksEditAction {
   static const String findGroup = "find";
   static const String viewGroup = "view";
   static const String windowGroup = "window";
+  static const String extraGroup = "extra";
   static const String functionGroup = "function";
   static const String defaultGroup = "default";
+  static List<String> get wellknownGroups => [PksEditAction.fileGroup, PksEditAction.editGroup, PksEditAction.findGroup,
+    PksEditAction.functionGroup, PksEditAction.extraGroup, PksEditAction.windowGroup, PksEditAction.viewGroup];
   final String id;
   final String? _description;
   final String group;

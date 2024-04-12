@@ -14,6 +14,7 @@
 import 'package:flutter/material.dart';
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
+import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/ui/main_page.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -26,7 +27,7 @@ void main(List<String> args) async {
   await windowManager.setPreventClose(true);
   runApp(SimpleBlocProvider(
       commandLineArguments: args,
-      child: const PksEditApplication()));
+      child: const PksIniProvider(createChild: PksEditApplication.new)));
 }
 
 ///

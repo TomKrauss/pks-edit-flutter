@@ -13,7 +13,9 @@
 
 import 'dart:io';
 
+import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
+import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/util/platform_extension.dart';
 
 part 'pks_ini.g.dart';
@@ -24,19 +26,19 @@ part 'pks_ini.g.dart';
 @JsonSerializable(includeIfNull: false)
 class ApplicationConfiguration {
   /// The application theme (colors etc...)
-  final String theme;
+  String theme;
   /// Used for include searches, when editing c-/c++ files.
   List<String> get includes => includePath.split(PlatformExtension.filePathSeparator);
   @JsonKey(name: "include-path")
   final String includePath;
   /// The application language (German, English)
-  final String language;
+  String language;
   /// The default font used in editors.
   @JsonKey(name: "default-font")
-  final String defaultFont;
+  String defaultFont;
   /// The size of the icons (small, medium, big, large)
   @JsonKey(name: "icon-size")
-  final String iconSizeName;
+  String iconSizeName;
   ///
   /// The size of the icons in the toolbar.
   ///
@@ -132,6 +134,7 @@ class PrintConfiguration {
 ///
 @JsonSerializable(includeIfNull: false)
 class PksIniConfiguration {
+  static PksIniConfiguration of(BuildContext context) => PksIniProvider.of(context);
   final ApplicationConfiguration configuration;
   @JsonKey(name: "print-configuration")
   final PrintConfiguration printConfiguration;
@@ -142,3 +145,44 @@ class PksIniConfiguration {
       _$PksIniConfigurationFromJson(map);
   Map<String, dynamic> toJson() => _$PksIniConfigurationToJson(this);
 }
+
+///
+/// Widget providing the application configuration (PksIni) allowing to access the application configuration from an inherited widget.
+///
+class PksIniContextWidget extends InheritedWidget {
+  const PksIniContextWidget({
+    super.key,
+    required this.configuration,
+    required super.child,
+  });
+
+  final PksIniConfiguration configuration;
+
+  @override
+  bool updateShouldNotify(PksIniContextWidget oldWidget) => true;
+}
+
+///
+/// This stateful widget provides access to the Business Logic Components (BLOC)
+/// of PKS Edit.
+///
+class PksIniProvider extends StatelessWidget {
+  final Widget Function() createChild;
+  const PksIniProvider({super.key, required this.createChild});
+
+  static PksIniContextWidget _contextWidget(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<PksIniContextWidget>()!;
+
+  static PksIniConfiguration of(BuildContext context) => _contextWidget(context).configuration;
+
+  @override
+  Widget build(BuildContext context) =>
+      StreamBuilder(stream: EditorBloc.of(context).pksIniStream, builder: (context, snapshot) {
+        var configuration = snapshot.data;
+        if (configuration != null) {
+            return PksIniContextWidget(configuration: configuration, child: createChild());
+        }
+        return const CircularProgressIndicator();
+  });
+}
+

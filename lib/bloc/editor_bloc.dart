@@ -236,8 +236,8 @@ class EditorBloc {
   static EditorBloc of(BuildContext context) => SimpleBlocProvider.of(context);
   final Logger _logger = Logger(printer: SimplePrinter(printTime: true, colors: false));
   late final OpenFileState _openFileState;
-  late final PksIniConfiguration pksIniConfiguration;
-  ApplicationConfiguration get applicationConfiguration => pksIniConfiguration.configuration;
+  final StreamController<PksIniConfiguration> _pksIniStreamController = BehaviorSubject();
+  Stream<PksIniConfiguration> get pksIniStream => _pksIniStreamController.stream;
   late final EditingConfigurations editingConfigurations;
   late final Themes themes;
   final StreamController<OpenFileState> _openFileSubject = BehaviorSubject.seeded(OpenFileState(files: const [], currentIndex: -1));
@@ -531,6 +531,11 @@ class EditorBloc {
     }
   }
 
+  void updateConfiguration(PksIniConfiguration configuration) {
+    themes.selectTheme(configuration.configuration.theme);
+    _pksIniStreamController.add(configuration);
+  }
+
   ///
   /// Initializes the BLOC interpreting the command line arguments.
   ///
@@ -548,8 +553,8 @@ class EditorBloc {
     var session = await PksConfiguration.singleton.currentSession;
     themes = await PksConfiguration.singleton.themes;
     editingConfigurations = await PksConfiguration.singleton.editingConfigurations;
-    pksIniConfiguration = await PksConfiguration.singleton.configuration;
-    themes.selectTheme(applicationConfiguration.theme);
+    final pksIniConfiguration = await PksConfiguration.singleton.configuration;
+    final applicationConfiguration = pksIniConfiguration.configuration;
     int? active;
     int idx = 0;
     if (applicationConfiguration.preserveHistory) {
@@ -567,6 +572,7 @@ class EditorBloc {
       }
     }
     openFiles.addAll(session.openFiles);
+    updateConfiguration(pksIniConfiguration);
     await initWindowOptions(session);
   }
 
