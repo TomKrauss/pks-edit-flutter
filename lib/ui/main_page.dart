@@ -44,6 +44,8 @@ class PksEditMainPage extends StatefulWidget {
 class _PksEditMainPageState extends State<PksEditMainPage>
     with TickerProviderStateMixin, WindowListener {
   late EditorBloc bloc;
+  late final FocusNode _searchbarFocusNode;
+  late final FocusNode _editorFocusNode;
 
   List<PksEditAction> getActions(OpenFileState? fileState) {
     final context = PksEditActionContext(openFileState: fileState);
@@ -226,6 +228,8 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   @override
   void initState() {
     windowManager.addListener(this);
+    _searchbarFocusNode = FocusNode();
+    _editorFocusNode = FocusNode();
     super.initState();
   }
 
@@ -233,6 +237,8 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   @override
   void dispose() {
     super.dispose();
+    _searchbarFocusNode.dispose();
+    _editorFocusNode.dispose();
     windowManager.removeListener(this);
   }
 
@@ -497,6 +503,14 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     _closeWindows([file]);
   }
 
+  void _toggleSearchBarFocus() {
+    if (_searchbarFocusNode.hasFocus) {
+      _editorFocusNode.requestFocus();
+    } else {
+      _searchbarFocusNode.requestFocus();
+    }
+  }
+
   Map<ShortcutActivator, VoidCallback> _buildShortcutMap(
       List<PksEditAction> actions) {
     final result = <ShortcutActivator, VoidCallback>{};
@@ -505,6 +519,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
         result[action.shortcut as ShortcutActivator] = action.onPressed!;
       }
     }
+    result[const SingleActivator(LogicalKeyboardKey.keyS, alt: true, control: true)] = _toggleSearchBarFocus;
     return result;
   }
 
@@ -546,8 +561,10 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                             width: double.infinity,
                             child: MenuBarWidget(actions: myActions)),
                         if (bloc.pksIniConfiguration.configuration.showToolbar)
-                        ToolBarWidget(actions: myActions, iconColor: bloc.themes.currentTheme.iconColor,),
-                        Expanded(child: EditorDockPanel(state: files, files: files.files, closeFile: (file) {
+                        ToolBarWidget(currentFile: files.currentFile, actions: myActions, iconColor: bloc.themes.currentTheme.iconColor,
+                          focusNode: _searchbarFocusNode,
+                          ),
+                        Expanded(child: EditorDockPanel(state: files, files: files.files, editorFocusNode: _editorFocusNode, closeFile: (file) {
                           _closeWindow(PksEditActionContext(openFileState: files, currentFile: file));
                         })),
                         if (bloc.applicationConfiguration.showStatusbar)
@@ -564,9 +581,10 @@ class EditorDockPanel extends StatefulWidget {
   final String dockName;
   final List<OpenFile> files;
   final OpenFileState state;
+  final FocusNode editorFocusNode;
   final void Function(OpenFile) closeFile;
   const EditorDockPanel({this.dockName = OpenFile.dockNameDefault,
-    required this.state, required this.files, required this.closeFile, super.key});
+    required this.state, required this.files, required this.closeFile, required this.editorFocusNode, super.key});
 
   @override
   State<EditorDockPanel> createState() => _EditorDockPanelState();
@@ -634,6 +652,8 @@ class _EditorDockPanelState extends State<EditorDockPanel> with TickerProviderSt
         autofocus: true,
         readOnly: file.readOnly,
         onChanged: file.onChanged,
+        focusNode: widget.editorFocusNode,
+        findController: file.findController,
         indicatorBuilder:
             (context, editingController, chunkController, notifier) => Row(
           children: [
@@ -677,12 +697,41 @@ class _EditorDockPanelState extends State<EditorDockPanel> with TickerProviderSt
 ///
 /// Displays a tool bar containing the tool bar triggered actions of PKS EDIT
 ///
-class ToolBarWidget extends StatelessWidget {
+class ToolBarWidget extends StatefulWidget {
+  final OpenFile? currentFile;
   final List<PksEditAction> actions;
   final Color iconColor;
+  final FocusNode focusNode;
 
   const ToolBarWidget(
-      {super.key, required this.actions, required this.iconColor});
+      {super.key, this.currentFile, required this.focusNode, required this.actions, required this.iconColor});
+
+  @override
+  State<StatefulWidget> createState() => ToolBarWidgetState();
+}
+
+///
+/// Displays a tool bar containing the tool bar triggered actions of PKS EDIT
+///
+class ToolBarWidgetState extends State<ToolBarWidget> {
+  final TextEditingController searchBarController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    searchBarController.addListener(() {
+      final findController = widget.currentFile?.findController;
+      if (findController != null) {
+        findController.findInputController.text = searchBarController.text;
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    searchBarController.dispose();
+  }
 
   Widget _buildButton(PksEditAction action, ApplicationConfiguration config, void Function()? callback) =>
       Tooltip(
@@ -693,20 +742,20 @@ class ToolBarWidget extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 3),
                 child: Icon(action.icon,
                     size: config.iconSize.toDouble(),
-                    color: callback == null ? Colors.grey : iconColor),
+                    color: callback == null ? Colors.grey : widget.iconColor),
               )));
 
-  Iterable<Widget> _buildItemsForGroup(BuildContext context, ApplicationConfiguration config, String group) =>
-      actions
+  Iterable<Widget> _buildItemsForGroup(ApplicationConfiguration config, String group) =>
+      widget.actions
           .where((e) => e.displayInToolbar && e.group == group)
           .map((e) => _buildButton(e, config, e.onPressed));
 
-  List<Widget> _buildToolbarItems(BuildContext context) {
+  List<Widget> _buildToolbarItems() {
     var result = <Widget>[];
     final config = EditorBloc.of(context).applicationConfiguration;
     for (var group in [PksEditAction.fileGroup, PksEditAction.editGroup, PksEditAction.findGroup,
         PksEditAction.functionGroup, PksEditAction.windowGroup, PksEditAction.viewGroup]) {
-      var items = _buildItemsForGroup(context, config, group);
+      var items = _buildItemsForGroup(config, group);
       if (items.isNotEmpty) {
         if (result.isNotEmpty) {
           result.add(VerticalDivider(
@@ -717,6 +766,18 @@ class ToolBarWidget extends StatelessWidget {
         }
         result.addAll(items);
       }
+    }
+    final findController = widget.currentFile?.findController;
+    if (findController != null) {
+      result.add(const Expanded(child: SizedBox()));
+      result.add(SizedBox(width: 450, child: TextField(
+          controller: searchBarController,
+          focusNode: widget.focusNode,
+          decoration: const InputDecoration(
+              prefixIcon: Padding(padding: EdgeInsets.only(right: 8), child: Icon(Icons.search)),
+              prefixIconConstraints: BoxConstraints(maxHeight: 36),
+              hintText: "Search Incrementally (Ctrl+Alt+S)",
+              contentPadding: EdgeInsets.all(4), isDense: true),)));
     }
     return result;
   }
@@ -729,7 +790,7 @@ class ToolBarWidget extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: _buildToolbarItems(context),
+            children: _buildToolbarItems(),
           )));
 }
 

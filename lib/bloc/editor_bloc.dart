@@ -141,6 +141,11 @@ class OpenFile {
   ///
   late final CodeLineEditingController controller;
 
+  ///
+  /// The controller for executing find and replace operations.
+  ///
+  late final CodeFindController findController;
+
   EditingConfiguration editingConfiguration;
 
   String get title {
@@ -195,6 +200,9 @@ class OpenFile {
     if (initialLineNumber != null) {
       controller.selection = CodeLineSelection.fromPosition(position: CodeLinePosition(index: initialLineNumber, offset: 0));
     }
+    findController = CodeFindController(controller, const CodeFindValue(option: CodeFindOption(pattern: "", caseSensitive: true, regex: false),
+        searching: true,
+        replaceMode: false));
   }
 
   ///

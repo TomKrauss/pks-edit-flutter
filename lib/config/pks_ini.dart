@@ -41,10 +41,10 @@ class ApplicationConfiguration {
   /// The size of the icons in the toolbar.
   ///
   int get iconSize => switch(iconSizeName) {
-    "medium" => 48,
-    "big" => 60,
-    "large" => 72,
-    _ => 32
+    "medium" => 32,
+    "big" => 48,
+    "large" => 64,
+    _ => 24
   };
 
   /// The default search engine for performing a search for editor words.
