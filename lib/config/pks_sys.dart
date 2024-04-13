@@ -351,8 +351,7 @@ class PksConfiguration {
         var string = configFile.readAsStringSync();
         _pksIniConfiguration = PksIniConfiguration.fromJson(jsonDecode(string));
       } else {
-        _pksIniConfiguration = PksIniConfiguration(configuration: ApplicationConfiguration.defaultConfiguration,
-            printConfiguration: PrintConfiguration(wrap: true));
+        _pksIniConfiguration = PksIniConfiguration(configuration: ApplicationConfiguration.defaultConfiguration);
       }
     }
     return _pksIniConfiguration!;

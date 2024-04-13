@@ -58,7 +58,7 @@ class SearchBarWidgetState extends State<SearchBarWidget> {
 
   @override
   Widget build(BuildContext context) {
-    final height = PksIniConfiguration.of(context).configuration.iconSize;
+    final height = PksIniConfiguration.of(context).configuration.iconSize.size;
     final theme = Theme.of(context);
     final color = ThemeData.estimateBrightnessForColor(theme.primaryColor) == Brightness.light ? Colors.black87 : Colors.white70;
     final fontSize = (height/2).toDouble();
@@ -123,7 +123,7 @@ class ToolBarWidgetState extends State<ToolBarWidget> {
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 3),
                 child: Icon(action.icon,
-                    size: config.iconSize.toDouble(),
+                    size: config.iconSize.size.toDouble(),
                     color: callback == null ? Colors.grey : iconColor),
               )));
 

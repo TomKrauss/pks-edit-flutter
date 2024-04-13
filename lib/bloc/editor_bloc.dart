@@ -29,6 +29,7 @@ import 'package:pks_edit_flutter/config/pks_sys.dart';
 import 'package:pks_edit_flutter/config/theme_configuration.dart';
 import 'package:pks_edit_flutter/model/languages.dart';
 import 'package:pks_edit_flutter/util/file_stat_extension.dart';
+import 'package:pks_edit_flutter/util/file_watcher.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:window_manager/window_manager.dart';
@@ -125,12 +126,21 @@ class OpenFile {
   /// Whether this is a new file.
   ///
   bool isNew;
+
   ///
   /// Whether the file was edited by the user but not yet saved.
   ///
   bool modified;
 
+  ///
+  /// Whether the file is read-only.
+  ///
   bool readOnly;
+
+  ///
+  /// The modification when the file was read / written the last time.
+  ///
+  late DateTime modificationTime;
 
   ///
   /// Internal flag, if the caret must be repositioned asynchronously
@@ -157,7 +167,10 @@ class OpenFile {
   late String _lastSavedText;
   void Function(OpenFile file)? _changedListener;
 
-  void saved() {
+  ///
+  /// Mark this file as "unchanged" by the user.
+  ///
+  void unchanged() {
     _lastSavedText = controller.text;
     _updateModified(false);
   }
@@ -172,6 +185,7 @@ class OpenFile {
   void _updateModified(bool newModified) {
     var oldModified = modified;
     modified = newModified;
+    modificationTime = DateTime.now();
     if (_changedListener != null && oldModified != newModified) {
       _changedListener!(this);
       needsCaretAdjustment = true;
@@ -193,9 +207,11 @@ class OpenFile {
   OpenFile({required this.filename, required this.text, this.dock = dockNameDefault,
     required this.editingConfiguration,
     this.readOnly = false,
+    DateTime? modificationTime,
     this.modified = false, this.encoding = utf8, required this.isNew, int? initialLineNumber}) {
     language = Languages.singleton.modeForFilename(filename);
     _lastSavedText = text;
+    this.modificationTime = modificationTime ?? DateTime.now();
     controller = CodeLineEditingController.fromText(text, CodeLineOptions(indentSize: editingConfiguration.tabSize));
     if (initialLineNumber != null) {
       controller.selection = CodeLineSelection.fromPosition(position: CodeLinePosition(index: initialLineNumber, offset: 0));
@@ -234,15 +250,19 @@ class CommandResult {
 ///
 class EditorBloc {
   static EditorBloc of(BuildContext context) => SimpleBlocProvider.of(context);
+
+  final List<String> openFiles = [];
   final Logger _logger = Logger(printer: SimplePrinter(printTime: true, colors: false));
   late final OpenFileState _openFileState;
   final StreamController<PksIniConfiguration> _pksIniStreamController = BehaviorSubject();
-  Stream<PksIniConfiguration> get pksIniStream => _pksIniStreamController.stream;
   late final EditingConfigurations editingConfigurations;
   late final Themes themes;
   final StreamController<OpenFileState> _openFileSubject = BehaviorSubject.seeded(OpenFileState(files: const [], currentIndex: -1));
+  final StreamController<OpenFile> _externalFileChanges = BehaviorSubject();
+
   Stream<OpenFileState> get openFileStream => _openFileSubject.stream;
-  final List<String> openFiles = [];
+  Stream<PksIniConfiguration> get pksIniStream => _pksIniStreamController.stream;
+  Stream<OpenFile> get externalFileChangeStream => _externalFileChanges.stream;
 
   void _refreshFiles() {
     _openFileSubject.add(_openFileState);
@@ -294,7 +314,7 @@ class EditorBloc {
     try {
       final file = File(fileHandle.filename);
       file.writeAsStringSync(fileHandle.controller.text, encoding: fileHandle.encoding);
-      fileHandle.saved();
+      fileHandle.unchanged();
       return CommandResult(success: true, message: "Successfully saved ${fileHandle.filename}");
     } catch(ex) {
       return CommandResult(success: false, message: ex.toString());
@@ -322,12 +342,29 @@ class EditorBloc {
     }
     if (filename != null) {
       f.filename = filename;
+      FileWatcher.singleton.addWatchedFile(filename);
     }
     var result = await _saveFile(f);
     if (filename != null) {
       _refreshFiles();
     }
     return result;
+  }
+
+  Future<CommandResult> abandonFile(OpenFile openFile) async {
+    try {
+      final file = File(openFile.filename).absolute;
+      final stat = file.statSync();
+      openFile.readOnly = stat.readOnly;
+      openFile.modificationTime = stat.modified;
+      Encoding encoding = await _detectEncoding(file);
+      openFile.controller.text = file.readAsStringSync(encoding: encoding);
+      openFile.unchanged();
+      _refreshFiles();
+      return CommandResult(success: true);
+    } catch(ex) {
+      return CommandResult(success: false, message: ex.toString());
+    }
   }
 
   ///
@@ -356,6 +393,7 @@ class EditorBloc {
     openFile.addChangeListener((OpenFile file) {
       _refreshFiles();
     });
+    FileWatcher.singleton.addWatchedFile(openFile.filename);
   }
 
   ///
@@ -455,7 +493,8 @@ class EditorBloc {
       final ec = await editingConfigurations.forFile(filename);
       final file = File.fromUri(
           Uri.file(filename, windows: Platform.isWindows));
-      final readOnly = file.statSync().readOnly;
+      final stat = file.statSync();
+      final readOnly = stat.readOnly;
       Encoding encoding = await _detectEncoding(file);
       String? text = file.readAsStringSync(encoding: encoding);
       openFiles.remove(filename);
@@ -465,6 +504,7 @@ class EditorBloc {
       }
       _addOpenFile(OpenFile(
           readOnly: readOnly,
+          modificationTime: stat.modified,
           editingConfiguration: ec,
           filename: filename, isNew: false, text: text, encoding: encoding,
           initialLineNumber: lineNumber,
@@ -533,6 +573,7 @@ class EditorBloc {
 
   void updateConfiguration(PksIniConfiguration configuration) {
     themes.selectTheme(configuration.configuration.theme);
+    PksConfiguration.singleton.saveSettings(configuration);
     _pksIniStreamController.add(configuration);
   }
 
@@ -574,10 +615,31 @@ class EditorBloc {
     openFiles.addAll(session.openFiles);
     updateConfiguration(pksIniConfiguration);
     await initWindowOptions(session);
+    FileWatcher.singleton.changeEvents.listen(_checkForFileChanges);
+  }
+
+  void _checkForFileChanges(FileSystemEvent event) {
+    final changedFile = event.path;
+    for (final of in _openFileState.files) {
+      var file = File(of.filename);
+      if (event.isDirectory && (file.parent.path != changedFile)) {
+        continue;
+      }
+      if (!event.isDirectory && (file.path != changedFile)) {
+        continue;
+      }
+      final stat = file.statSync();
+      if (stat.modified.isAfter(of.modificationTime)) {
+        // Set modification time to not report again.
+        of.modificationTime = stat.modified;
+        _externalFileChanges.add(of);
+      }
+    }
   }
 
   Future<void> dispose() async {
     _openFileSubject.close();
+    _externalFileChanges.close();
   }
 
   ///

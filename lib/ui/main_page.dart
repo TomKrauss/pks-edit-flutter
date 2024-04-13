@@ -11,6 +11,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
@@ -30,6 +31,7 @@ import 'package:pks_edit_flutter/ui/dialog/settings_dialog.dart';
 import 'package:pks_edit_flutter/ui/status_bar_widget.dart';
 import 'package:pks_edit_flutter/ui/tool_bar_widget.dart';
 import 'package:re_editor/re_editor.dart';
+import 'package:sound_library/sound_library.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:window_manager/window_manager.dart';
 
@@ -47,6 +49,7 @@ class PksEditMainPage extends StatefulWidget {
 class _PksEditMainPageState extends State<PksEditMainPage>
     with TickerProviderStateMixin, WindowListener {
   late EditorBloc bloc;
+  late StreamSubscription<OpenFile> _externalFileSubscription;
   late final FocusNode _searchbarFocusNode;
   late final FocusNode _editorFocusNode;
 
@@ -235,6 +238,12 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   void didChangeDependencies() {
     super.didChangeDependencies();
     bloc = EditorBloc.of(context);
+    _externalFileSubscription = bloc.externalFileChangeStream.listen((event) async {
+        if ((await ConfirmationDialog.show(context: context, message: "File ${event.title} is changed. Do you want to reload it?")) == 'yes') {
+          final result = await bloc.abandonFile(event);
+          _handleCommandResult(result);
+        }
+    });
   }
 
   @override
@@ -249,6 +258,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   @override
   void dispose() {
     super.dispose();
+    _externalFileSubscription.cancel();
     _searchbarFocusNode.dispose();
     _editorFocusNode.dispose();
     windowManager.removeListener(this);
@@ -303,20 +313,30 @@ class _PksEditMainPageState extends State<PksEditMainPage>
             .showSnackBar(SnackBar(content: Text(message)));
       }
     } else {
+      var config = PksIniConfiguration.of(context).configuration;
+      if (config.playSoundOnError) {
+        SoundPlayer.play(config.errorSound);
+      }
       message ??= "An error occurred executing the command";
-      await showDialog<void>(
-          context: context,
-          barrierDismissible: false,
-          builder: (BuildContext context) => AlertDialog(
-                content: Text(message!),
-                actions: [
-                  ElevatedButton(
-                      onPressed: () {
-                        Navigator.of(context).pop();
-                      },
-                      child: const Text("OK"))
-                ],
-              ));
+      if (config.showErrorsInToast) {
+        ScaffoldMessenger.of(context)
+            .showSnackBar(SnackBar(content: Text(message), backgroundColor: Theme.of(context).colorScheme.errorContainer,));
+      } else {
+        await showDialog<void>(
+            context: context,
+            barrierDismissible: false,
+            builder: (BuildContext context) =>
+                AlertDialog(
+                  content: Text(message!),
+                  actions: [
+                    ElevatedButton(
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: const Text("OK"))
+                  ],
+                ));
+      }
     }
   }
 
