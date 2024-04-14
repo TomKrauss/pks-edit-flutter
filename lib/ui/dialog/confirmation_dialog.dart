@@ -24,6 +24,8 @@ class ConfirmationDialog extends StatelessWidget {
   final String message;
   final IconData? icon;
   final Map<String, String?> actions;
+  static const Map<String, String?> yesNoActions = {"Yes": "yes", "No": "no"};
+  static const Map<String, String?> yesNoCancelActions = {"Yes": "yes", "No": "no", "Cancel": null};
 
   ///
   /// Show a confirmation dialog with the given [title], [message] and [actions] and an optional [icon]. The result is the value of the
@@ -50,7 +52,7 @@ class ConfirmationDialog extends StatelessWidget {
       Map<String, String?>? actions,
       super.key})
       : title = title ?? "Confirmation",
-        actions = actions ?? const {"Yes": "yes", "No": "no", "Cancel": null};
+        actions = actions ?? yesNoCancelActions;
 
   @override
   Widget build(BuildContext context) =>
