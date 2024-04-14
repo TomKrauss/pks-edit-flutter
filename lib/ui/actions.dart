@@ -277,6 +277,48 @@ class PksEditActions {
           text: "Cycle window backward",
           group: PksEditAction.windowGroup),
       PksEditAction(
+          id: "activate-window-1",
+          execute: _activateWindow1,
+          shortcut:
+          const SingleActivator(
+              LogicalKeyboardKey.numpad1, control: true),
+          text: "Activate Window 1"),
+      PksEditAction(
+          id: "activate-window-1",
+          execute: _activateWindow1,
+          shortcut:
+          const SingleActivator(
+              LogicalKeyboardKey.digit1, control: true),
+          text: "Activate Window 1"),
+      PksEditAction(
+          id: "activate-window-2",
+          execute: _activateWindow2,
+          shortcut:
+          const SingleActivator(
+              LogicalKeyboardKey.digit2, control: true),
+          text: "Activate Window 2"),
+      PksEditAction(
+          id: "activate-window-3",
+          execute: _activateWindow3,
+          shortcut:
+          const SingleActivator(
+              LogicalKeyboardKey.digit3, control: true),
+          text: "Activate Window 3"),
+      PksEditAction(
+          id: "activate-window-4",
+          execute: _activateWindow4,
+          shortcut:
+          const SingleActivator(
+              LogicalKeyboardKey.digit4, control: true),
+          text: "Activate Window 4"),
+      PksEditAction(
+          id: "activate-window-5",
+          execute: _activateWindow5,
+          shortcut:
+          const SingleActivator(
+              LogicalKeyboardKey.digit5, control: true),
+          text: "Activate Window 5"),
+      PksEditAction(
           id: "goto-line",
           execute: _gotoLine,
           isEnabled: _hasFile,
@@ -401,6 +443,31 @@ class PksEditActions {
   void _cycleWindowBackward() {
     final bloc = EditorBloc.of(getBuildContext());
     bloc.cycleWindow(-1);
+  }
+
+  void _activateWindow(int index) {
+    final bloc = EditorBloc.of(getBuildContext());
+    bloc.activateWindowByIndex(index);
+  }
+
+  void _activateWindow1() {
+    _activateWindow(1);
+  }
+
+  void _activateWindow2() {
+    _activateWindow(2);
+  }
+
+  void _activateWindow3() {
+    _activateWindow(3);
+  }
+
+  void _activateWindow4() {
+    _activateWindow(4);
+  }
+
+  void _activateWindow5() {
+    _activateWindow(5);
   }
 
   void _saveFileAs() async {

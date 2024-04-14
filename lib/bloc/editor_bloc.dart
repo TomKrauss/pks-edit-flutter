@@ -101,6 +101,10 @@ class OpenFile {
   static const String dockNameRight = "rightSlot";
   static const String dockNameBottom = "bottomSlot";
   ///
+  /// The index in the list of open files. Can be used to select the file via shortcut.
+  ///
+  int index = 0;
+  ///
   /// The absolute path name of the file edited.
   ///
   String filename;
@@ -254,6 +258,7 @@ class EditorBloc {
   final List<String> openFiles = [];
   final Logger _logger = Logger(printer: SimplePrinter(printTime: true, colors: false));
   late final OpenFileState _openFileState;
+  int? _maximumNumberOfOpenWindows;
   final StreamController<PksIniConfiguration> _pksIniStreamController = BehaviorSubject();
   late final EditingConfigurations editingConfigurations;
   late final Themes themes;
@@ -385,15 +390,52 @@ class EditorBloc {
   }
 
   ///
+  /// Check, whether the current number of open files exceeds the maximum number of
+  /// configured open windows. If this is the case, close windows to satisfy the maximumNumberOfOpenWindows condition.
+  void _checkForMaxOpenWindows(OpenFile? doNotClose) {
+    var max = _maximumNumberOfOpenWindows;
+    if (max != null && max > 0) {
+      var candidates = _openFileState.files.where((element) => !element.modified).toList();
+      while(_openFileState.files.length > max && candidates.isNotEmpty) {
+        var file = candidates.first;
+        if (file == doNotClose) {
+          break;
+        }
+        closeFile(file);
+        candidates.remove(file);
+      }
+    }
+  }
+
+  void _updateFileIndices() {
+    for (int i = 0; i < _openFileState.files.length; i++) {
+      _openFileState.files[i].index = i+1;
+    }
+  }
+
+  ///
+  /// Activate / make current the window with the given logical [index]. Note,
+  /// that PKS Edit window indices start with 1 rather than with 0.
+  ///
+  void activateWindowByIndex(int index) {
+    index--;
+    if (index >= 0 && index < _openFileState.files.length) {
+      _openFileState.currentIndex = index;
+    }
+  }
+
+  ///
   /// Add an open file to the list of open files.
   ///
   void _addOpenFile(OpenFile openFile) {
     _openFileState.files.add(openFile);
     _openFileState.currentIndex = _openFileState.files.length-1;
+    _updateFileIndices();
     openFile.addChangeListener((OpenFile file) {
       _refreshFiles();
     });
     FileWatcher.singleton.addWatchedFile(openFile.filename);
+    _checkForMaxOpenWindows(openFile);
   }
 
   ///
@@ -537,6 +579,7 @@ class EditorBloc {
       return;
     }
     file.removeChangeListener();
+    _updateFileIndices();
     if (_openFileState.currentIndex >= _openFileState.files.length) {
       _openFileState.currentIndex = _openFileState.files.length-1;
     } else {
@@ -574,6 +617,8 @@ class EditorBloc {
   void updateConfiguration(PksIniConfiguration configuration) {
     themes.selectTheme(configuration.configuration.theme);
     PksConfiguration.singleton.saveSettings(configuration);
+    _maximumNumberOfOpenWindows = configuration.configuration.maximumOpenWindows;
+    _checkForMaxOpenWindows(null);
     _pksIniStreamController.add(configuration);
   }
 

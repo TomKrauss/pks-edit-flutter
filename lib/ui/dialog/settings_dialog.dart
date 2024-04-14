@@ -12,6 +12,8 @@
 //
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 
@@ -50,15 +52,37 @@ class _SettingsDialogState extends State<SettingsDialog> {
       });
     }
   }
-  Widget property(String label, Widget editor) =>
-      Row(children: [SizedBox(width: 200, child: Text(label)), Expanded(child: editor)]);
+
+  Widget property(String label, IconData? icon, Widget editor) =>
+      Row(children: [SizedBox(width: 300, child: Row(children: [Icon(icon), const SizedBox(width: 10), Text(label,
+            style: Theme.of(context).listTileTheme.titleTextStyle)])), Expanded(child: editor)]);
+
+  Widget intProperty(String label, IconData? icon, int originalValue, void Function(int newValue) assignValue) =>
+    property(label, icon, TextField(controller: TextEditingController(text: "$originalValue"), inputFormatters: [FilteringTextInputFormatter.digitsOnly], onChanged: (newValue) {
+      var newIntValue = int.tryParse(newValue);
+      if (newIntValue != null) {
+        changed = true;
+        assignValue(newIntValue);
+      }
+    },));
+
+  Widget booleanProperty(String label, IconData? icon, bool checked, void Function(bool newValue) onCheck) =>
+    CheckboxListTile(
+        secondary: Icon(icon),
+        title: Text(label), contentPadding: EdgeInsets.zero, value: checked, onChanged: (val) {
+      if (val != null) {
+        changed = true;
+        onCheck(val);
+      }
+    });
 
   ///
   /// Create an editor to edit a config value consisting of enumeratable options.
   ///
-  Widget enumProperty<T>(String label, List<T> values, T selected, void Function(T value) onSelect, {String Function(T)? toString}) =>
+  Widget enumProperty<T>(String label, IconData? icon, List<T> values, T selected, void Function(T value) onSelect, {String Function(T)? toString}) =>
       property(
           label,
+          icon,
           DropdownButton<T>(
               items: values
                   .map((e) => DropdownMenuItem(
@@ -86,13 +110,17 @@ class _SettingsDialogState extends State<SettingsDialog> {
         contentPadding: const EdgeInsets.all(25),
         children: [
       enumProperty(
-          "Language", ApplicationConfiguration.supportedLanguages, conf.language, (newLang) => conf.language = newLang),
+          "Language", Icons.language, ApplicationConfiguration.supportedLanguages, conf.language, (newLang) => conf.language = newLang),
       enumProperty(
-          "Theme", themes, bloc.themes.currentTheme.name, (newTheme) => conf.theme = newTheme),
+          "Theme", Icons.palette, themes, bloc.themes.currentTheme.name, (newTheme) => conf.theme = newTheme),
       enumProperty(
-          "Text Font", ApplicationConfiguration.supportedFonts, configuration.configuration.defaultFont, (newFont) => conf.defaultFont = newFont),
+          "Text Font", Icons.font_download_rounded, ApplicationConfiguration.supportedFonts, conf.defaultFont, (newFont) => conf.defaultFont = newFont),
       enumProperty(
-        "Icon Size", iconSizes, configuration.configuration.iconSize, (newIconSize) => conf.iconSize = newIconSize, toString: (s) => s.name),
+        "Icon Size", FontAwesomeIcons.arrowUp91, iconSizes, conf.iconSize, (newIconSize) => conf.iconSize = newIconSize, toString: (s) => s.name),
+      booleanProperty("Compact Editor Tabs", FontAwesomeIcons.tableColumns, conf.compactEditorTabs, (newValue) {conf.compactEditorTabs = newValue; }),
+      booleanProperty("Show Toolbar", Icons.border_top, conf.showToolbar, (newValue) {conf.showToolbar = newValue; }),
+      booleanProperty("Show Statusbar", Icons.border_bottom, conf.showStatusbar, (newValue) {conf.showStatusbar = newValue; }),
+      intProperty("Maximum Number of Windows", FontAwesomeIcons.windowMaximize, conf.maximumOpenWindows, (newValue) { conf.maximumOpenWindows = newValue; }),
       Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [

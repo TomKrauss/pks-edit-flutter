@@ -254,12 +254,12 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
     }
   }
 
-  List<Widget> _buildTabs() => widget.files
+  List<Widget> _buildTabs(bool compactMode) => widget.files
       .map((e) => Tab(
     child: Row(children: [
       FaIcon(e.icon, size: 16),
       const SizedBox(width: 4),
-      Tooltip(message: e.filename, child: Text(e.title)),
+      Tooltip(message: e.filename, child: Text("#${e.index} ${compactMode ? e.title : e.filename}")),
       const SizedBox(width: 4),
       InkWell(
           onTap: () {
@@ -268,7 +268,7 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
           child: Icon(
             Icons.close,
             color: Theme.of(context).dividerColor,
-          ))
+          )),
     ]),
   ))
       .toList();
@@ -312,12 +312,19 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
   @override
   Widget build(BuildContext context) {
     updateTabs(widget.files);
+    var config = PksIniConfiguration.of(context).configuration;
+    var labelStyle = Theme.of(context).textTheme.bodySmall;
+    var unselectedLabelStyle = labelStyle?.copyWith(color: Theme.of(context).dividerColor);
+    labelStyle = labelStyle?.copyWith(fontWeight: FontWeight.bold);
     return Column(children: [
       TabBar(
           controller: controller,
           tabAlignment: TabAlignment.start,
+          padding: EdgeInsets.zero,
+          labelStyle: labelStyle,
+          unselectedLabelStyle: unselectedLabelStyle,
           isScrollable: true,
-          tabs: _buildTabs()),
+          tabs: _buildTabs(config.compactEditorTabs)),
       Expanded(
           child: widget.files.isEmpty ? const SizedBox() : _buildEditor(widget.files[controller.index])),
     ],);

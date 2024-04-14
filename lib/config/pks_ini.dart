@@ -95,18 +95,18 @@ class ApplicationConfiguration {
 
   /// Whether the status bar will be displayed.
   @JsonKey(name: "show-statusbar")
-  final bool showStatusbar;
+  bool showStatusbar;
   /// Whether the function key bar will be displayed.
   @JsonKey(name: "show-functionkeys")
-  final bool showFunctionKeys;
+  bool showFunctionKeys;
   /// Whether the option bar will be displayed.
   @JsonKey(name: "show-optionbar")
-  final bool showOptionBar;
+  bool showOptionBar;
   /// Whether the tool bar will be displayed.
   @JsonKey(name: "show-toolbar")
-  final bool showToolbar;
+  bool showToolbar;
   @JsonKey(name: "compact-editor-tabs")
-  final bool compactEditorTabs;
+  bool compactEditorTabs;
   /// Whether all forms/dialogs are opened close to the mouse position.
   @JsonKey(name: "forms-follow-mouse")
   final bool formsFollowMouse;
@@ -132,7 +132,7 @@ class ApplicationConfiguration {
 
   /// The maximum number of open windows before starting to close windows automatically. If <= 0 - not limit.
   @JsonKey(name: "maximum-open-windows")
-  final int maximumOpenWindows;
+  int maximumOpenWindows;
   /// Restore previously opened files.
   @JsonKey(name: "preserve-history")
   final bool preserveHistory;
