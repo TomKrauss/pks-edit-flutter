@@ -14,18 +14,19 @@
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:pks_edit_flutter/generated/l10n.dart';
 
 ///
 /// Brings up a dialog to ask for a confirmation with actions and the possible outcome of
 /// the confirmation as selected by the user.
 ///
 class ConfirmationDialog extends StatelessWidget {
-  final String title;
+  final String? title;
   final String message;
   final IconData? icon;
-  final Map<String, String?> actions;
-  static const Map<String, String?> yesNoActions = {"Yes": "yes", "No": "no"};
-  static const Map<String, String?> yesNoCancelActions = {"Yes": "yes", "No": "no", "Cancel": null};
+  final Map<String, String?>? actions;
+  static Map<String, String?> get yesNoActions => {S.current.yes: "yes", S.current.no: "no"};
+  static Map<String, String?> get yesNoCancelActions => {S.current.yes: "yes", S.current.no: "no", S.current.cancel: null};
 
   ///
   /// Show a confirmation dialog with the given [title], [message] and [actions] and an optional [icon]. The result is the value of the
@@ -46,17 +47,15 @@ class ConfirmationDialog extends StatelessWidget {
               icon: icon ?? Icons.question_mark));
 
   const ConfirmationDialog(
-      {String? title,
+      {this.title,
       required this.message,
       this.icon = Icons.question_mark,
-      Map<String, String?>? actions,
-      super.key})
-      : title = title ?? "Confirmation",
-        actions = actions ?? yesNoCancelActions;
+      this.actions,
+      super.key});
 
   @override
   Widget build(BuildContext context) =>
-      SimpleDialog(title: Text(title),
+      SimpleDialog(title: Text(title ?? S.of(context).confirmation),
           contentPadding: const EdgeInsets.all(25),
           children: [
               Row(children: [
@@ -75,7 +74,7 @@ class ConfirmationDialog extends StatelessWidget {
               const SizedBox(height: 20),
               Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: actions.entries
+                  children: (actions ?? yesNoCancelActions).entries
                       .mapIndexed((idx, e) => ElevatedButton(
                           onPressed: () {
                             Navigator.of(context).pop(e.value);

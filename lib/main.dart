@@ -12,11 +12,13 @@
 //
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/ui/main_page.dart';
 import 'package:window_manager/window_manager.dart';
+import 'generated/l10n.dart';
 
 ///
 /// Start the PKS Edit application
@@ -40,7 +42,9 @@ class PksEditApplication extends StatelessWidget {
     final bloc = EditorBloc.of(context);
     var theme = bloc.themes.currentTheme;
     return ThemeData(
-        colorScheme: theme.isDark ? const ColorScheme.dark() : ColorScheme.fromSeed(seedColor: theme.backgroundColor),
+        colorScheme: theme.isDark
+            ? const ColorScheme.dark()
+            : ColorScheme.fromSeed(seedColor: theme.backgroundColor),
         dividerColor: theme.dialogBorder,
         appBarTheme: AppBarTheme(backgroundColor: theme.dialogBackground));
   }
@@ -50,6 +54,14 @@ class PksEditApplication extends StatelessWidget {
   Widget build(BuildContext context) => MaterialApp(
           title: 'PKS EDIT',
           debugShowCheckedModeBanner: false,
+          locale: Locale(PksIniConfiguration.of(context).configuration.locale),
+          supportedLocales: S.delegate.supportedLocales,
+          localizationsDelegates: const [
+            S.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
           theme: _createTheme(context),
           home: const PksEditMainPage(title: 'PKS EDIT'),
         );

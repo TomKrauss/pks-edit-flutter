@@ -16,6 +16,7 @@ import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
+import 'package:pks_edit_flutter/generated/l10n.dart';
 
 ///
 /// Display the settings to edit in PKS Edit.
@@ -110,21 +111,21 @@ class _SettingsDialogState extends State<SettingsDialog> {
         contentPadding: const EdgeInsets.all(25),
         children: [
       enumProperty(
-          "Language", Icons.language, ApplicationConfiguration.supportedLanguages, conf.language, (newLang) => conf.language = newLang),
+          S.of(context).language, Icons.language, ApplicationConfiguration.supportedLanguages, conf.language, (newLang) => conf.language = newLang),
       enumProperty(
           "Theme", Icons.palette, themes, bloc.themes.currentTheme.name, (newTheme) => conf.theme = newTheme),
       enumProperty(
           "Text Font", Icons.font_download_rounded, ApplicationConfiguration.supportedFonts, conf.defaultFont, (newFont) => conf.defaultFont = newFont),
       enumProperty(
-        "Icon Size", FontAwesomeIcons.arrowUp91, iconSizes, conf.iconSize, (newIconSize) => conf.iconSize = newIconSize, toString: (s) => s.name),
-      booleanProperty("Compact Editor Tabs", FontAwesomeIcons.tableColumns, conf.compactEditorTabs, (newValue) {conf.compactEditorTabs = newValue; }),
-      booleanProperty("Show Toolbar", Icons.border_top, conf.showToolbar, (newValue) {conf.showToolbar = newValue; }),
-      booleanProperty("Show Statusbar", Icons.border_bottom, conf.showStatusbar, (newValue) {conf.showStatusbar = newValue; }),
-      intProperty("Maximum Number of Windows", FontAwesomeIcons.windowMaximize, conf.maximumOpenWindows, (newValue) { conf.maximumOpenWindows = newValue; }),
-      Padding(padding: const EdgeInsets.symmetric(vertical: 10), child: Row(
+        S.of(context).iconSize, FontAwesomeIcons.arrowUp91, iconSizes, conf.iconSize, (newIconSize) => conf.iconSize = newIconSize, toString: (s) => s.name),
+      booleanProperty(S.of(context).compactEditorTabs, FontAwesomeIcons.tableColumns, conf.compactEditorTabs, (newValue) {conf.compactEditorTabs = newValue; }),
+      booleanProperty(S.of(context).showToolbar, Icons.border_top, conf.showToolbar, (newValue) {conf.showToolbar = newValue; }),
+      booleanProperty(S.of(context).showStatusbar, Icons.border_bottom, conf.showStatusbar, (newValue) {conf.showStatusbar = newValue; }),
+      intProperty(S.of(context).maximumNumberOfWindows, FontAwesomeIcons.windowMaximize, conf.maximumOpenWindows, (newValue) { conf.maximumOpenWindows = newValue; }),
+      Padding(padding: const EdgeInsets.only(top: 40), child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-        createButton("Apply", _changed ? () {
+        createButton(S.of(context).apply, _changed ? () {
           bloc.updateConfiguration(configuration);
           configuration = configuration.copyWith();
           changed = false;
@@ -133,7 +134,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
           bloc.updateConfiguration(configuration);
           Navigator.of(context).pop();
         } : null),
-        createButton("Cancel", () {
+        createButton(S.of(context).cancel, () {
           Navigator.of(context).pop();
         }),
       ],))

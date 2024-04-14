@@ -17,6 +17,7 @@ import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/ui/actions.dart';
 import 'package:re_editor/re_editor.dart';
+import 'package:pks_edit_flutter/generated/l10n.dart';
 
 ///
 /// A widget displaying a search area in the toolbar.
@@ -89,7 +90,7 @@ class SearchBarWidgetState extends State<SearchBarWidget> {
                   filled: true,
                   fillColor: theme.primaryColor,
                   suffixIcon: Icon(_searchDirection == AxisDirection.down ? Icons.arrow_downward : Icons.arrow_upward, color: color, size: fontSize+4,),
-                  hintText: "Search incrementally (Ctrl+Alt+S)",
+                  hintText: S.of(context).searchIncrementally("Ctrl+Alt+S"),
                   hintStyle: theme.textTheme.bodySmall?.copyWith(color: color, fontSize: fontSize),
                   contentPadding: const EdgeInsets.all(6), isDense: true),))));
   }

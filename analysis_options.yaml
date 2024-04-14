@@ -1,12 +1,11 @@
 include: package:flutter_lints/flutter.yaml
 
 analyzer:
+  exclude: [lib/generated/**]
   language:
     #  strict-casts: true
     strict-inference: true
     strict-raw-types: true
-  errors:
-    constant_identifier_names: ignore
 
 linter:
   rules:

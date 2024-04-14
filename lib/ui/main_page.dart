@@ -32,7 +32,7 @@ import 'package:re_editor/re_editor.dart';
 import 'package:sound_library/sound_library.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:window_manager/window_manager.dart';
-
+import 'package:pks_edit_flutter/generated/l10n.dart';
 ///
 /// Main page of the PKS Edit application.
 ///
@@ -59,7 +59,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     super.didChangeDependencies();
     bloc = EditorBloc.of(context);
     _externalFileSubscription = bloc.externalFileChangeStream.listen((event) async {
-        if ((await ConfirmationDialog.show(context: context, message: "File ${event.title} is changed. Do you want to reload it?")) == 'yes') {
+        if ((await ConfirmationDialog.show(context: context, message: S.of(context).reloadChangedFile(event.title))) == 'yes') {
           final result = await bloc.abandonFile(event);
           _handleCommandResult(result);
         }
@@ -93,7 +93,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     if (!mounted) {
       return;
     }
-    actions.execute(PksEditActions.ACTION_EXIT);
+    actions.execute(PksEditActions.actionExit);
   }
 
   ///
@@ -117,7 +117,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
       if (config.playSoundOnError) {
         SoundPlayer.play(config.errorSound);
       }
-      message ??= "An error occurred executing the command";
+      message ??= S.of(context).anErrorOccurred;
       if (config.showErrorsInToast) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(message), backgroundColor: Theme.of(context).colorScheme.errorContainer,));
@@ -193,7 +193,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                           ),
                         Expanded(child: EditorDockPanelWidget(state: files, files: files.files, editorFocusNode: _editorFocusNode, closeFile: (file) {
                           _actionContext = PksEditActionContext(openFileState: files, currentFile: file);
-                          actions.execute(PksEditActions.ACTION_CLOSE_WINDOW);
+                          actions.execute(PksEditActions.actionCloseWindow);
                         })),
                         if (configuration.showStatusbar)
                         StatusBarWidget(fileState: files)
@@ -345,7 +345,7 @@ class MenuBarWidget extends StatelessWidget {
           context: context,
           applicationName: "PKS Edit",
           children: [
-            const Text("Flutter version of the famous Atari Code Editor"),
+            Text(S.of(context).aboutInfoText),
             const Divider(),
             const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -363,20 +363,20 @@ class MenuBarWidget extends StatelessWidget {
   List<Widget> _buildMenuBarChildren(BuildContext context) => [
         SubmenuButton(
           menuChildren: _buildFileMenu(context),
-          child: const Text("File"),
+          child: Text(S.of(context).file),
         ),
         SubmenuButton(
           menuChildren: _buildMenuForGroup(context, PksEditAction.editGroup),
-          child: const Text("Edit"),
+          child: Text(S.of(context).edit),
         ),
         SubmenuButton(
           menuChildren: _buildMenuForGroup(context, PksEditAction.findGroup),
-          child: const Text("Find"),
+          child: Text(S.of(context).find),
         ),
         SubmenuButton(
           menuChildren:
               _buildMenuForGroup(context, PksEditAction.functionGroup),
-          child: const Text("Functions"),
+          child: Text(S.of(context).functions),
         ),
         const SubmenuButton(
           menuChildren: [],
@@ -388,12 +388,12 @@ class MenuBarWidget extends StatelessWidget {
         ),
         SubmenuButton(
           menuChildren: _buildMenuForGroup(context, PksEditAction.windowGroup),
-          child: const Text("Window"),
+          child: Text(S.of(context).window),
         ),
         SubmenuButton(
           menuChildren: [
             _createMenuButton(
-                context, "About...", null, null, () {
+                context, S.of(context).about, null, null, () {
                   _showAbout(context);
                 })
           ],

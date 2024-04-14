@@ -8,6 +8,8 @@ environment:
   sdk: '>=3.3.2 <4.0.0'
 
 dependencies:
+  flutter_localizations:
+    sdk: flutter
   json_annotation: ^4.8.1
   rxdart: ^0.27.4
   package_info_plus: ^6.0.0
@@ -23,6 +25,8 @@ dependencies:
   file_selector: ^1.0.3
   flutter_highlight: ^0.7.0
   super_drag_and_drop: ^0.8.11
+  intl_utils: ^2.8.7
+  intl: ^0.18.0
   flutter:
     sdk: flutter
 
@@ -32,6 +36,10 @@ dev_dependencies:
   flutter_lints: ^3.0.0
   json_serializable: ^6.7.1
   build_runner: ^2.3.3
+
+flutter_intl:
+  enabled: true
+  main_locale: en
 
 flutter:
   uses-material-design: true

@@ -79,6 +79,7 @@ class ApplicationConfiguration {
   String theme;
   /// The application language (Deutsch, English)
   String language;
+
   /// Returns the selected locale
   String get locale {
     if (language == "English") {

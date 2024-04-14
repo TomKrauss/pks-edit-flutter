@@ -14,6 +14,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pks_edit_flutter/ui/actions.dart';
+import 'package:pks_edit_flutter/generated/l10n.dart';
 
 ///
 /// Arguments to pass on to the input dialog.
@@ -142,7 +143,7 @@ class _InputDialogState extends State<InputDialog> {
                     onPressed: () {
                       Navigator.of(context).pop(null);
                     },
-                    child: const Text("Cancel")),
+                    child: Text(S.of(context).cancel)),
               ],
             )
           ]);

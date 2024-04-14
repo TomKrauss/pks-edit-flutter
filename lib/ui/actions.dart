@@ -88,8 +88,8 @@ class PksEditAction {
 /// The actions supported by PKS-Edit.
 ///
 class PksEditActions {
-  static const ACTION_EXIT = "exit";
-  static const ACTION_CLOSE_WINDOW = "close-window";
+  static const actionExit = "exit";
+  static const actionCloseWindow = "close-window";
   final PksEditActionContext Function() getActionContext;
   final BuildContext Function() getBuildContext;
   final Future<void> Function(CommandResult commandResult) handleCommandResult;
@@ -149,7 +149,7 @@ class PksEditActions {
           group: PksEditAction.fileGroup,
           icon: Icons.save_as),
       PksEditAction(
-          id: ACTION_CLOSE_WINDOW,
+          id: actionCloseWindow,
           execute: _closeWindow,
           text: "Close Window",
           shortcut:
@@ -178,7 +178,7 @@ class PksEditActions {
           description: "Closes all other editor windows but current",
           group: PksEditAction.fileGroup),
       PksEditAction(
-          id: ACTION_EXIT,
+          id: actionExit,
           execute: _exit,
           text: "Exit",
           shortcut: const SingleActivator(LogicalKeyboardKey.f4, alt: true),
