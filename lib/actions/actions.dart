@@ -3,6 +3,19 @@
 //
 // PKS-EDIT - Flutter
 //
+// Last modified: 2024
+// Author: Tom Krauß
+//
+// This Source Code Form is subject to the terms of the Mozilla Public
+// License, v. 2.0. If a copy of the MPL was not distributed with this
+// file, You can obtain one at https://mozilla.org/MPL/2.0/.
+//
+
+//
+// actions.dart
+//
+// PKS-EDIT - Flutter
+//
 // Last modified: 07.04.24, 08:07
 // Author: Tom Krauß
 //
@@ -94,7 +107,7 @@ class PksEditActions {
   final BuildContext Function() getBuildContext;
   final Future<void> Function(CommandResult commandResult) handleCommandResult;
   final Map<ShortcutActivator, VoidCallback> additionalActions;
-  late final List<PksEditAction> actions;
+  final Map<String, PksEditAction> actions = {};
   late final Map<ShortcutActivator, VoidCallback> shortcuts;
 
   PksEditActions({required this.getBuildContext, required this.getActionContext,
@@ -102,8 +115,12 @@ class PksEditActions {
     _initialize();
   }
 
+  void _registerAction(PksEditAction action) {
+    actions[action.id] = action;
+  }
+
   void _initialize() {
-    actions = [
+    final actions = [
       PksEditAction(
           id: "open-file",
           execute: _openFile,
@@ -337,6 +354,7 @@ class PksEditActions {
           icon: Icons.create_outlined),
     ];
     shortcuts = _buildShortcutMap(actions);
+    actions.forEach(_registerAction);
   }
 
   bool _hasFile() =>
@@ -646,7 +664,7 @@ class PksEditActions {
   /// Execute an action given the action id.
   ///
   Future<void> execute(String actionId) async {
-    var action = actions.where((element) => element.id == actionId).first.onPressed;
+    var action = actions[actionId]?.onPressed;
     if (action != null) {
       action();
     }

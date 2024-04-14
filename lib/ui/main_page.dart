@@ -24,7 +24,7 @@ import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/actions/shortcuts.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
-import 'package:pks_edit_flutter/ui/actions.dart';
+import 'package:pks_edit_flutter/actions/actions.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/status_bar_widget.dart';
 import 'package:pks_edit_flutter/ui/tool_bar_widget.dart';
@@ -171,6 +171,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
         var files = snapshot.data;
         _actionContext = PksEditActionContext(openFileState: files);
         final myActions = actions;
+        final ac = actions.actions.values;
         files ??= OpenFileState(files: [], currentIndex: 0);
         final configuration = PksIniConfiguration.of(context).configuration;
         return CallbackShortcuts(
@@ -186,9 +187,9 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                       children: <Widget>[
                         SizedBox(
                             width: double.infinity,
-                            child: MenuBarWidget(actions: myActions.actions)),
+                            child: MenuBarWidget(actions: ac)),
                         if (configuration.showToolbar)
-                        ToolBarWidget(currentFile: files.currentFile, actions: myActions.actions,
+                        ToolBarWidget(currentFile: files.currentFile, actions: ac,
                           focusNode: _searchbarFocusNode,
                           ),
                         Expanded(child: EditorDockPanelWidget(state: files, files: files.files, editorFocusNode: _editorFocusNode, closeFile: (file) {
@@ -335,7 +336,7 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
 /// Displays a menu bar containing the menu bar triggered actions of PKS EDIT
 ///
 class MenuBarWidget extends StatelessWidget {
-  final List<PksEditAction> actions;
+  final Iterable<PksEditAction> actions;
   const MenuBarWidget({super.key, required this.actions});
 
   void _showAbout(BuildContext context) async {

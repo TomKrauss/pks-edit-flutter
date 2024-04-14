@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as path;
+import 'package:pks_edit_flutter/actions/action_bindings.dart';
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
 import 'package:pks_edit_flutter/bloc/templates.dart';
 import 'package:pks_edit_flutter/config/editing_configuration.dart';
@@ -261,6 +262,7 @@ class EditorBloc {
   int? _maximumNumberOfOpenWindows;
   final StreamController<PksIniConfiguration> _pksIniStreamController = BehaviorSubject();
   late final EditingConfigurations editingConfigurations;
+  late final ActionBindings actionBindings;
   late final Themes themes;
   final StreamController<OpenFileState> _openFileSubject = BehaviorSubject.seeded(OpenFileState(files: const [], currentIndex: -1));
   final StreamController<OpenFile> _externalFileChanges = BehaviorSubject();
@@ -639,6 +641,7 @@ class EditorBloc {
     var session = await PksConfiguration.singleton.currentSession;
     themes = await PksConfiguration.singleton.themes;
     editingConfigurations = await PksConfiguration.singleton.editingConfigurations;
+    actionBindings = await PksConfiguration.singleton.actionBindings;
     final pksIniConfiguration = await PksConfiguration.singleton.configuration;
     final applicationConfiguration = pksIniConfiguration.configuration;
     int? active;

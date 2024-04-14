@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
+import 'package:pks_edit_flutter/actions/action_bindings.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/editing_configuration.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
@@ -247,9 +248,10 @@ class PksEditSession {
 class PksConfiguration {
   PksConfiguration._();
   static const sessionFilename = "pkssession.json";
-  static const defaultConfigFilename = "pkseditini.json";
-  static const defaultThemeFilename = "themeconfig.json";
-  static const defaultEditingConfigurationFilename = "pkseditconfig.json";
+  static const configFilename = "pkseditini.json";
+  static const themeFilename = "themeconfig.json";
+  static const editingConfigurationFilename = "pkseditconfig.json";
+  static const actionBindingsFilename = "pksactionbindings.json";
   static const pksSysVariable = "PKS_SYS";
   static PksConfiguration singleton = PksConfiguration._();
   final Logger _logger =
@@ -258,6 +260,7 @@ class PksConfiguration {
   PksEditSession? _pksEditSession;
   PksIniConfiguration? _pksIniConfiguration;
   EditingConfigurations? _editingConfigurations;
+  ActionBindings? _actionBindings;
   Themes? _themes;
 
   set pksSysDirectory(String newDir) {
@@ -292,7 +295,7 @@ class PksConfiguration {
     if (_pksSysDirectory == null) {
       var pksSys =
           Platform.environment[pksSysVariable] ?? pksSysVariable.toLowerCase();
-      if (File(join(pksSys, defaultConfigFilename)).existsSync()) {
+      if (File(join(pksSys, configFilename)).existsSync()) {
         _pksSysDirectory = pksSys;
       } else {
         var systemDir = getPksSysFromWinIni();
@@ -310,7 +313,7 @@ class PksConfiguration {
   /// 
   Future<Themes> get themes async {
     if (_themes == null) {
-      var themeFile = File(join(pksSysDirectory, defaultThemeFilename));
+      var themeFile = File(join(pksSysDirectory, themeFilename));
       if (themeFile.existsSync()) {
         _logger.i("Reading theme configuration file ${themeFile.path}.");
         var string = themeFile.readAsStringSync();
@@ -321,13 +324,31 @@ class PksConfiguration {
     }
     return _themes!;
   }
-  
+
+  ///
+  /// Returns the current action bindings configuration.
+  ///
+  Future<ActionBindings> get actionBindings async {
+    if (_actionBindings == null) {
+      var configFile = File(join(pksSysDirectory, actionBindingsFilename));
+      if (configFile.existsSync()) {
+        _logger.i("Reading action bindings configuration file ${configFile.path}.");
+        var string = configFile.readAsStringSync();
+        _actionBindings = ActionBindings.fromJson(jsonDecode(string));
+      } else {
+        _actionBindings = ActionBindings();
+      }
+    }
+    return _actionBindings!;
+  }
+
+
   ///
   /// Returns the current editing configuration.
   ///
   Future<EditingConfigurations> get editingConfigurations async {
     if (_editingConfigurations == null) {
-      var configFile = File(join(pksSysDirectory, defaultEditingConfigurationFilename));
+      var configFile = File(join(pksSysDirectory, editingConfigurationFilename));
       if (configFile.existsSync()) {
         _logger.i("Reading editing configuration file ${configFile.path}.");
         var string = configFile.readAsStringSync();
@@ -345,7 +366,7 @@ class PksConfiguration {
   ///
   Future<PksIniConfiguration> get configuration async {
     if (_pksIniConfiguration == null) {
-      var configFile = File(join(pksSysDirectory, defaultConfigFilename));
+      var configFile = File(join(pksSysDirectory, configFilename));
       if (configFile.existsSync()) {
         _logger.i("Reading application configuration file ${configFile.path}.");
         var string = configFile.readAsStringSync();
@@ -398,7 +419,7 @@ class PksConfiguration {
   /// Save the current PKS EDIT settings.
   ///
   Future<void> saveSettings(PksIniConfiguration configuration) async {
-    var settingsFile = File(join(pksSysDirectory, defaultConfigFilename));
+    var settingsFile = File(join(pksSysDirectory, configFilename));
     settingsFile.writeAsStringSync(
         const JsonEncoder.withIndent("  ").convert(configuration.toJson()));
   }

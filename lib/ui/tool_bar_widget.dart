@@ -15,7 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
-import 'package:pks_edit_flutter/ui/actions.dart';
+import 'package:pks_edit_flutter/actions/actions.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
 
@@ -101,7 +101,7 @@ class SearchBarWidgetState extends State<SearchBarWidget> {
 ///
 class ToolBarWidget extends StatefulWidget {
   final OpenFile? currentFile;
-  final List<PksEditAction> actions;
+  final Iterable<PksEditAction> actions;
   final FocusNode focusNode;
 
   const ToolBarWidget(
