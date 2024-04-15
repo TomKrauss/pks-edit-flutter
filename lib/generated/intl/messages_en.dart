@@ -29,8 +29,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "aboutInfoText": MessageLookupByLibrary.simpleMessage(
             "Flutter version of the famous Atari Code Editor"),
-        "actionAbandonFile":
-            MessageLookupByLibrary.simpleMessage("Refresh File Contents"),
         "actionCloseAllButCurrentWindow":
             MessageLookupByLibrary.simpleMessage("Close All other Windows"),
         "actionCloseAllWindows":
@@ -41,8 +39,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionCut": MessageLookupByLibrary.simpleMessage("Cut"),
         "actionCycleWindow":
             MessageLookupByLibrary.simpleMessage("Cycle window forward"),
-        "actionDescriptionAbandonFile": MessageLookupByLibrary.simpleMessage(
-            "Ignore all changes in the current file and refresh contents"),
         "actionDescriptionCloseAllButCurrentWindow":
             MessageLookupByLibrary.simpleMessage(
                 "Closes all other editor windows but current"),
@@ -50,13 +46,18 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Closes all editor windows"),
         "actionDescriptionCloseWindow": MessageLookupByLibrary.simpleMessage(
             "Closes the current editor window"),
+        "actionDescriptionDiscardChangesInFile":
+            MessageLookupByLibrary.simpleMessage(
+                "Ignore all changes in the current file and refresh contents"),
         "actionDescriptionExit":
             MessageLookupByLibrary.simpleMessage("Exit PKS Edit"),
         "actionDescriptionSaveCurrentFile":
             MessageLookupByLibrary.simpleMessage("Save current file"),
         "actionDescriptionSaveFileAs": MessageLookupByLibrary.simpleMessage(
             "Save current file under new name"),
-        "actionErase": MessageLookupByLibrary.simpleMessage("Delete Block"),
+        "actionDiscardChangesInFile":
+            MessageLookupByLibrary.simpleMessage("Refresh File Contents"),
+        "actionErase": MessageLookupByLibrary.simpleMessage("Delete Selection"),
         "actionExit": MessageLookupByLibrary.simpleMessage("Exit"),
         "actionGotoLine": MessageLookupByLibrary.simpleMessage("Goto line..."),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("New File..."),

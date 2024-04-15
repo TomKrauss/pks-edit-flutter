@@ -148,11 +148,11 @@ class PksEditActions {
           textKey: "actionSaveFile",
           descriptionKey: "actionDescriptionSaveCurrentFile",),
       PksEditAction(
-          id: "abandon-file",
-          execute: _refreshFileContents,
+          id: "discard-changes-in-file",
+          execute: _discardChangesInFile,
           isEnabled: _canSave,
-          textKey: "actionAbandonFile",
-          descriptionKey: "actionDescriptionAbandonFile"),
+          textKey: "actionDiscardChangesInFile",
+          descriptionKey: "actionDescriptionDiscardChangesInFile"),
       PksEditAction(
           id: "save-file-as",
           execute: _saveFileAs,
@@ -195,12 +195,12 @@ class PksEditActions {
           isEnabled: _hasFile,
           textKey: "actionCopy"),
       PksEditAction(
-          id: "erase-bloc",
-          execute: _eraseBlock,
+          id: "erase-selection",
+          execute: _eraseSelection,
           isEnabled: _hasWriteableFile,
           textKey: "actionErase"),
       PksEditAction(
-          id: "delete-block",
+          id: "delete-selection",
           execute: _cut,
           isEnabled: _hasWriteableFile,
           textKey: "actionCut"),
@@ -210,7 +210,7 @@ class PksEditActions {
           isEnabled: _hasWriteableFile,
           textKey: "actionPaste"),
       PksEditAction(
-          id: "mark-all",
+          id: "select-all",
           execute: _selectAll,
           isEnabled: _hasFile,
           textKey: "actionSelectAll"),
@@ -313,7 +313,7 @@ class PksEditActions {
     }
   }
 
-  void _eraseBlock() {
+  void _eraseSelection() {
     _withCurrentFile(getActionContext(), (controller) {
       controller.deleteSelection();
     });
@@ -376,7 +376,7 @@ class PksEditActions {
     return false;
   }
 
-  void _refreshFileContents() async {
+  void _discardChangesInFile() async {
     var context = getBuildContext();
     final bloc = EditorBloc.of(context);
     var f = getActionContext().currentFile;

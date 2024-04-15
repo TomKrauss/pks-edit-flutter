@@ -361,20 +361,20 @@ class S {
   }
 
   /// `Refresh File Contents`
-  String get actionAbandonFile {
+  String get actionDiscardChangesInFile {
     return Intl.message(
       'Refresh File Contents',
-      name: 'actionAbandonFile',
+      name: 'actionDiscardChangesInFile',
       desc: '',
       args: [],
     );
   }
 
   /// `Ignore all changes in the current file and refresh contents`
-  String get actionDescriptionAbandonFile {
+  String get actionDescriptionDiscardChangesInFile {
     return Intl.message(
       'Ignore all changes in the current file and refresh contents',
-      name: 'actionDescriptionAbandonFile',
+      name: 'actionDescriptionDiscardChangesInFile',
       desc: '',
       args: [],
     );
@@ -500,10 +500,10 @@ class S {
     );
   }
 
-  /// `Delete Block`
+  /// `Delete Selection`
   String get actionErase {
     return Intl.message(
-      'Delete Block',
+      'Delete Selection',
       name: 'actionErase',
       desc: '',
       args: [],

@@ -29,8 +29,6 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "aboutInfoText": MessageLookupByLibrary.simpleMessage(
             "Flutter Version des beliebten Atari Code Editors"),
-        "actionAbandonFile":
-            MessageLookupByLibrary.simpleMessage("Datei neu laden"),
         "actionCloseAllButCurrentWindow":
             MessageLookupByLibrary.simpleMessage("Andere Fenster schließen"),
         "actionCloseAllWindows":
@@ -41,8 +39,6 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionCut": MessageLookupByLibrary.simpleMessage("Ausschneiden"),
         "actionCycleWindow":
             MessageLookupByLibrary.simpleMessage("Nächstes Fester auswählen"),
-        "actionDescriptionAbandonFile": MessageLookupByLibrary.simpleMessage(
-            "Alle Änderungen ignorieren und Datei neu laden"),
         "actionDescriptionCloseAllButCurrentWindow":
             MessageLookupByLibrary.simpleMessage(
                 "Schließt alle Fenster außer dem aktuellen"),
@@ -51,12 +47,17 @@ class MessageLookup extends MessageLookupByLibrary {
                 "Schließt alle Bearbeitungsfenster"),
         "actionDescriptionCloseWindow": MessageLookupByLibrary.simpleMessage(
             "Schließt das aktuelle Bearbeitungsfenster"),
+        "actionDescriptionDiscardChangesInFile":
+            MessageLookupByLibrary.simpleMessage(
+                "Alle Änderungen ignorieren und Datei neu laden"),
         "actionDescriptionExit":
             MessageLookupByLibrary.simpleMessage("PKS Edit beenden"),
         "actionDescriptionSaveCurrentFile":
             MessageLookupByLibrary.simpleMessage("Aktuelle Datei speichern"),
         "actionDescriptionSaveFileAs": MessageLookupByLibrary.simpleMessage(
             "Datei unter einem neuen Namen speichern"),
+        "actionDiscardChangesInFile":
+            MessageLookupByLibrary.simpleMessage("Datei neu laden"),
         "actionErase":
             MessageLookupByLibrary.simpleMessage("Selection löschen"),
         "actionExit": MessageLookupByLibrary.simpleMessage("Ende"),
