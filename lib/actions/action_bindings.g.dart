@@ -8,11 +8,11 @@ part of 'action_bindings.dart';
 
 ToolbarItemBinding _$ToolbarItemBindingFromJson(Map<String, dynamic> json) =>
     ToolbarItemBinding(
-      context: json['context'] as String?,
       label: json['label'] as String?,
       isSeparator: json['separator'] as bool? ?? false,
-      commandReference: json['command'] as String?,
       icon: json['icon'] as String?,
+      context: json['context'] as String?,
+      commandReference: json['command'] as String?,
     );
 
 Map<String, dynamic> _$ToolbarItemBindingToJson(ToolbarItemBinding instance) {
@@ -25,10 +25,10 @@ Map<String, dynamic> _$ToolbarItemBindingToJson(ToolbarItemBinding instance) {
   }
 
   writeNotNull('context', instance.context);
-  writeNotNull('label', instance.label);
-  writeNotNull('icon', instance.icon);
-  val['separator'] = instance.isSeparator;
   writeNotNull('command', instance.commandReference);
+  writeNotNull('icon', instance.icon);
+  writeNotNull('label', instance.label);
+  val['separator'] = instance.isSeparator;
   return val;
 }
 
@@ -37,12 +37,13 @@ MenuItemBinding _$MenuItemBindingFromJson(Map<String, dynamic> json) =>
       isSeparator: json['separator'] as bool? ?? false,
       isHistoryMenu: json['history-menu'] as bool? ?? false,
       isMacroCommand: json['macro-menu'] as bool? ?? false,
-      context: json['context'] as String?,
       labelId: json['label-id'] as int?,
       label: json['label'] as String?,
       children: (json['sub-menu'] as List<dynamic>?)
           ?.map((e) => MenuItemBinding.fromJson(e as Map<String, dynamic>))
           .toList(),
+      icon: json['icon'] as String?,
+      context: json['context'] as String?,
       commandReference: json['command'] as String?,
     );
 
@@ -56,19 +57,20 @@ Map<String, dynamic> _$MenuItemBindingToJson(MenuItemBinding instance) {
   }
 
   writeNotNull('context', instance.context);
+  writeNotNull('command', instance.commandReference);
+  writeNotNull('icon', instance.icon);
   writeNotNull('label', instance.label);
   writeNotNull('label-id', instance.labelId);
   val['separator'] = instance.isSeparator;
   val['history-menu'] = instance.isHistoryMenu;
   val['macro-menu'] = instance.isMacroCommand;
-  writeNotNull('command', instance.commandReference);
   writeNotNull('sub-menu', instance.children);
   return val;
 }
 
 KeyBinding _$KeyBindingFromJson(Map<String, dynamic> json) => KeyBinding(
-      context: json['context'] as String?,
       key: json['key'] as String,
+      context: json['context'] as String?,
       commandReference: json['command'] as String?,
     );
 
@@ -82,8 +84,8 @@ Map<String, dynamic> _$KeyBindingToJson(KeyBinding instance) {
   }
 
   writeNotNull('context', instance.context);
-  val['key'] = instance.key;
   writeNotNull('command', instance.commandReference);
+  val['key'] = instance.key;
   return val;
 }
 

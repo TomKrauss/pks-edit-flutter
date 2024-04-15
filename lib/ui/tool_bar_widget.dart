@@ -13,6 +13,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:pks_edit_flutter/actions/action_bindings.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/actions/actions.dart';
@@ -101,7 +102,7 @@ class SearchBarWidgetState extends State<SearchBarWidget> {
 ///
 class ToolBarWidget extends StatefulWidget {
   final OpenFile? currentFile;
-  final Iterable<PksEditAction> actions;
+  final Iterable<ToolbarItemBinding> actions;
   final FocusNode focusNode;
 
   const ToolBarWidget(
@@ -116,40 +117,42 @@ class ToolBarWidget extends StatefulWidget {
 ///
 class ToolBarWidgetState extends State<ToolBarWidget> {
 
-  Widget _buildButton(PksEditAction action, ApplicationConfiguration config, Color iconColor, void Function()? callback) =>
+  Widget _buildButton(PksEditAction action, IconData? icon, ApplicationConfiguration config, Color iconColor, void Function()? callback) =>
       Tooltip(
           message: action.description,
           child: InkWell(
               onTap: callback,
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 3),
-                child: Icon(action.icon,
+                child: Icon(icon,
                     size: config.iconSize.size.toDouble(),
                     color: callback == null ? Colors.grey : iconColor),
               )));
 
-  Iterable<Widget> _buildItemsForGroup(ApplicationConfiguration config, Color iconColor, String group) =>
-      widget.actions
-          .where((e) => e.displayInToolbar && e.group == group)
-          .map((e) => _buildButton(e, config, iconColor, e.onPressed));
+  Iterable<Widget> _buildItems(ApplicationConfiguration config, Color iconColor) {
+    var result = <Widget>[];
+    Widget? previous;
+    for (var e in widget.actions) {
+      var widget =
+      e.isSeparator ? VerticalDivider(
+        indent: 3,
+        endIndent: 3,
+        color: Theme.of(context).dividerColor,
+      ) : _buildButton(e.action!, e.iconData, config, iconColor, e.action!.onPressed);
+      if (e.isSeparator && previous is VerticalDivider) {
+        continue;
+      }
+      previous = widget;
+      result.add(widget);
+    }
+    return result;
+  }
 
   List<Widget> _buildToolbarItems() {
     var result = <Widget>[];
     final config = PksIniConfiguration.of(context).configuration;
     final iconColor = EditorBloc.of(context).themes.currentTheme.iconColor;
-    for (var group in PksEditAction.wellknownGroups) {
-      var items = _buildItemsForGroup(config, iconColor, group);
-      if (items.isNotEmpty) {
-        if (result.isNotEmpty) {
-          result.add(VerticalDivider(
-            indent: 3,
-            endIndent: 3,
-            color: Theme.of(context).dividerColor,
-          ));
-        }
-        result.addAll(items);
-      }
-    }
+    result.addAll(_buildItems(config, iconColor));
     final findController = widget.currentFile?.findController;
     if (findController != null) {
       result.add(const Expanded(child: SizedBox()));

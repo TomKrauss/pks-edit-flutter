@@ -27,9 +27,62 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "about": MessageLookupByLibrary.simpleMessage("Über..."),
         "aboutInfoText": MessageLookupByLibrary.simpleMessage(
             "Flutter Version des beliebten Atari Code Editors"),
+        "actionAbandonFile":
+            MessageLookupByLibrary.simpleMessage("Datei neu laden"),
+        "actionCloseAllButCurrentWindow":
+            MessageLookupByLibrary.simpleMessage("Andere Fenster schließen"),
+        "actionCloseAllWindows":
+            MessageLookupByLibrary.simpleMessage("Alle Fenster schließen"),
+        "actionCloseWindow":
+            MessageLookupByLibrary.simpleMessage("Fenster schließen"),
+        "actionCopy": MessageLookupByLibrary.simpleMessage("Kopieren"),
+        "actionCut": MessageLookupByLibrary.simpleMessage("Ausschneiden"),
+        "actionCycleWindow":
+            MessageLookupByLibrary.simpleMessage("Nächstes Fester auswählen"),
+        "actionDescriptionAbandonFile": MessageLookupByLibrary.simpleMessage(
+            "Alle Änderungen ignorieren und Datei neu laden"),
+        "actionDescriptionCloseAllButCurrentWindow":
+            MessageLookupByLibrary.simpleMessage(
+                "Schließt alle Fenster außer dem aktuellen"),
+        "actionDescriptionCloseAllWindows":
+            MessageLookupByLibrary.simpleMessage(
+                "Schließt alle Bearbeitungsfenster"),
+        "actionDescriptionCloseWindow": MessageLookupByLibrary.simpleMessage(
+            "Schließt das aktuelle Bearbeitungsfenster"),
+        "actionDescriptionExit":
+            MessageLookupByLibrary.simpleMessage("PKS Edit beenden"),
+        "actionDescriptionSaveCurrentFile":
+            MessageLookupByLibrary.simpleMessage("Aktuelle Datei speichern"),
+        "actionDescriptionSaveFileAs": MessageLookupByLibrary.simpleMessage(
+            "Datei unter einem neuen Namen speichern"),
+        "actionErase":
+            MessageLookupByLibrary.simpleMessage("Selection löschen"),
+        "actionExit": MessageLookupByLibrary.simpleMessage("Ende"),
+        "actionGotoLine":
+            MessageLookupByLibrary.simpleMessage("Gehe zu Zeile..."),
+        "actionNewFile":
+            MessageLookupByLibrary.simpleMessage("Neue Datei anlegen..."),
+        "actionOpenFile":
+            MessageLookupByLibrary.simpleMessage("Datei öffnen..."),
+        "actionPaste": MessageLookupByLibrary.simpleMessage("Einfügen"),
+        "actionRedo": MessageLookupByLibrary.simpleMessage("Wiederholen"),
+        "actionSaveFile":
+            MessageLookupByLibrary.simpleMessage("Datei speichern"),
+        "actionSaveFileAs":
+            MessageLookupByLibrary.simpleMessage("Datei speichern unter..."),
+        "actionSelectAll":
+            MessageLookupByLibrary.simpleMessage("Alles auswählen"),
+        "actionSelectPreviousWindow": MessageLookupByLibrary.simpleMessage(
+            "Vorheriges Fenster auswählen"),
+        "actionSetOptions":
+            MessageLookupByLibrary.simpleMessage("Einstellungen ändern..."),
+        "actionShowCopyright":
+            MessageLookupByLibrary.simpleMessage("Über PKS Edit..."),
+        "actionToggleComment":
+            MessageLookupByLibrary.simpleMessage("Kommentare umschalten"),
+        "actionUndo": MessageLookupByLibrary.simpleMessage("Rückgängig"),
         "anErrorOccurred": MessageLookupByLibrary.simpleMessage(
             "Ein Fehler ist beim Ausführen des Kommandos aufgetreten"),
         "apply": MessageLookupByLibrary.simpleMessage("Anwenden"),
@@ -37,16 +90,24 @@ class MessageLookup extends MessageLookupByLibrary {
         "compactEditorTabs":
             MessageLookupByLibrary.simpleMessage("Editor Reiter kompakt"),
         "confirmation": MessageLookupByLibrary.simpleMessage("Bestätigung"),
-        "edit": MessageLookupByLibrary.simpleMessage("Bearbeiten"),
-        "file": MessageLookupByLibrary.simpleMessage("Datei"),
-        "find": MessageLookupByLibrary.simpleMessage("Suchen"),
-        "functions": MessageLookupByLibrary.simpleMessage("Funktionen"),
         "iconSize": MessageLookupByLibrary.simpleMessage("Icongröße"),
         "language": MessageLookupByLibrary.simpleMessage("Sprache"),
         "maximumNumberOfWindows":
             MessageLookupByLibrary.simpleMessage("Maximale Anzahl Fenster"),
         "no": MessageLookupByLibrary.simpleMessage("Nein"),
         "reloadChangedFile": m0,
+        "resource1901": MessageLookupByLibrary.simpleMessage("Datei"),
+        "resource1902": MessageLookupByLibrary.simpleMessage("Bearbeiten"),
+        "resource1903": MessageLookupByLibrary.simpleMessage("Suchen"),
+        "resource1904": MessageLookupByLibrary.simpleMessage("Funktionen"),
+        "resource1905": MessageLookupByLibrary.simpleMessage("Makros"),
+        "resource1906": MessageLookupByLibrary.simpleMessage("Ansicht"),
+        "resource1907": MessageLookupByLibrary.simpleMessage("Extra"),
+        "resource1908": MessageLookupByLibrary.simpleMessage("Fenster"),
+        "resource1909": MessageLookupByLibrary.simpleMessage("Drucken"),
+        "resource1910": MessageLookupByLibrary.simpleMessage("Konvertieren"),
+        "resource1911": MessageLookupByLibrary.simpleMessage("Überblick"),
+        "resource1913": MessageLookupByLibrary.simpleMessage("Vergleichen"),
         "searchIncrementally": m1,
         "showStatusbar":
             MessageLookupByLibrary.simpleMessage("Statuszeile anzeigen"),

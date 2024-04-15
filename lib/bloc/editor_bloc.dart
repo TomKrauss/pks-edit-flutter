@@ -31,6 +31,7 @@ import 'package:pks_edit_flutter/config/theme_configuration.dart';
 import 'package:pks_edit_flutter/model/languages.dart';
 import 'package:pks_edit_flutter/util/file_stat_extension.dart';
 import 'package:pks_edit_flutter/util/file_watcher.dart';
+import 'package:pks_edit_flutter/util/logger.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:window_manager/window_manager.dart';
@@ -257,7 +258,7 @@ class EditorBloc {
   static EditorBloc of(BuildContext context) => SimpleBlocProvider.of(context);
 
   final List<String> openFiles = [];
-  final Logger _logger = Logger(printer: SimplePrinter(printTime: true, colors: false));
+  final Logger _logger = createLogger("EditorBloc");
   late final OpenFileState _openFileState;
   int? _maximumNumberOfOpenWindows;
   final StreamController<PksIniConfiguration> _pksIniStreamController = BehaviorSubject();
@@ -700,7 +701,7 @@ class EditorBloc {
       return;
     }
     final session = await current.prepareSave(context: context, state: _openFileState);
-    _logger.e("Saving current session.");
+    _logger.i("Saving current session.");
     PksConfiguration.singleton.saveSession(session);
   }
 

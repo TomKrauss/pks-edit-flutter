@@ -27,9 +27,55 @@ class MessageLookup extends MessageLookupByLibrary {
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
-        "about": MessageLookupByLibrary.simpleMessage("About..."),
         "aboutInfoText": MessageLookupByLibrary.simpleMessage(
             "Flutter version of the famous Atari Code Editor"),
+        "actionAbandonFile":
+            MessageLookupByLibrary.simpleMessage("Refresh File Contents"),
+        "actionCloseAllButCurrentWindow":
+            MessageLookupByLibrary.simpleMessage("Close All other Windows"),
+        "actionCloseAllWindows":
+            MessageLookupByLibrary.simpleMessage("Close All Windows"),
+        "actionCloseWindow":
+            MessageLookupByLibrary.simpleMessage("Close Window"),
+        "actionCopy": MessageLookupByLibrary.simpleMessage("Copy"),
+        "actionCut": MessageLookupByLibrary.simpleMessage("Cut"),
+        "actionCycleWindow":
+            MessageLookupByLibrary.simpleMessage("Cycle window forward"),
+        "actionDescriptionAbandonFile": MessageLookupByLibrary.simpleMessage(
+            "Ignore all changes in the current file and refresh contents"),
+        "actionDescriptionCloseAllButCurrentWindow":
+            MessageLookupByLibrary.simpleMessage(
+                "Closes all other editor windows but current"),
+        "actionDescriptionCloseAllWindows":
+            MessageLookupByLibrary.simpleMessage("Closes all editor windows"),
+        "actionDescriptionCloseWindow": MessageLookupByLibrary.simpleMessage(
+            "Closes the current editor window"),
+        "actionDescriptionExit":
+            MessageLookupByLibrary.simpleMessage("Exit PKS Edit"),
+        "actionDescriptionSaveCurrentFile":
+            MessageLookupByLibrary.simpleMessage("Save current file"),
+        "actionDescriptionSaveFileAs": MessageLookupByLibrary.simpleMessage(
+            "Save current file under new name"),
+        "actionErase": MessageLookupByLibrary.simpleMessage("Delete Block"),
+        "actionExit": MessageLookupByLibrary.simpleMessage("Exit"),
+        "actionGotoLine": MessageLookupByLibrary.simpleMessage("Goto line..."),
+        "actionNewFile": MessageLookupByLibrary.simpleMessage("New File..."),
+        "actionOpenFile": MessageLookupByLibrary.simpleMessage("Open File..."),
+        "actionPaste": MessageLookupByLibrary.simpleMessage("Paste"),
+        "actionRedo": MessageLookupByLibrary.simpleMessage("Redo"),
+        "actionSaveFile": MessageLookupByLibrary.simpleMessage("Save File"),
+        "actionSaveFileAs":
+            MessageLookupByLibrary.simpleMessage("Save File As..."),
+        "actionSelectAll": MessageLookupByLibrary.simpleMessage("Select All"),
+        "actionSelectPreviousWindow":
+            MessageLookupByLibrary.simpleMessage("Cycle window backward"),
+        "actionSetOptions":
+            MessageLookupByLibrary.simpleMessage("Change Settings..."),
+        "actionShowCopyright":
+            MessageLookupByLibrary.simpleMessage("About PKS Edit..."),
+        "actionToggleComment":
+            MessageLookupByLibrary.simpleMessage("Comment Single Line"),
+        "actionUndo": MessageLookupByLibrary.simpleMessage("Undo"),
         "anErrorOccurred": MessageLookupByLibrary.simpleMessage(
             "An error occurred executing the command"),
         "apply": MessageLookupByLibrary.simpleMessage("Apply"),
@@ -37,16 +83,24 @@ class MessageLookup extends MessageLookupByLibrary {
         "compactEditorTabs":
             MessageLookupByLibrary.simpleMessage("Compact Editor Tabs"),
         "confirmation": MessageLookupByLibrary.simpleMessage("Confirmation"),
-        "edit": MessageLookupByLibrary.simpleMessage("Edit"),
-        "file": MessageLookupByLibrary.simpleMessage("File"),
-        "find": MessageLookupByLibrary.simpleMessage("Find"),
-        "functions": MessageLookupByLibrary.simpleMessage("Functions"),
         "iconSize": MessageLookupByLibrary.simpleMessage("Icon Size"),
         "language": MessageLookupByLibrary.simpleMessage("Language"),
         "maximumNumberOfWindows":
             MessageLookupByLibrary.simpleMessage("Maximum Number of Windows"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "reloadChangedFile": m0,
+        "resource1901": MessageLookupByLibrary.simpleMessage("File"),
+        "resource1902": MessageLookupByLibrary.simpleMessage("Edit"),
+        "resource1903": MessageLookupByLibrary.simpleMessage("Find"),
+        "resource1904": MessageLookupByLibrary.simpleMessage("Functions"),
+        "resource1905": MessageLookupByLibrary.simpleMessage("Macros"),
+        "resource1906": MessageLookupByLibrary.simpleMessage("View"),
+        "resource1907": MessageLookupByLibrary.simpleMessage("Extra"),
+        "resource1908": MessageLookupByLibrary.simpleMessage("Windows"),
+        "resource1909": MessageLookupByLibrary.simpleMessage("Print"),
+        "resource1910": MessageLookupByLibrary.simpleMessage("Convert"),
+        "resource1911": MessageLookupByLibrary.simpleMessage("Overview"),
+        "resource1913": MessageLookupByLibrary.simpleMessage("Diff"),
         "searchIncrementally": m1,
         "showStatusbar": MessageLookupByLibrary.simpleMessage("Show Statusbar"),
         "showToolbar": MessageLookupByLibrary.simpleMessage("Show Toolbar"),

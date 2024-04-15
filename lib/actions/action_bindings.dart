@@ -15,8 +15,13 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter_named/font_awesome_flutter_named.dart';
+import 'package:intl/intl.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:logger/logger.dart';
+import 'package:material_icons_named/material_icons_named.dart';
+import 'package:pks_edit_flutter/actions/actions.dart';
+import 'package:pks_edit_flutter/util/logger.dart';
 
 part 'action_bindings.g.dart';
 
@@ -108,24 +113,97 @@ final _logicalKeyMapping = <String, LogicalKeyboardKey>{
 };
 
 ///
-/// Describes a toolbar button.
-///
-@JsonSerializable(includeIfNull: false)
-class ToolbarItemBinding {
+/// A general binding in PKS Edit.
+class Binding {
   /// The logical context in which this item is active.
   final String? context;
-  /// The help text (tooltip) to display for the button. If no label is specified, a default from the referenced action is used.
-  final String? label;
-  /// The name of the icon to display for the toolbar. If no label is specified, a default from the referenced action is used.
-  final String? icon;
-  /// true for separator items. Separator menus do not need a label and no command reference.
-  @JsonKey(name: "separator")
-  final bool isSeparator;
+
   /// the associated command to execute. If that starts with a @, we are referring to a named action.
   @JsonKey(name: "command")
   final String? commandReference;
+  Binding({this.context, this.commandReference});
 
-  ToolbarItemBinding({this.context, this.label, this.isSeparator = false, this.commandReference, this.icon});
+  @JsonKey(includeFromJson: false, includeToJson: false )
+  PksEditAction? action;
+}
+
+///
+/// Describes a binding which allows to define an icon.
+///
+class BindingWithIcon extends Binding {
+  static final Logger _logger = createLogger("ToolbarItemBinding");
+  static const iconNameMappings = <String,String>{
+    "floppy": "floppyDisk",
+    "cut": "scissors",
+    "copy": "clipboard",
+    "undo": "arrowRotateLeft",
+    "redo": "arrowRotateRight",
+    "exchangeAlt": "rightLeft",
+    "cog": "gear",
+    "search": "magnifyingGlass",
+    "searchPlus": "magnifyingGlassPlus",
+    "searchMinus": "magnifyingGlassMinus",
+    "stopCircle": "circleStop",
+    "infoCircle": "circleInfo",
+    "solidArrowAltCircleUp": "solidCircleUp"
+  };
+  /// The name of the icon to display for the toolbar. If no label is specified, a default from the referenced action is used.
+  final String? icon;
+
+  IconData? get iconData {
+    var name = icon;
+    if (name == null) {
+      return action?.icon;
+    }
+    if (name.startsWith("fa-")) {
+      name = name.substring(3);
+    } else {
+      return materialIcons[name.replaceAll('-', '_')];
+    }
+    var result = StringBuffer();
+    var trySolid = true;
+    if (name.endsWith("-o")) {
+      name = name.substring(0, name.length-2);
+      trySolid = false;
+    }
+    for (int i = 0; i < name.length; i++) {
+      var c = name[i];
+      if (c == '-' && ++i < name.length) {
+        result.write(name[i].toUpperCase());
+      } else {
+        result.write(c);
+      }
+    }
+    name = result.toString();
+    name = iconNameMappings[name] ?? name;
+    IconData? data;
+    if (trySolid) {
+      data = faIconNameMapping["solid${name[0].toUpperCase()}${name.substring(1)}"];
+    }
+    data ??= faIconNameMapping[name];
+    if (data == null) {
+      _logger.w("Icon $result not found.");
+    }
+    return data;
+  }
+
+  BindingWithIcon({this.icon, super.context, super.commandReference});
+
+}
+
+///
+/// Describes a toolbar button.
+///
+@JsonSerializable(includeIfNull: false)
+class ToolbarItemBinding extends BindingWithIcon {
+  /// The help text (tooltip) to display for the button. If no label is specified, a default from the referenced action is used.
+  final String? label;
+
+  /// true for separator items. Separator menus do not need a label and no command reference.
+  @JsonKey(name: "separator")
+  final bool isSeparator;
+
+  ToolbarItemBinding({this.label, this.isSeparator = false, super.icon, super.context, super.commandReference});
 
   static ToolbarItemBinding fromJson(Map<String, dynamic> map) =>
       _$ToolbarItemBindingFromJson(map);
@@ -136,9 +214,7 @@ class ToolbarItemBinding {
 /// Describes a menu item.
 ///
 @JsonSerializable(includeIfNull: false)
-class MenuItemBinding {
-  /// The logical context in which this item is active.
-  final String? context;
+class MenuItemBinding extends BindingWithIcon {
   /// The label to display for the menu. If no label is specified, a default from the referenced action is used.
   final String? label;
   /// Used in the windows version only: the resource id - specified there as a number.
@@ -153,15 +229,23 @@ class MenuItemBinding {
   /// true for "macro" menus. Will be replaced during runtime by a list of global macro function bindings.
   @JsonKey(name: "macro-menu")
   final bool isMacroCommand;
-  /// the associated command to execute. If that starts with a @, we are referring to a named action.
-  @JsonKey(name: "command")
-  final String? commandReference;
   /// Optional children for nested menus.
   @JsonKey(name: "sub-menu")
-  final List<MenuItemBinding>? children;
+  List<MenuItemBinding>? children;
+  String get title {
+    if (label != null) {
+      return label!;
+    }
+    if (labelId != null) {
+      return Intl.message("$labelId", name: "resource$labelId");
+    }
+    return action?.label ?? "Menu";
+  }
   MenuItemBinding({this.isSeparator = false, this.isHistoryMenu = false, this.isMacroCommand = false,
-    this.context,
-    this.labelId, this.label, this.children, this.commandReference});
+    this.labelId, this.label, this.children,
+    super.icon,
+    super.context,
+    super.commandReference});
 
   static MenuItemBinding fromJson(Map<String, dynamic> map) =>
       _$MenuItemBindingFromJson(map);
@@ -172,13 +256,12 @@ class MenuItemBinding {
 /// Describes the connection between a key press and an action to execute.
 ///
 @JsonSerializable(includeIfNull: false)
-class KeyBinding {
-  static final Logger _logger = Logger();
+class KeyBinding extends Binding {
+  static final Logger _logger = createLogger("KeyBinding");
   static bool convertControl = Platform.isMacOS;
-  /// The logical context in which this item is active.
-  final String? context;
   /// The specification of the key - e.g. 'Ctrl escape'.
   final String key;
+  @JsonKey(includeFromJson: false, includeToJson: false )
   late final SingleActivator activator;
 
   SingleActivator _calculateActivator(String key) {
@@ -207,7 +290,7 @@ class KeyBinding {
         }
         final k = _logicalKeyMapping[s];
         if (k == null) {
-          _logger.i("Cannot determine logical key for $s");
+          _logger.w("Cannot determine logical key for $s");
         }
         logicalKey = k ?? LogicalKeyboardKey.add;
       }
@@ -215,10 +298,7 @@ class KeyBinding {
     return SingleActivator(logicalKey, alt: alt, shift: shift, meta: meta || (control && convertControl), control: control && !convertControl);
   }
 
-  /// the associated command to execute. If that starts with a @, we are referring to a named action.
-  @JsonKey(name: "command")
-  final String? commandReference;
-  KeyBinding({this.context, required this.key, this.commandReference}) {
+  KeyBinding({required this.key, super.context, super.commandReference}) {
     activator = _calculateActivator(key);
   }
 
@@ -228,7 +308,7 @@ class KeyBinding {
 }
 
 @JsonSerializable(includeIfNull: false)
-class MouseBinding {
+class MouseBinding extends Binding {
   static MouseBinding fromJson(Map<String, dynamic> map) =>
       _$MouseBindingFromJson(map);
   Map<String, dynamic> toJson() => _$MouseBindingToJson(this);
@@ -240,19 +320,78 @@ class MouseBinding {
 @JsonSerializable(includeIfNull: false)
 class ActionBindings {
   /// Describes the menu bar.
-  final List<MenuItemBinding> menu;
+  List<MenuItemBinding> menu;
   /// Describes the context menu.
   @JsonKey(name: "context-menu")
-  final List<MenuItemBinding> contextMenu;
+  List<MenuItemBinding> contextMenu;
   /// Describes the mouse button action association.
   @JsonKey(name: "mouse-bindings")
-  final List<MouseBinding> mouseBindings;
+  List<MouseBinding> mouseBindings;
   /// Describes the toolbar buttons.
-  final List<ToolbarItemBinding> toolbar;
+  List<ToolbarItemBinding> toolbar;
   @JsonKey(name: "key-bindings")
-  final List<KeyBinding> keys;
+  List<KeyBinding> keys;
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  final Map<ShortcutActivator,VoidCallback> shortcuts = {};
+
+  void registerAdditionalAction(ShortcutActivator activator, VoidCallback callback) {
+    shortcuts[activator] = callback;
+  }
+
+  List<T> _processBindings<T extends Binding>(PksEditActions actions, List<T> bindings) {
+    final result = <T>[];
+    for (var b in bindings) {
+      final command = b.commandReference;
+      if (b is MenuItemBinding && b.isHistoryMenu) {
+        result.add(b);
+      } else if (command != null && command.startsWith("@")) {
+        var action = actions.actions[command.substring(1)];
+        if (action != null) {
+          result.add(b);
+          action.referenced = true;
+          b.action = action;
+          if (b is BindingWithIcon && b.icon != null && action.icon == null) {
+            action.icon = b.iconData;
+          }
+          if (b is KeyBinding) {
+            action.shortcut = b.activator;
+            shortcuts[b.activator] = () {
+              var f = action.onPressed;
+              if (f != null) {
+                f();
+              }
+            };
+          }
+        }
+      } else if (command == null) {
+        result.add(b);
+      }
+      if (b is MenuItemBinding && b.children != null) {
+        b.children = _processBindings(actions, b.children!);
+        if (b.children!.isEmpty) {
+          result.removeLast();
+        }
+      }
+    }
+    return result;
+  }
+
+  void processBindingsWith(PksEditActions actions) {
+    menu = _processBindings(actions, menu);
+    contextMenu = _processBindings(actions, contextMenu);
+    toolbar = _processBindings(actions, toolbar);
+    mouseBindings = _processBindings(actions, mouseBindings);
+    keys = _processBindings(actions, keys);
+    // for (var a in actions.actions.values) {
+    //  if (!a.referenced) {
+    //    print("Command ${a.id} not referenced");
+    //  }
+    //}
+  }
 
   ActionBindings({this.menu = const [], this.contextMenu = const[], this.toolbar = const[], this.keys = const[], this.mouseBindings = const[]});
+
   static ActionBindings fromJson(Map<String, dynamic> map) =>
       _$ActionBindingsFromJson(map);
   Map<String, dynamic> toJson() => _$ActionBindingsToJson(this);

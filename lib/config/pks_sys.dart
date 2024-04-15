@@ -23,6 +23,7 @@ import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/editing_configuration.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/config/theme_configuration.dart';
+import 'package:pks_edit_flutter/util/logger.dart';
 import 'package:window_manager/window_manager.dart';
 
 part 'pks_sys.g.dart';
@@ -254,8 +255,7 @@ class PksConfiguration {
   static const actionBindingsFilename = "pksactionbindings.json";
   static const pksSysVariable = "PKS_SYS";
   static PksConfiguration singleton = PksConfiguration._();
-  final Logger _logger =
-      Logger(printer: SimplePrinter(printTime: true, colors: false));
+  final Logger _logger = createLogger("PksConfiguration");
   String? _pksSysDirectory;
   PksEditSession? _pksEditSession;
   PksIniConfiguration? _pksIniConfiguration;

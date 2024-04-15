@@ -19,12 +19,13 @@ import 'package:flutter/services.dart';
 import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
+import 'package:pks_edit_flutter/actions/action_bindings.dart';
+import 'package:pks_edit_flutter/actions/actions.dart';
 import 'package:pks_edit_flutter/actions/shortcuts.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
-import 'package:pks_edit_flutter/actions/actions.dart';
+import 'package:pks_edit_flutter/generated/l10n.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/status_bar_widget.dart';
 import 'package:pks_edit_flutter/ui/tool_bar_widget.dart';
@@ -32,7 +33,6 @@ import 'package:re_editor/re_editor.dart';
 import 'package:sound_library/sound_library.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:window_manager/window_manager.dart';
-import 'package:pks_edit_flutter/generated/l10n.dart';
 ///
 /// Main page of the PKS Edit application.
 ///
@@ -58,6 +58,10 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   void didChangeDependencies() {
     super.didChangeDependencies();
     bloc = EditorBloc.of(context);
+    bloc.actionBindings.processBindingsWith(actions);
+    bloc.actionBindings.registerAdditionalAction(
+        const SingleActivator(LogicalKeyboardKey.keyS, alt: true, control: true),
+        _toggleSearchBarFocus);
     _externalFileSubscription = bloc.externalFileChangeStream.listen((event) async {
         if ((await ConfirmationDialog.show(context: context, message: S.of(context).reloadChangedFile(event.title))) == 'yes') {
           final result = await bloc.abandonFile(event);
@@ -72,8 +76,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     _searchbarFocusNode = FocusNode();
     _editorFocusNode = FocusNode();
     actions = PksEditActions(getBuildContext: () => context,
-        handleCommandResult: _handleCommandResult, getActionContext: () => _actionContext,
-        additionalActions: { const SingleActivator(LogicalKeyboardKey.keyS, alt: true, control: true): _toggleSearchBarFocus }
+        handleCommandResult: _handleCommandResult, getActionContext: () => _actionContext
     );
     super.initState();
   }
@@ -170,12 +173,10 @@ class _PksEditMainPageState extends State<PksEditMainPage>
       builder: (context, snapshot) {
         var files = snapshot.data;
         _actionContext = PksEditActionContext(openFileState: files);
-        final myActions = actions;
-        final ac = actions.actions.values;
         files ??= OpenFileState(files: [], currentIndex: 0);
         final configuration = PksIniConfiguration.of(context).configuration;
         return CallbackShortcuts(
-                bindings: myActions.shortcuts,
+                bindings: bloc.actionBindings.shortcuts,
                 child: Focus(
                     child: Scaffold(
                         body: DropRegion(formats: const [
@@ -187,9 +188,9 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                       children: <Widget>[
                         SizedBox(
                             width: double.infinity,
-                            child: MenuBarWidget(actions: ac)),
+                            child: MenuBarWidget(actions: bloc.actionBindings.menu)),
                         if (configuration.showToolbar)
-                        ToolBarWidget(currentFile: files.currentFile, actions: ac,
+                        ToolBarWidget(currentFile: files.currentFile, actions: bloc.actionBindings.toolbar,
                           focusNode: _searchbarFocusNode,
                           ),
                         Expanded(child: EditorDockPanelWidget(state: files, files: files.files, editorFocusNode: _editorFocusNode, closeFile: (file) {
@@ -336,96 +337,47 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
 /// Displays a menu bar containing the menu bar triggered actions of PKS EDIT
 ///
 class MenuBarWidget extends StatelessWidget {
-  final Iterable<PksEditAction> actions;
+  final Iterable<MenuItemBinding> actions;
   const MenuBarWidget({super.key, required this.actions});
 
-  void _showAbout(BuildContext context) async {
-    final info = await PackageInfo.fromPlatform();
-    if (context.mounted) {
-      showAboutDialog(
-          context: context,
-          applicationName: "PKS Edit",
-          children: [
-            Text(S.of(context).aboutInfoText),
-            const Divider(),
-            const Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text("Author: Tom Krauß"),
-                Text("Design: Rolf Pahlen")
-              ],
-            )
-          ],
-          applicationIcon: Image.asset("lib/assets/images/pks.png"),
-          applicationVersion: info.version);
-    }
-  }
-
-  List<Widget> _buildMenuBarChildren(BuildContext context) => [
-        SubmenuButton(
-          menuChildren: _buildFileMenu(context),
-          child: Text(S.of(context).file),
-        ),
-        SubmenuButton(
-          menuChildren: _buildMenuForGroup(context, PksEditAction.editGroup),
-          child: Text(S.of(context).edit),
-        ),
-        SubmenuButton(
-          menuChildren: _buildMenuForGroup(context, PksEditAction.findGroup),
-          child: Text(S.of(context).find),
-        ),
-        SubmenuButton(
-          menuChildren:
-              _buildMenuForGroup(context, PksEditAction.functionGroup),
-          child: Text(S.of(context).functions),
-        ),
-        const SubmenuButton(
-          menuChildren: [],
-          child: Text("Macro"),
-        ),
-        SubmenuButton(
-          menuChildren: _buildMenuForGroup(context, PksEditAction.extraGroup),
-          child: const Text("Extras"),
-        ),
-        SubmenuButton(
-          menuChildren: _buildMenuForGroup(context, PksEditAction.windowGroup),
-          child: Text(S.of(context).window),
-        ),
-        SubmenuButton(
-          menuChildren: [
-            _createMenuButton(
-                context, S.of(context).about, null, null, () {
-                  _showAbout(context);
-                })
-          ],
-          child: const Text("?"),
-        ),
-      ];
-
-  @override
-  Widget build(BuildContext context) =>
-      MenuBar(children: _buildMenuBarChildren(context));
-
-  MenuItemButton _createMenuButton(BuildContext context, String label, IconData? icon,
-        MenuSerializableShortcut? shortcut, void Function()? onPressed) =>
-    MenuItemButton(
+  Widget _createMenuButton(BuildContext context, String label, IconData? icon, MenuSerializableShortcut? shortcut,
+        void Function()? onPressed) =>
+      MenuItemButton(
         leadingIcon: icon == null ?
-          SizedBox(width: Theme.of(context).menuButtonTheme.style?.iconSize?.resolve({MaterialState.selected}) ?? 24) :
+        SizedBox(width: Theme.of(context).menuButtonTheme.style?.iconSize?.resolve({MaterialState.selected}) ?? 24) :
         Icon(icon),
         onPressed: onPressed, shortcut: shortcut, child: Text(label));
 
-  List<Widget> _buildMenuForGroup(BuildContext context, String group) {
-    final List<Widget> result = [];
-    actions
-        .where((element) => element.displayInMenu && element.group == group)
-        .forEach((e) {
-      if (e.separatorBefore) {
-        result.add(const Divider());
+  List<Widget> _buildChildren(BuildContext context, Iterable<MenuItemBinding> actions) {
+    var result = <Widget>[];
+    for (var b in actions) {
+      if (b.children != null && b.children!.isNotEmpty) {
+        result.add(SubmenuButton(
+          menuChildren: _buildChildren(context, b.children!),
+          child: Text(b.title),
+        ));
+      } else if (b.isSeparator) {
+        if (result.isNotEmpty && result.lastOrNull is! Divider) {
+          result.add(const Divider());
+        }
+        if (b.isHistoryMenu) {
+          result.add(SubmenuButton(menuChildren: _buildHistoryMenu(context), child: const Text("Recent Files")));
+        }
+      } else {
+        final icon = b.iconData;
+        var element = _createMenuButton(context, b.title, icon, b.action?.shortcut, b.action?.onPressed);
+        result.add(element);
       }
-      result.add(_createMenuButton(context, e.label, e.icon, e.shortcut, e.onPressed));
-    });
+    }
+    if (result.lastOrNull is Divider) {
+      result.removeLast();
+    }
     return result;
   }
+
+  @override
+  Widget build(BuildContext context) =>
+      MenuBar(children: _buildChildren(context, actions));
 
   String _shortenFileName(String filename) {
     if (filename.length < 40) {
@@ -438,9 +390,7 @@ class MenuBarWidget extends StatelessWidget {
     return path.join(segments.first, segments[1], "...", segments[segments.length-2], segments.last);
   }
 
-  List<Widget> _buildFileMenu(BuildContext context) {
-    final List<Widget> result =
-        _buildMenuForGroup(context, PksEditAction.fileGroup);
+  List<Widget> _buildHistoryMenu(BuildContext context) {
     final subMenu = <Widget>[];
     final bloc = EditorBloc.of(context);
     for (var of in bloc.openFiles) {
@@ -448,8 +398,7 @@ class MenuBarWidget extends StatelessWidget {
             bloc.openFile(of);
           }));
     }
-    result.insert(0, SubmenuButton(menuChildren: subMenu, child: const Text("Recent Files")));
-    return result;
+    return subMenu;
   }
 }
 

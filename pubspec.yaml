@@ -21,6 +21,8 @@ dependencies:
   path: ^1.8.2
   sound_library: ^0.2.0
   font_awesome_flutter: ^10.6.0
+  font_awesome_flutter_named: ^1.1.2+1
+  material_icons_named: ^3.16.0
   logger: ^2.0.2
   file_selector: ^1.0.3
   flutter_highlight: ^0.7.0

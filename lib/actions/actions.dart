@@ -28,13 +28,15 @@ import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/input_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/settings_dialog.dart';
 import 'package:re_editor/re_editor.dart';
+import 'package:pks_edit_flutter/generated/l10n.dart';
 
 ///
 /// Context used in actions to evaluate actions and action enablement.
@@ -50,27 +52,33 @@ class PksEditActionContext {
 /// Represents an action to be executed by PKS-Edit.
 ///
 class PksEditAction {
-  static const String fileGroup = "file";
-  static const String editGroup = "edit";
-  static const String findGroup = "find";
-  static const String viewGroup = "view";
-  static const String windowGroup = "window";
-  static const String extraGroup = "extra";
-  static const String functionGroup = "function";
-  static const String defaultGroup = "default";
-  static List<String> get wellknownGroups => [PksEditAction.fileGroup, PksEditAction.editGroup, PksEditAction.findGroup,
-    PksEditAction.functionGroup, PksEditAction.extraGroup, PksEditAction.windowGroup, PksEditAction.viewGroup];
   final String id;
   final String? _description;
-  final String group;
-  final MenuSerializableShortcut? shortcut;
   ///
-  /// Add a separator before creating a button in the toolbar / in a menu before adding
-  /// the button for this action.
+  /// If the description was specified using an L10N key - this is the key.
   ///
-  final bool separatorBefore;
-  String? text;
+  final String? descriptionKey;
+  ///
+  /// If the text was specified using an L10N key - this is the key.
+  ///
+  final String? textKey;
+  bool referenced = false;
+  MenuSerializableShortcut? shortcut;
+  ///
+  /// If an icon is configured - use it.
   IconData? icon;
+  final String? _text;
+
+  String? get text {
+    if (_text != null) {
+      return _text;
+    }
+    if (textKey != null) {
+      return Intl.message(textKey!, name: textKey);
+    }
+    return null;
+  }
+
   ///
   /// Returns the label to be used to display the action in a UI.
   ///
@@ -78,40 +86,44 @@ class PksEditAction {
   ///
   /// Returns the text to be displayed as a description (tooltip) for this action
   ///
-  String get description => "${_description ?? label}${shortcut == null ? '' : '- ${shortcut!.debugDescribeKeys()}'}";
+  String get description {
+    var t = _description;
+    if (t == null && descriptionKey != null) {
+      t = Intl.message(descriptionKey!, name: descriptionKey);
+    }
+    t ??= label;
+    return "$t${shortcut == null ? '' : '- ${shortcut!.debugDescribeKeys()}'}";
+  }
   final bool Function() isEnabled;
   final void Function() execute;
 
-  bool get displayInToolbar => icon != null;
   bool get displayInMenu => true;
 
   void Function()? get onPressed => isEnabled() ? execute : null;
 
   static bool _alwaysEnabled() => true;
 
-  PksEditAction({required this.id, this.isEnabled = _alwaysEnabled,
-    required this.execute,
-    this.separatorBefore = false,
-    this.shortcut,
-    this.group = defaultGroup,
-    this.text, this.icon, String? description}) : _description = description;
+    PksEditAction({required this.id, this.isEnabled = _alwaysEnabled,
+      required this.execute,
+      this.textKey,
+      this.shortcut,
+      this.descriptionKey,
+      String? text, String? description}) : _text = text, _description = description;
 }
 
 ///
 /// The actions supported by PKS-Edit.
 ///
 class PksEditActions {
-  static const actionExit = "exit";
-  static const actionCloseWindow = "close-window";
+  static const actionExit = "exit-edit";
+  static const actionCloseWindow = "quit-file";
   final PksEditActionContext Function() getActionContext;
   final BuildContext Function() getBuildContext;
   final Future<void> Function(CommandResult commandResult) handleCommandResult;
-  final Map<ShortcutActivator, VoidCallback> additionalActions;
   final Map<String, PksEditAction> actions = {};
-  late final Map<ShortcutActivator, VoidCallback> shortcuts;
 
   PksEditActions({required this.getBuildContext, required this.getActionContext,
-        required this.handleCommandResult, required this.additionalActions}) {
+        required this.handleCommandResult}) {
     _initialize();
   }
 
@@ -124,236 +136,135 @@ class PksEditActions {
       PksEditAction(
           id: "open-file",
           execute: _openFile,
-          text: "Open File...",
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.keyO, control: true),
-          group: PksEditAction.fileGroup,
-          icon: Icons.file_open),
+          textKey: "actionOpenFile",),
       PksEditAction(
-          id: "new-file",
+          id: "open-new-file",
           execute: _newFile,
-          text: "New File...",
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.keyN, control: true),
-          group: PksEditAction.fileGroup,
-          icon: Icons.create_outlined),
+          textKey: "actionNewFile",),
       PksEditAction(
           id: "save-file",
           execute: _saveFile,
           isEnabled: _canSave,
-          text: "Save File",
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.keyS, control: true),
-          description: "Save current file",
-          group: PksEditAction.fileGroup,
-          icon: Icons.save),
+          textKey: "actionSaveFile",
+          descriptionKey: "actionDescriptionSaveCurrentFile",),
       PksEditAction(
           id: "abandon-file",
-          execute: _abandonFile,
+          execute: _refreshFileContents,
           isEnabled: _canSave,
-          text: "Abandon File",
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.f5, control: true),
-          description: "Abandon all changes in the current file",
-          group: PksEditAction.fileGroup,
-          icon: Icons.recycling),
+          textKey: "actionAbandonFile",
+          descriptionKey: "actionDescriptionAbandonFile"),
       PksEditAction(
           id: "save-file-as",
           execute: _saveFileAs,
           isEnabled: _hasFile,
-          text: "Save File As...",
-          description: "Save current file under new name",
-          group: PksEditAction.fileGroup,
-          icon: Icons.save_as),
+          textKey: "actionSaveFileAs",
+          descriptionKey: "actionDescriptionSaveFileAs"),
       PksEditAction(
           id: actionCloseWindow,
           execute: _closeWindow,
-          text: "Close Window",
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.keyW, control: true),
-          description: "Closes the current editor window",
-          group: PksEditAction.fileGroup,
-          icon: Icons.close),
+          textKey: "actionCloseWindow",
+          descriptionKey: "actionDescriptionCloseWindow"),
       PksEditAction(
           id: "close-all-windows",
           execute: _closeAllWindows,
-          text: "Close All Windows",
-          shortcut:
-          const SingleActivator(
-              LogicalKeyboardKey.keyW, control: true, shift: true),
-          icon: Icons.done_all,
-          description: "Closes all editor windows",
-          group: PksEditAction.fileGroup),
+          textKey: "actionCloseAllWindows",
+          descriptionKey: "actionDescriptionCloseAllWindows"),
       PksEditAction(
-          id: "close-all-but-active",
+          id: "close-all-but-current-window",
           execute: _closeAllButActive,
-          text: "Close All other Windows",
-          shortcut:
-          const SingleActivator(
-              LogicalKeyboardKey.keyW, control: true, alt: true),
-          icon: Icons.clear_all,
-          description: "Closes all other editor windows but current",
-          group: PksEditAction.fileGroup),
+          textKey: "actionCloseAllButCurrentWindow",
+          descriptionKey: "actionDescriptionCloseAllButCurrentWindow"),
       PksEditAction(
           id: actionExit,
           execute: _exit,
-          text: "Exit",
-          shortcut: const SingleActivator(LogicalKeyboardKey.f4, alt: true),
-          icon: Icons.exit_to_app,
-          description: "Exit PKS Edit",
-          separatorBefore: true,
-          group: PksEditAction.fileGroup),
+          textKey: "actionExit",
+          descriptionKey: "actionDescriptionExit"),
       PksEditAction(
           id: "undo",
           execute: _undo,
           isEnabled: _canUndo,
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.keyZ, control: true),
-          text: "Undo",
-          group: PksEditAction.editGroup,
-          icon: Icons.undo),
+          textKey: "actionUndo"),
       PksEditAction(
           id: "redo",
           execute: _redo,
           isEnabled: _canRedo,
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.keyY, control: true),
-          text: "Redo",
-          group: PksEditAction.editGroup,
-          icon: Icons.redo),
+          textKey: "actionRedo"),
       PksEditAction(
-          id: "copy",
+          id: "copy-to-clipboard",
           execute: _copy,
           isEnabled: _hasFile,
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.keyC, control: true),
-          text: "Copy",
-          separatorBefore: true,
-          group: PksEditAction.editGroup,
-          icon: Icons.copy),
+          textKey: "actionCopy"),
       PksEditAction(
-          id: "cut",
+          id: "erase-bloc",
+          execute: _eraseBlock,
+          isEnabled: _hasWriteableFile,
+          textKey: "actionErase"),
+      PksEditAction(
+          id: "delete-block",
           execute: _cut,
           isEnabled: _hasWriteableFile,
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.keyX, control: true),
-          text: "Cut",
-          group: PksEditAction.editGroup,
-          icon: Icons.cut),
+          textKey: "actionCut"),
       PksEditAction(
-          id: "paste",
+          id: "paste-clipboard",
           execute: _paste,
           isEnabled: _hasWriteableFile,
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.keyV, control: true),
-          text: "Paste",
-          group: PksEditAction.editGroup,
-          icon: Icons.paste),
+          textKey: "actionPaste"),
       PksEditAction(
-          id: "select-all",
+          id: "mark-all",
           execute: _selectAll,
           isEnabled: _hasFile,
-          shortcut: const SingleActivator(
-              LogicalKeyboardKey.keyA, control: true),
-          icon: Icons.select_all,
-          separatorBefore: true,
-          text: "Select All",
-          group: PksEditAction.editGroup),
+          textKey: "actionSelectAll"),
       PksEditAction(
-          id: "comment-line",
+          id: "toggle-comment",
           execute: _commentLine,
           isEnabled: _hasFile,
-          shortcut: const SingleActivator(
-              LogicalKeyboardKey.numpad7, control: true),
-          icon: Icons.comment,
-          text: "Comment Single Line",
-          group: PksEditAction.functionGroup),
+          textKey: "actionToggleComment"),
       PksEditAction(
-          id: "transpose-characters",
-          execute: _transposeCharacters,
-          isEnabled: _hasFile,
-          shortcut: const SingleActivator(
-              LogicalKeyboardKey.keyT, control: true),
-          text: "Transpose Characters",
-          group: PksEditAction.functionGroup),
-      PksEditAction(
-          id: "cycle-window-forward",
+          id: "cycle-window",
           execute: _cycleWindowForward,
-          shortcut: const SingleActivator(
-              LogicalKeyboardKey.tab, control: true),
-          icon: Icons.rotate_left,
-          text: "Cycle window forward",
-          group: PksEditAction.windowGroup),
+          textKey: "actionCycleWindow"),
       PksEditAction(
-          id: "cycle-window-backward",
+          id: "select-previous-window",
           execute: _cycleWindowBackward,
-          shortcut:
-          const SingleActivator(
-              LogicalKeyboardKey.tab, control: true, shift: true),
-          icon: Icons.rotate_right,
-          text: "Cycle window backward",
-          group: PksEditAction.windowGroup),
+          textKey: "actionSelectPreviousWindow"),
       PksEditAction(
-          id: "activate-window-1",
+          id: "select-window-1",
           execute: _activateWindow1,
-          shortcut:
-          const SingleActivator(
-              LogicalKeyboardKey.numpad1, control: true),
           text: "Activate Window 1"),
       PksEditAction(
-          id: "activate-window-1",
-          execute: _activateWindow1,
-          shortcut:
-          const SingleActivator(
-              LogicalKeyboardKey.digit1, control: true),
-          text: "Activate Window 1"),
-      PksEditAction(
-          id: "activate-window-2",
+          id: "select-window-2",
           execute: _activateWindow2,
-          shortcut:
-          const SingleActivator(
-              LogicalKeyboardKey.digit2, control: true),
           text: "Activate Window 2"),
       PksEditAction(
-          id: "activate-window-3",
+          id: "select-window-3",
           execute: _activateWindow3,
-          shortcut:
-          const SingleActivator(
-              LogicalKeyboardKey.digit3, control: true),
           text: "Activate Window 3"),
       PksEditAction(
-          id: "activate-window-4",
+          id: "select-window-4",
           execute: _activateWindow4,
-          shortcut:
-          const SingleActivator(
-              LogicalKeyboardKey.digit4, control: true),
           text: "Activate Window 4"),
       PksEditAction(
-          id: "activate-window-5",
+          id: "select-window-5",
           execute: _activateWindow5,
-          shortcut:
-          const SingleActivator(
-              LogicalKeyboardKey.digit5, control: true),
           text: "Activate Window 5"),
+      PksEditAction(
+          id: "select-window-6",
+          execute: _activateWindow6,
+          text: "Activate Window 6"),
       PksEditAction(
           id: "goto-line",
           execute: _gotoLine,
           isEnabled: _hasFile,
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.keyG, control: true),
-          icon: Icons.numbers_sharp,
-          text: "Goto line",
-          group: PksEditAction.findGroup),
+          textKey: "actionGotoLine"),
       PksEditAction(
-          id: "change-settings",
+          id: "set-options",
           execute: _changeSettings,
-          text: "Change Settings...",
-          shortcut:
-          const SingleActivator(LogicalKeyboardKey.numpadMultiply, alt: true),
-          group: PksEditAction.extraGroup,
-          icon: Icons.create_outlined),
+          textKey: "actionSetOptions"),
+      PksEditAction(
+          id: "show-copyright",
+          execute: _showAbout,
+          textKey: "actionShowCopyright"),
     ];
-    shortcuts = _buildShortcutMap(actions);
     actions.forEach(_registerAction);
   }
 
@@ -371,12 +282,41 @@ class PksEditActions {
     return false;
   }
 
+  void _showAbout() async {
+    final context = getBuildContext();
+    final info = await PackageInfo.fromPlatform();
+    if (context.mounted) {
+      showAboutDialog(
+          context: context,
+          applicationName: "PKS Edit",
+          children: [
+            Text(S.of(context).aboutInfoText),
+            const Divider(),
+            const Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text("Author: Tom Krauß"),
+                Text("Design: Rolf Pahlen")
+              ],
+            )
+          ],
+          applicationIcon: Image.asset("lib/assets/images/pks.png"),
+          applicationVersion: info.version);
+    }
+  }
+
   void _withCurrentFile(PksEditActionContext actionContext,
       void Function(CodeLineEditingController controller) callback) {
     var f = actionContext.currentFile;
     if (f != null) {
       callback(f.controller);
     }
+  }
+
+  void _eraseBlock() {
+    _withCurrentFile(getActionContext(), (controller) {
+      controller.deleteSelection();
+    });
   }
 
   void _copy() {
@@ -409,12 +349,6 @@ class PksEditActions {
     });
   }
 
-  void _transposeCharacters() {
-    _withCurrentFile(getActionContext(), (controller) {
-      controller.transposeCharacters();
-    });
-  }
-
   void _selectAll() {
     _withCurrentFile(getActionContext(), (controller) {
       controller.selectAll();
@@ -442,7 +376,7 @@ class PksEditActions {
     return false;
   }
 
-  void _abandonFile() async {
+  void _refreshFileContents() async {
     var context = getBuildContext();
     final bloc = EditorBloc.of(context);
     var f = getActionContext().currentFile;
@@ -487,6 +421,11 @@ class PksEditActions {
   void _activateWindow5() {
     _activateWindow(5);
   }
+
+  void _activateWindow6() {
+    _activateWindow(6);
+  }
+
 
   void _saveFileAs() async {
     final bloc = EditorBloc.of(getBuildContext());
@@ -641,23 +580,6 @@ class PksEditActions {
     if (context.mounted) {
       bloc.exitApp(context);
     }
-  }
-
-  Map<ShortcutActivator, VoidCallback> _buildShortcutMap(
-      List<PksEditAction> actions) {
-    final result = <ShortcutActivator, VoidCallback>{};
-    for (final action in actions) {
-      if (action.shortcut is ShortcutActivator) {
-        result[action.shortcut as ShortcutActivator] = () {
-          var f = action.onPressed;
-          if (f != null) {
-            f();
-          }
-        };
-      }
-    }
-    result.addAll(additionalActions);
-    return result;
   }
 
   ///
