@@ -20,10 +20,15 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'en';
 
-  static String m0(file) =>
+  static String m0(length) => "Copied ${length} characters to the clipboard.";
+
+  static String m1(lineCount) =>
+      "Line number must be in range: 1 - ${lineCount}.";
+
+  static String m2(file) =>
       "File ${file} is changed. Do you want to reload it?";
 
-  static String m1(shortcut) => "Search incrementally (${shortcut})";
+  static String m3(shortcut) => "Search incrementally (${shortcut})";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -84,12 +89,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "compactEditorTabs":
             MessageLookupByLibrary.simpleMessage("Compact Editor Tabs"),
         "confirmation": MessageLookupByLibrary.simpleMessage("Confirmation"),
+        "copiedToClipboardHint": m0,
+        "gotoLine": MessageLookupByLibrary.simpleMessage("Goto Line"),
         "iconSize": MessageLookupByLibrary.simpleMessage("Icon Size"),
         "language": MessageLookupByLibrary.simpleMessage("Language"),
+        "lineNumber": MessageLookupByLibrary.simpleMessage("Line number"),
+        "lineNumberRangeHint": m1,
         "maximumNumberOfWindows":
             MessageLookupByLibrary.simpleMessage("Maximum Number of Windows"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
-        "reloadChangedFile": m0,
+        "reallyDiscardAllChanges": MessageLookupByLibrary.simpleMessage(
+            "Do you really want to discard all changes?"),
+        "reloadChangedFile": m2,
         "resource1901": MessageLookupByLibrary.simpleMessage("File"),
         "resource1902": MessageLookupByLibrary.simpleMessage("Edit"),
         "resource1903": MessageLookupByLibrary.simpleMessage("Find"),
@@ -102,7 +113,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resource1910": MessageLookupByLibrary.simpleMessage("Convert"),
         "resource1911": MessageLookupByLibrary.simpleMessage("Overview"),
         "resource1913": MessageLookupByLibrary.simpleMessage("Diff"),
-        "searchIncrementally": m1,
+        "searchIncrementally": m3,
         "showStatusbar": MessageLookupByLibrary.simpleMessage("Show Statusbar"),
         "showToolbar": MessageLookupByLibrary.simpleMessage("Show Toolbar"),
         "window": MessageLookupByLibrary.simpleMessage("Window"),

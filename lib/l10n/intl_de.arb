@@ -56,5 +56,10 @@
   "actionSetOptions": "Einstellungen ändern...",
   "actionGotoLine": "Gehe zu Zeile...",
   "actionShowCopyright": "Über PKS Edit...",
-  "actionSelectPreviousWindow": "Vorheriges Fenster auswählen"
+  "actionSelectPreviousWindow": "Vorheriges Fenster auswählen",
+  "copiedToClipboardHint": "{length} Zeichen auf die Zwischenablage kopiert.",
+  "reallyDiscardAllChanges": "Willst Du wirklich alle Änderungen verwerfen?",
+  "gotoLine": "Gehe zu Zeile",
+  "lineNumber": "Zeilennummer",
+  "lineNumberRangeHint": "Zeilennummer muss im Bereich 1 - {lineCount} liegen."
 }

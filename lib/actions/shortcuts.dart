@@ -18,15 +18,6 @@ import 'package:flutter/services.dart';
 import 'package:re_editor/re_editor.dart';
 
 const Map<CodeShortcutType, List<ShortcutActivator>> _kDefaultCommonCodeShortcutsActivators = {
-  CodeShortcutType.cut: [
-    SingleActivator(LogicalKeyboardKey.keyX, control: true)
-  ],
-  CodeShortcutType.copy: [
-    SingleActivator(LogicalKeyboardKey.keyC, control: true)
-  ],
-  CodeShortcutType.paste: [
-    SingleActivator(LogicalKeyboardKey.keyV, control: true)
-  ],
   CodeShortcutType.delete: [
     SingleActivator(LogicalKeyboardKey.delete,),
     SingleActivator(LogicalKeyboardKey.delete, shift: true),

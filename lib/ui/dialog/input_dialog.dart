@@ -28,13 +28,18 @@ class InputDialogArguments {
   final String inputLabel;
   final String title;
   final TextInputType keyboardType;
+  ///
+  /// An optional input validator.
+  ///
+  final String? Function(String value)? validator;
 
   InputDialogArguments(
       {required this.context,
       required this.title,
       required this.inputLabel,
-        this.keyboardType = TextInputType.text,
-        this.options = const {},
+      this.validator,
+      this.keyboardType = TextInputType.text,
+      this.options = const {},
       this.initialValue});
 }
 
@@ -67,6 +72,7 @@ class InputDialog extends StatefulWidget {
 }
 
 class _InputDialogState extends State<InputDialog> {
+  String? _validationHint;
   late final TextEditingController controller;
   late final Map<String, bool> selectedOptions;
   @override
@@ -75,6 +81,9 @@ class _InputDialogState extends State<InputDialog> {
     controller = TextEditingController(text: widget.arguments.initialValue);
     selectedOptions = {}..addAll(widget.arguments.options);
     controller.addListener(() {
+      if (widget.arguments.validator != null) {
+        _validationHint = widget.arguments.validator!(controller.text);
+      }
       setState(() {});
     });
   }
@@ -120,11 +129,15 @@ class _InputDialogState extends State<InputDialog> {
               const SizedBox(width: 10),
               Expanded(
                   child: ConstrainedBox(
-                      constraints: const BoxConstraints(minWidth: 300),
+                      constraints: const BoxConstraints(minWidth: 300, minHeight: 80),
                       child:
                           TextField(controller: controller, autofocus: true,
                             keyboardType: widget.arguments.keyboardType,
                             inputFormatters: inputFormatters,
+                            onSubmitted: (s) {
+                              _submit();
+                            },
+                            decoration: InputDecoration(errorText: _validationHint).applyDefaults(Theme.of(context).inputDecorationTheme),
                           )))
             ]),
             const SizedBox(height: 10),
@@ -133,11 +146,9 @@ class _InputDialogState extends State<InputDialog> {
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
                 ElevatedButton(
-                    onPressed: controller.text.isEmpty
+                    onPressed: controller.text.isEmpty || _validationHint != null
                         ? null
-                        : () {
-                            Navigator.of(context).pop(InputResult(selectedText: controller.text, selectedOptions: selectedOptions));
-                          },
+                        : _submit,
                     child: const Text("OK")),
                 ElevatedButton(
                     onPressed: () {
@@ -147,4 +158,11 @@ class _InputDialogState extends State<InputDialog> {
               ],
             )
           ]);
+
+  void _submit() {
+    if (controller.text.isEmpty || _validationHint != null) {
+      return;
+    }
+    Navigator.of(context).pop(InputResult(selectedText: controller.text, selectedOptions: selectedOptions));
+  }
 }

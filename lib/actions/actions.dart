@@ -192,17 +192,17 @@ class PksEditActions {
       PksEditAction(
           id: "copy-to-clipboard",
           execute: _copy,
-          isEnabled: _hasFile,
+          isEnabled: _hasSelection,
           textKey: "actionCopy"),
       PksEditAction(
           id: "erase-selection",
           execute: _eraseSelection,
-          isEnabled: _hasWriteableFile,
+          isEnabled: _hasWriteableSelection,
           textKey: "actionErase"),
       PksEditAction(
           id: "delete-selection",
           execute: _cut,
-          isEnabled: _hasWriteableFile,
+          isEnabled: _hasWriteableSelection,
           textKey: "actionCut"),
       PksEditAction(
           id: "paste-clipboard",
@@ -271,8 +271,18 @@ class PksEditActions {
   bool _hasFile() =>
       getActionContext().currentFile != null;
 
-  bool _hasWriteableFile() =>
-      getActionContext().currentFile != null && getActionContext().currentFile?.readOnly != true;
+  bool _hasSelection() =>
+      getActionContext().currentFile?.controller.selection.isCollapsed == false;
+
+  bool _hasWriteableSelection() {
+    var f = getActionContext().currentFile;
+    return f != null && !f.readOnly && !f.controller.selection.isCollapsed;
+  }
+
+  bool _hasWriteableFile() {
+    var f = getActionContext().currentFile;
+    return f != null && !f.readOnly;
+  }
 
   bool _canRedo() {
     var f = getActionContext().currentFile;
@@ -322,6 +332,10 @@ class PksEditActions {
   void _copy() {
     _withCurrentFile(getActionContext(), (controller) {
       controller.copy();
+      var s = controller.selectedText;
+      if (s.isNotEmpty) {
+        handleCommandResult(CommandResult(success: true, message: S.current.copiedToClipboardHint(s.length)));
+      }
     });
   }
 
@@ -381,7 +395,7 @@ class PksEditActions {
     final bloc = EditorBloc.of(context);
     var f = getActionContext().currentFile;
     if (f != null && f.modified) {
-      if ((await ConfirmationDialog.show(context: context, message: "Do you really want to abandon all changes?", actions: ConfirmationDialog.yesNoActions)) == "yes") {
+      if ((await ConfirmationDialog.show(context: context, message: S.of(context).reallyDiscardAllChanges, actions: ConfirmationDialog.yesNoActions)) == "yes") {
         bloc.abandonFile(f);
       }
     }
@@ -446,30 +460,39 @@ class PksEditActions {
     handleCommandResult(await bloc.saveActiveFile());
   }
 
+
   void _gotoLine() async {
     var controller = getActionContext().currentFile?.controller;
     if (controller == null) {
       return;
     }
-    final result = await InputDialog.show(context: getBuildContext(), arguments:
-    InputDialogArguments(context: getActionContext(), title: "Goto Line",
-        keyboardType: TextInputType.number,
-        inputLabel: "Line number", initialValue: "${controller.selection.start.index+1}"));
-    if (result != null) {
-      var newLine = int.tryParse(result.selectedText);
-      if (newLine != null) {
-        if (newLine < 0 || newLine >= controller.lineCount) {
-          handleCommandResult(CommandResult(success: true, message: "Line number of of range (0 - ${controller.lineCount})"));
-          return;
-        }
-        controller.selection = controller.selection.copyWith(
-          baseIndex: newLine-1,
-          baseOffset: 0,
-          extentIndex: newLine-1,
-          extentOffset: 0,
-        );
-        controller.makeCursorCenterIfInvisible();
+    final context = getBuildContext();
+    final intl = S.of(context);
+    int? newLine;
+    String? validate(String newValue) {
+      newLine = int.tryParse(newValue);
+      if (newLine == null) {
+        return "";
       }
+      if (newLine! <= 0 || newLine! > controller.lineCount) {
+        return intl.lineNumberRangeHint(controller.lineCount);
+      }
+      return null;
+    }
+    final result = await InputDialog.show(context: context, arguments:
+    InputDialogArguments(context: getActionContext(), title: intl.gotoLine,
+        keyboardType: TextInputType.number,
+        validator: validate,
+        inputLabel: intl.lineNumber, initialValue: "${controller.selection.start.index+1}"));
+    var nl = newLine;
+    if (result != null && nl != null) {
+      controller.selection = controller.selection.copyWith(
+        baseIndex: nl-1,
+        baseOffset: 0,
+        extentIndex: nl-1,
+        extentOffset: 0,
+      );
+      controller.makeCursorCenterIfInvisible();
     }
   }
 

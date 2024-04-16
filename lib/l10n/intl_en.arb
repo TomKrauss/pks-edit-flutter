@@ -56,5 +56,10 @@
   "actionSetOptions": "Change Settings...",
   "actionGotoLine": "Goto line...",
   "actionShowCopyright": "About PKS Edit...",
-  "actionSelectPreviousWindow": "Cycle window backward"
+  "actionSelectPreviousWindow": "Cycle window backward",
+  "copiedToClipboardHint": "Copied {length} characters to the clipboard.",
+  "reallyDiscardAllChanges": "Do you really want to discard all changes?",
+  "gotoLine": "Goto Line",
+  "lineNumber": "Line number",
+  "lineNumberRangeHint": "Line number must be in range: 1 - {lineCount}."
 }

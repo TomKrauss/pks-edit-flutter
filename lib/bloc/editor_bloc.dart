@@ -45,13 +45,19 @@ class OpenFileState {
   int _currentIndex;
   int get currentIndex => _currentIndex;
   final void Function()? _currentChanged;
-  OpenFile? get _currentFile => currentIndex < 0 || files.length <= currentIndex ? null : files[currentIndex];
-  set currentFile(OpenFile? file) => currentIndex = file == null ? -1 : files.indexOf(file);
+  OpenFile? _currentFile;
+  set currentFile(OpenFile? file) {
+    if (file == _currentFile) {
+      return;
+    }
+    currentIndex = file == null ? -1 : files.indexOf(file);
+  }
   set currentIndex(int idx) {
     if (_currentIndex == idx) {
       return;
     }
     _currentIndex = idx;
+    _currentFile = idx < 0 || idx >= files.length ? null : files[idx];
     if (_currentChanged != null) {
       _currentChanged();
     }
@@ -102,6 +108,9 @@ class OpenFile {
   static const String dockNameDefault = "default";
   static const String dockNameRight = "rightSlot";
   static const String dockNameBottom = "bottomSlot";
+
+  bool _selectionWasCollapsed = true;
+
   ///
   /// The index in the list of open files. Can be used to select the file via shortcut.
   ///
@@ -183,6 +192,13 @@ class OpenFile {
 
   void onChanged(CodeLineEditingValue value) {
     if (controller.codeLines.equals(controller.preValue?.codeLines)) {
+      final newCollapsed = value.selection.isCollapsed;
+      if (newCollapsed != _selectionWasCollapsed) {
+        _selectionWasCollapsed = newCollapsed;
+        if (_changedListener != null) {
+          _changedListener!(this);
+        }
+      }
       return;
     }
     _updateModified(controller.text != _lastSavedText);

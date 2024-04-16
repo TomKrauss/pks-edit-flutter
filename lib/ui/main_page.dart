@@ -19,14 +19,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_highlight/themes/atom-one-dark.dart';
 import 'package:flutter_highlight/themes/atom-one-light.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:path/path.dart' as path;
-import 'package:pks_edit_flutter/actions/action_bindings.dart';
 import 'package:pks_edit_flutter/actions/actions.dart';
 import 'package:pks_edit_flutter/actions/shortcuts.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
+import 'package:pks_edit_flutter/ui/dialog/context_menu_widget.dart';
+import 'package:pks_edit_flutter/ui/menu_bar_widget.dart';
 import 'package:pks_edit_flutter/ui/status_bar_widget.dart';
 import 'package:pks_edit_flutter/ui/tool_bar_widget.dart';
 import 'package:re_editor/re_editor.dart';
@@ -283,6 +283,7 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
         autofocus: true,
         readOnly: file.readOnly,
         onChanged: file.onChanged,
+        toolbarController: ContextMenuControllerImpl(menuItems: bloc.actionBindings.contextMenu),
         shortcutsActivatorsBuilder: const PksEditCodeShortcutsActivatorsBuilder(),
         border: Border(top: BorderSide(color: Theme.of(context).appBarTheme.backgroundColor ?? Colors.transparent)),
         focusNode: widget.editorFocusNode,
@@ -330,75 +331,6 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
       Expanded(
           child: widget.files.isEmpty ? const SizedBox() : _buildEditor(widget.files[controller.index])),
     ],);
-  }
-}
-
-///
-/// Displays a menu bar containing the menu bar triggered actions of PKS EDIT
-///
-class MenuBarWidget extends StatelessWidget {
-  final Iterable<MenuItemBinding> actions;
-  const MenuBarWidget({super.key, required this.actions});
-
-  Widget _createMenuButton(BuildContext context, String label, IconData? icon, MenuSerializableShortcut? shortcut,
-        void Function()? onPressed) =>
-      MenuItemButton(
-        leadingIcon: icon == null ?
-        SizedBox(width: Theme.of(context).menuButtonTheme.style?.iconSize?.resolve({MaterialState.selected}) ?? 24) :
-        Icon(icon),
-        onPressed: onPressed, shortcut: shortcut, child: Text(label));
-
-  List<Widget> _buildChildren(BuildContext context, Iterable<MenuItemBinding> actions) {
-    var result = <Widget>[];
-    for (var b in actions) {
-      if (b.children != null && b.children!.isNotEmpty) {
-        result.add(SubmenuButton(
-          menuChildren: _buildChildren(context, b.children!),
-          child: Text(b.title),
-        ));
-      } else if (b.isSeparator) {
-        if (result.isNotEmpty && result.lastOrNull is! Divider) {
-          result.add(const Divider());
-        }
-        if (b.isHistoryMenu) {
-          result.add(SubmenuButton(menuChildren: _buildHistoryMenu(context), child: const Text("Recent Files")));
-        }
-      } else {
-        final icon = b.iconData;
-        var element = _createMenuButton(context, b.title, icon, b.action?.shortcut, b.action?.onPressed);
-        result.add(element);
-      }
-    }
-    if (result.lastOrNull is Divider) {
-      result.removeLast();
-    }
-    return result;
-  }
-
-  @override
-  Widget build(BuildContext context) =>
-      MenuBar(children: _buildChildren(context, actions));
-
-  String _shortenFileName(String filename) {
-    if (filename.length < 40) {
-      return filename;
-    }
-    var segments = path.split(filename);
-    if (segments.length < 4) {
-      return filename;
-    }
-    return path.join(segments.first, segments[1], "...", segments[segments.length-2], segments.last);
-  }
-
-  List<Widget> _buildHistoryMenu(BuildContext context) {
-    final subMenu = <Widget>[];
-    final bloc = EditorBloc.of(context);
-    for (var of in bloc.openFiles) {
-      subMenu.add(_createMenuButton(context, _shortenFileName(of), null, null,  () {
-            bloc.openFile(of);
-          }));
-    }
-    return subMenu;
   }
 }
 

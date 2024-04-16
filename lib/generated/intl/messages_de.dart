@@ -20,10 +20,16 @@ typedef String MessageIfAbsent(String messageStr, List<dynamic> args);
 class MessageLookup extends MessageLookupByLibrary {
   String get localeName => 'de';
 
-  static String m0(file) =>
+  static String m0(length) =>
+      "${length} Zeichen auf die Zwischenablage kopiert.";
+
+  static String m1(lineCount) =>
+      "Zeilennummer muss im Bereich 1 - ${lineCount} liegen.";
+
+  static String m2(file) =>
       "Datei ${file} ist geändert. Soll sie neu geladen und die Änderungen überschrieben werden?";
 
-  static String m1(shortcut) => "Inkrementell suchen (${shortcut})";
+  static String m3(shortcut) => "Inkrementell suchen (${shortcut})";
 
   final messages = _notInlinedMessages(_notInlinedMessages);
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
@@ -91,12 +97,18 @@ class MessageLookup extends MessageLookupByLibrary {
         "compactEditorTabs":
             MessageLookupByLibrary.simpleMessage("Editor Reiter kompakt"),
         "confirmation": MessageLookupByLibrary.simpleMessage("Bestätigung"),
+        "copiedToClipboardHint": m0,
+        "gotoLine": MessageLookupByLibrary.simpleMessage("Gehe zu Zeile"),
         "iconSize": MessageLookupByLibrary.simpleMessage("Icongröße"),
         "language": MessageLookupByLibrary.simpleMessage("Sprache"),
+        "lineNumber": MessageLookupByLibrary.simpleMessage("Zeilennummer"),
+        "lineNumberRangeHint": m1,
         "maximumNumberOfWindows":
             MessageLookupByLibrary.simpleMessage("Maximale Anzahl Fenster"),
         "no": MessageLookupByLibrary.simpleMessage("Nein"),
-        "reloadChangedFile": m0,
+        "reallyDiscardAllChanges": MessageLookupByLibrary.simpleMessage(
+            "Willst Du wirklich alle Änderungen verwerfen?"),
+        "reloadChangedFile": m2,
         "resource1901": MessageLookupByLibrary.simpleMessage("Datei"),
         "resource1902": MessageLookupByLibrary.simpleMessage("Bearbeiten"),
         "resource1903": MessageLookupByLibrary.simpleMessage("Suchen"),
@@ -109,7 +121,7 @@ class MessageLookup extends MessageLookupByLibrary {
         "resource1910": MessageLookupByLibrary.simpleMessage("Konvertieren"),
         "resource1911": MessageLookupByLibrary.simpleMessage("Überblick"),
         "resource1913": MessageLookupByLibrary.simpleMessage("Vergleichen"),
-        "searchIncrementally": m1,
+        "searchIncrementally": m3,
         "showStatusbar":
             MessageLookupByLibrary.simpleMessage("Statuszeile anzeigen"),
         "showToolbar": MessageLookupByLibrary.simpleMessage("Toolbar anzeigen"),

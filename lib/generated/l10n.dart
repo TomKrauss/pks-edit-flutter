@@ -619,6 +619,56 @@ class S {
       args: [],
     );
   }
+
+  /// `Copied {length} characters to the clipboard.`
+  String copiedToClipboardHint(Object length) {
+    return Intl.message(
+      'Copied $length characters to the clipboard.',
+      name: 'copiedToClipboardHint',
+      desc: '',
+      args: [length],
+    );
+  }
+
+  /// `Do you really want to discard all changes?`
+  String get reallyDiscardAllChanges {
+    return Intl.message(
+      'Do you really want to discard all changes?',
+      name: 'reallyDiscardAllChanges',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Goto Line`
+  String get gotoLine {
+    return Intl.message(
+      'Goto Line',
+      name: 'gotoLine',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Line number`
+  String get lineNumber {
+    return Intl.message(
+      'Line number',
+      name: 'lineNumber',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Line number must be in range: 1 - {lineCount}.`
+  String lineNumberRangeHint(Object lineCount) {
+    return Intl.message(
+      'Line number must be in range: 1 - $lineCount.',
+      name: 'lineNumberRangeHint',
+      desc: '',
+      args: [lineCount],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {
