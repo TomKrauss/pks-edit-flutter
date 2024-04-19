@@ -228,13 +228,14 @@ class OpenFile {
 
   OpenFile({required this.filename, required this.text, this.dock = dockNameDefault,
     required this.editingConfiguration,
+    required TextLineBreak lineBreak,
     this.readOnly = false,
     DateTime? modificationTime,
     this.modified = false, this.encoding = utf8, required this.isNew, int? initialLineNumber}) {
     language = Languages.singleton.modeForFilename(filename);
     _lastSavedText = text;
     this.modificationTime = modificationTime ?? DateTime.now();
-    controller = CodeLineEditingController.fromText(text, CodeLineOptions(indentSize: editingConfiguration.tabSize));
+    controller = CodeLineEditingController.fromText(text, CodeLineOptions(indentSize: editingConfiguration.tabSize, lineBreak: lineBreak));
     if (initialLineNumber != null) {
       controller.selection = CodeLineSelection.fromPosition(position: CodeLinePosition(index: initialLineNumber, offset: 0));
     }
@@ -278,12 +279,14 @@ class EditorBloc {
   late final OpenFileState _openFileState;
   int? _maximumNumberOfOpenWindows;
   final StreamController<PksIniConfiguration> _pksIniStreamController = BehaviorSubject();
+  final StreamController<CommandResult> _errorResults = BehaviorSubject();
   late final EditingConfigurations editingConfigurations;
   late final ActionBindings actionBindings;
   late final Themes themes;
   final StreamController<OpenFileState> _openFileSubject = BehaviorSubject.seeded(OpenFileState(files: const [], currentIndex: -1));
   final StreamController<OpenFile> _externalFileChanges = BehaviorSubject();
 
+  Stream<CommandResult> get errorResultStream => _errorResults.stream;
   Stream<OpenFileState> get openFileStream => _openFileSubject.stream;
   Stream<PksIniConfiguration> get pksIniStream => _pksIniStreamController.stream;
   Stream<OpenFile> get externalFileChangeStream => _externalFileChanges.stream;
@@ -310,6 +313,12 @@ class EditorBloc {
   /// Whether there are any editor windows open, which are currently in the state modified.
   ///
   bool get hasChangedWindows => _openFileState.files.where((element) => element.modified).isNotEmpty;
+
+  void _addErrorResult(CommandResult result) {
+    if (!result.success) {
+      _errorResults.add(result);
+    }
+  }
 
   ///
   /// Try to select (make current) the file with the given absolute [filename].
@@ -381,8 +390,8 @@ class EditorBloc {
       final stat = file.statSync();
       openFile.readOnly = stat.readOnly;
       openFile.modificationTime = stat.modified;
-      Encoding encoding = await _detectEncoding(file);
-      openFile.controller.text = file.readAsStringSync(encoding: encoding);
+      final result = await _detectEncoding(file);
+      openFile.controller.text = file.readAsStringSync(encoding: result.encoding);
       openFile.unchanged();
       _refreshFiles();
       return CommandResult(success: true);
@@ -469,18 +478,24 @@ class EditorBloc {
     if (File(filename).existsSync()) {
       return await openFile(filename);
     }
-    _addOpenFile(OpenFile(filename: filename, isNew: true,
+    _addOpenFile(OpenFile(filename: filename,
+        isNew: true,
+        lineBreak: Platform.isWindows ? TextLineBreak.crlf : TextLineBreak.lf,
         editingConfiguration: await editingConfigurations.forFile(filename),
         text: insertTemplate ? Templates.singleton.generateInitialContent(filename) : ""));
     return CommandResult(success: true);
   }
 
-  Encoding _parseBytesToDetectEncoding(List<int> pData) {
+  ({Encoding encoding, TextLineBreak lineBreak}) _parseBytesToDetectEncoding(List<int> pData) {
     var i = 0;
     final end = pData.length;
     int nLength;
+    var lb = TextLineBreak.lf;
     while (i < end) {
       int byte = pData[i++];
+      if (byte == 13 && i < end && pData[i] == 10) {
+        lb = TextLineBreak.crlf;
+      }
       if (byte <= 0x7F || i >= end) {
         /* 1 byte sequence: U+0000..U+007F */
         continue;
@@ -496,46 +511,46 @@ class EditorBloc {
       }
       if (i + nLength >= end) {
         /* truncated string or invalid byte sequence */
-        return latin1;
+        return (encoding: latin1, lineBreak: lb);
       }
 
       /* Check continuation bytes: bit 7 should be set, bit 6 should be unset (b10xxxxxx). */
       for (i = 0; i < nLength; i++) {
         if ((pData[i] & 0xC0) != 0x80) {
-          return latin1;
+          return (encoding: latin1, lineBreak: lb);
         }
         if (nLength == 1) {
-          return utf8;
+          return (encoding: utf8, lineBreak: lb);
         } else if (nLength == 2) {
           /* 3 bytes sequence: U+0800..U+FFFF */
           int ch = ((pData[0] & 0x0f) << 12) + ((pData[1] & 0x3f) << 6) +
               (pData[2] & 0x3f);
           /* (0xff & 0x0f) << 12 | (0xff & 0x3f) << 6 | (0xff & 0x3f) = 0xffff, so ch <= 0xffff */
           if (ch < 0x0800) {
-            return latin1;
+            return (encoding: latin1, lineBreak: lb);
           }
           /* surrogates (U+D800-U+DFFF) are invalid in UTF-8: test if (0xD800 <= ch && ch <= 0xDFFF) */
           if ((ch >> 11) == 0x1b) {
-            return latin1;
+            return (encoding: latin1, lineBreak: lb);
           }
-          return utf8;
+          return (encoding: utf8, lineBreak: lb);
         } else if (nLength == 3) {
           /* 4 bytes sequence: U+10000..U+10FFFF */
           int ch = ((pData[0] & 0x07) << 18) + ((pData[1] & 0x3f) << 12) +
               ((pData[2] & 0x3f) << 6) + (pData[3] & 0x3f);
           if ((ch < 0x10000) || (0x10FFFF < ch)) {
-            return latin1;
+            return (encoding: latin1, lineBreak: lb);
           }
-          return utf8;
+          return (encoding: utf8, lineBreak: lb);
         }
         i += nLength;
       }
     }
-    return latin1;
+    return (encoding: latin1, lineBreak: lb);
   }
 
 
-  Future<Encoding> _detectEncoding(File file) async {
+  Future<({Encoding encoding, TextLineBreak lineBreak})> _detectEncoding(File file) async {
     final size = min(4096, await file.length());
     final tester = file.openRead(0, size);
     return _parseBytesToDetectEncoding(await tester.first);
@@ -556,8 +571,8 @@ class EditorBloc {
           Uri.file(filename, windows: Platform.isWindows));
       final stat = file.statSync();
       final readOnly = stat.readOnly;
-      Encoding encoding = await _detectEncoding(file);
-      String? text = file.readAsStringSync(encoding: encoding);
+      final result = await _detectEncoding(file);
+      String? text = file.readAsStringSync(encoding: result.encoding);
       openFiles.remove(filename);
       openFiles.insert(0, filename);
       if (openFiles.length > 10) {
@@ -567,7 +582,11 @@ class EditorBloc {
           readOnly: readOnly,
           modificationTime: stat.modified,
           editingConfiguration: ec,
-          filename: filename, isNew: false, text: text, encoding: encoding,
+          filename: filename,
+          isNew: false,
+          text: text,
+          lineBreak: result.lineBreak,
+          encoding: result.encoding,
           initialLineNumber: lineNumber,
           dock: dock ?? OpenFile.dockNameDefault));
       _logger.i("Opened file $filename");
@@ -648,7 +667,7 @@ class EditorBloc {
     _openFileState = OpenFileState(files: [], currentIndex: -1, currentChanged: _refreshFiles);
     for (var arg in arguments) {
       if (!arg.startsWith("-")) {
-        await openFile(arg);
+        _addErrorResult(await openFile(arg));
       } else {
         if (arg.startsWith("-pks_sys:")) {
           PksConfiguration.singleton.pksSysDirectory = arg.substring(9);
@@ -670,8 +689,8 @@ class EditorBloc {
           active = idx;
         }
         idx++;
-        await openFile(f.path, dock: f.dock,
-            lineNumber: f.lineNumber < 0 ? null : f.lineNumber);
+        _addErrorResult(await openFile(f.path, dock: f.dock,
+            lineNumber: f.lineNumber < 0 ? null : f.lineNumber));
       }
       if (active != null) {
         _openFileState.currentIndex = active;
@@ -705,6 +724,7 @@ class EditorBloc {
   Future<void> dispose() async {
     _openFileSubject.close();
     _externalFileChanges.close();
+    _errorResults.close();
   }
 
   ///

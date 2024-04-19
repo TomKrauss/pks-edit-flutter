@@ -35,6 +35,12 @@ class MessageLookup extends MessageLookupByLibrary {
   static Map<String, Function> _notInlinedMessages(_) => <String, Function>{
         "aboutInfoText": MessageLookupByLibrary.simpleMessage(
             "Flutter Version des beliebten Atari Code Editors"),
+        "actionCharToLower": MessageLookupByLibrary.simpleMessage(
+            "In Kleinschreibung konvertieren"),
+        "actionCharToUpper": MessageLookupByLibrary.simpleMessage(
+            "In Großschreibung konvertieren"),
+        "actionCharToggleUpperLower": MessageLookupByLibrary.simpleMessage(
+            "Groß-/Kleinschreibung invertieren"),
         "actionCloseAllButCurrentWindow":
             MessageLookupByLibrary.simpleMessage("Andere Fenster schließen"),
         "actionCloseAllWindows":

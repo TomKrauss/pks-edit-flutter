@@ -560,6 +560,36 @@ class S {
     );
   }
 
+  /// `Convert to Upper Case`
+  String get actionCharToUpper {
+    return Intl.message(
+      'Convert to Upper Case',
+      name: 'actionCharToUpper',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Convert to Lower Case`
+  String get actionCharToLower {
+    return Intl.message(
+      'Convert to Lower Case',
+      name: 'actionCharToLower',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Toggle Upper/Lower Case`
+  String get actionCharToggleUpperLower {
+    return Intl.message(
+      'Toggle Upper/Lower Case',
+      name: 'actionCharToggleUpperLower',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Comment Single Line`
   String get actionToggleComment {
     return Intl.message(

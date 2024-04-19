@@ -15,13 +15,17 @@ import 'package:re_highlight/languages/asciidoc.dart';
 import 'package:re_highlight/languages/bash.dart';
 import 'package:re_highlight/languages/basic.dart';
 import 'package:re_highlight/languages/c.dart';
+import 'package:re_highlight/languages/cmake.dart';
 import 'package:re_highlight/languages/cpp.dart';
+import 'package:re_highlight/languages/csharp.dart';
 import 'package:re_highlight/languages/css.dart';
 import 'package:re_highlight/languages/dart.dart';
 import 'package:re_highlight/languages/dockerfile.dart';
 import 'package:re_highlight/languages/dos.dart';
+import 'package:re_highlight/languages/erlang.dart';
 import 'package:re_highlight/languages/excel.dart';
 import 'package:re_highlight/languages/go.dart';
+import 'package:re_highlight/languages/gradle.dart';
 import 'package:re_highlight/languages/groovy.dart';
 import 'package:re_highlight/languages/ini.dart';
 import 'package:re_highlight/languages/java.dart';
@@ -36,6 +40,8 @@ import 'package:re_highlight/languages/xml.dart';
 import 'package:re_highlight/languages/yaml.dart';
 import 'package:re_highlight/re_highlight.dart';
 
+///
+/// Represents a language in which it is assumed, that the file
 class Language {
   final Mode mode;
   final String name;
@@ -62,6 +68,8 @@ class Languages {
     RegExp(r".*\.js"): Language(name: "javascript", mode: langJavascript),
     RegExp(r".*\.ts"): Language(name: "typescript", mode: langTypescript),
     RegExp(r".*\.css"): Language(name: "css", mode: langCss),
+    RegExp(r"makefile"): Language(name: "makefile", mode: langCmake),
+    RegExp(r".*\.cs"): Language(name: "csharp", mode: langCsharp),
     RegExp(r".*\.csv"): Language(name: "csv", mode: langExcel),
     RegExp(r".*\.c"): Language(name: "c", mode: langC),
     RegExp(r".*\.(c\+\+|cpp)"): Language(name: "c++", mode: langCpp),
@@ -69,11 +77,15 @@ class Languages {
     RegExp(r".*\.md"): Language(name: "markdown", mode: langMarkdown),
     RegExp(r".*\.bat"): Language(name: "batch", mode: langDos),
     RegExp(r".*\.(xml|pom)"): Language(name: "xml", mode: langXml),
-    RegExp(r".*\.(gradle|groovy)"): Language(name: "groovy", mode: langGroovy),
+    RegExp(r".*\.groovy"): Language(name: "groovy", mode: langGroovy),
+    RegExp(r".*\.gradle"): Language(name: "gradle", mode: langGradle),
+    RegExp(r".*\.bas"): Language(name: "basic", mode: langBasic),
+    RegExp(r".*\.(erl|hrl)"): Language(name: "erlang", mode: langErlang),
     RegExp(r".*\.py"): Language(name: "python", mode: langPython),
-    RegExp(r"[^.]+"): Language(name: "shell", mode: langBash),
+    RegExp(r".*\.(csh|bash|sh)"): Language(name: "shell", mode: langBash),
+    RegExp(r"[^.]+"): Language(name: "sysconfig", mode: langProperties),
   };
-  final Language defaultLanguage = Language(name: "basic", mode: langBasic);
+  final Language defaultLanguage = Language(name: "no-language", mode: Mode(name: "No Language"));
 
   Language modeForFilename(String fileName) {
     for (var e in _languageMappings.entries) {

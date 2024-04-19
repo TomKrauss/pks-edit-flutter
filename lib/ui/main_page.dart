@@ -50,6 +50,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   late StreamSubscription<OpenFile> _externalFileSubscription;
   late final FocusNode _searchbarFocusNode;
   late final FocusNode _editorFocusNode;
+  late StreamSubscription<CommandResult> _errorSubscription;
   PksEditActionContext _actionContext = PksEditActionContext(openFileState: null);
 
   late final PksEditActions actions;
@@ -68,6 +69,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
           _handleCommandResult(result);
         }
     });
+    _errorSubscription = bloc.errorResultStream.listen(_handleCommandResult);
   }
 
   @override
@@ -88,6 +90,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     _externalFileSubscription.cancel();
     _searchbarFocusNode.dispose();
     _editorFocusNode.dispose();
+    _errorSubscription.cancel();
     windowManager.removeListener(this);
   }
 

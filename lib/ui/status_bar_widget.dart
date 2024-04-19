@@ -37,6 +37,8 @@ class StatusBarWidget extends StatelessWidget {
             Text(current.filename),
             Row(children: [
               divider,
+              Text(current.controller.options.lineBreak.name),
+              divider,
               Tooltip(message: current.readOnly ? "Read-only" : "Writeable", child: Icon(current.readOnly ? Icons.lock_outline : Icons.lock_open, size: 16)),
               divider,
               Text(current.encoding.name),

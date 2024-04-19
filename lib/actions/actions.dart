@@ -31,6 +31,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
+import 'package:pks_edit_flutter/bloc/controller_extension.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/input_dialog.dart';
@@ -200,6 +201,21 @@ class PksEditActions {
           isEnabled: _hasWriteableSelection,
           textKey: "actionErase"),
       PksEditAction(
+          id: "char-to-lower",
+          execute: _charToLower,
+          isEnabled: _hasWriteableSelection,
+          textKey: "actionCharToLower"),
+      PksEditAction(
+          id: "char-to-upper",
+          execute: _charToUpper,
+          isEnabled: _hasWriteableSelection,
+          textKey: "actionCharToUpper"),
+      PksEditAction(
+          id: "char-toggle-upper-lower",
+          execute: _charToggleUpperLower,
+          isEnabled: _hasWriteableSelection,
+          textKey: "actionCharToggleUpperLower"),
+      PksEditAction(
           id: "delete-selection",
           execute: _cut,
           isEnabled: _hasWriteableSelection,
@@ -315,22 +331,21 @@ class PksEditActions {
     }
   }
 
-  void _withCurrentFile(PksEditActionContext actionContext,
-      void Function(CodeLineEditingController controller) callback) {
-    var f = actionContext.currentFile;
+  void _withCurrentFile(void Function(CodeLineEditingController controller) callback) {
+    var f = getActionContext().currentFile;
     if (f != null) {
       callback(f.controller);
     }
   }
 
   void _eraseSelection() {
-    _withCurrentFile(getActionContext(), (controller) {
+    _withCurrentFile((controller) {
       controller.deleteSelection();
     });
   }
 
   void _copy() {
-    _withCurrentFile(getActionContext(), (controller) {
+    _withCurrentFile((controller) {
       controller.copy();
       var s = controller.selectedText;
       if (s.isNotEmpty) {
@@ -340,38 +355,56 @@ class PksEditActions {
   }
 
   void _cut() {
-    _withCurrentFile(getActionContext(), (controller) {
+    _withCurrentFile((controller) {
       controller.cut();
     });
   }
 
   void _paste() {
-    _withCurrentFile(getActionContext(), (controller) {
+    _withCurrentFile((controller) {
       controller.paste();
     });
   }
 
   void _undo() {
-    _withCurrentFile(getActionContext(), (controller) {
+    _withCurrentFile((controller) {
       controller.undo();
     });
   }
 
   void _commentLine() {
-    _withCurrentFile(getActionContext(), (controller) {
+    _withCurrentFile((controller) {
       //controller.transposeCharacters();
     });
   }
 
   void _selectAll() {
-    _withCurrentFile(getActionContext(), (controller) {
+    _withCurrentFile((controller) {
       controller.selectAll();
     });
   }
 
   void _redo() {
-    _withCurrentFile(getActionContext(), (controller) {
+    _withCurrentFile((controller) {
       controller.redo();
+    });
+  }
+
+  void _charToggleUpperLower() {
+    _withCurrentFile((controller) {
+      controller.charToggleUpperLower();
+    });
+  }
+
+  void _charToUpper() {
+    _withCurrentFile((controller) {
+      controller.charToUpper();
+    });
+  }
+
+  void _charToLower() {
+    _withCurrentFile((controller) {
+      controller.charToLower();
     });
   }
 

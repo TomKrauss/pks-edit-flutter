@@ -55,13 +55,6 @@ class SimpleBlocProvider extends StatefulWidget {
 class SimpleBlocState<S extends SimpleBlocProvider> extends State<S> {
   bool _initialized = false;
   late final EditorBloc bloc;
-  late Future<void> _initialize;
-
-  @override
-  void initState() {
-    super.initState();
-    _initialize = initialize();
-  }
 
   @protected
   Future<void> initialize() async {
@@ -81,7 +74,7 @@ class SimpleBlocState<S extends SimpleBlocProvider> extends State<S> {
   }
 
   @override
-  Widget build(BuildContext context) => FutureBuilder(future: _initialize, builder: (context, snapshot) {
+  Widget build(BuildContext context) => FutureBuilder(future: initialize(), builder: (context, snapshot) {
     if (!snapshot.hasData) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return Theme(
