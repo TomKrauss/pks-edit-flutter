@@ -42,6 +42,8 @@
   "actionCloseAllButCurrentWindow": "Close All other Windows",
   "actionDescriptionCloseAllButCurrentWindow": "Closes all other editor windows but current",
   "actionExit": "Exit",
+  "actionUseLinuxLineEnds": "Use LF for Line Ends",
+  "actionUseWindowsLineEnds": "Use CR+LF for Line Ends",
   "actionDescriptionExit": "Exit PKS Edit",
   "actionDescriptionSaveCurrentFile": "Save current file",
   "actionUndo": "Undo",

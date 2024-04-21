@@ -102,6 +102,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionToggleComment":
             MessageLookupByLibrary.simpleMessage("Kommentare umschalten"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Rückgängig"),
+        "actionUseLinuxLineEnds": MessageLookupByLibrary.simpleMessage(
+            "Linefeed als Zeilenende verwenden"),
+        "actionUseWindowsLineEnds": MessageLookupByLibrary.simpleMessage(
+            "CR+LF als Zeilenende verwenden"),
         "anErrorOccurred": MessageLookupByLibrary.simpleMessage(
             "Ein Fehler ist beim Ausführen des Kommandos aufgetreten"),
         "apply": MessageLookupByLibrary.simpleMessage("Anwenden"),

@@ -164,7 +164,7 @@ class OpenFile {
   ///
   /// The controller for performing the editing operations on the file.
   ///
-  late final CodeLineEditingController controller;
+  late CodeLineEditingController controller;
 
   ///
   /// The controller for executing find and replace operations.
@@ -188,6 +188,18 @@ class OpenFile {
   void unchanged() {
     _lastSavedText = controller.text;
     _updateModified(false);
+  }
+
+  ///
+  /// Assign a new line break strategy.
+  ///
+  void updateLineBreak(TextLineBreak newLineBreak) {
+    if (newLineBreak == controller.options.lineBreak) {
+      return;
+    }
+    controller = CodeLineEditingController(codeLines: controller.codeLines,
+        options: controller.options.copyWith(lineBreak: newLineBreak));
+    _changedListener!(this);
   }
 
   void onChanged(CodeLineEditingValue value) {

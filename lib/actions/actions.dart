@@ -38,6 +38,7 @@ import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/input_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/search_replace_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/settings_dialog.dart';
+import 'package:re_editor/re_editor.dart';
 
 ///
 /// Context used in actions to evaluate actions and action enablement.
@@ -227,6 +228,16 @@ class PksEditActions {
           isEnabled: _hasWriteableSelection,
           textKey: "actionErase"),
       PksEditAction(
+          id: "use-linux-lineends",
+          execute: _useLinuxLineEnds,
+          isEnabled: _hasWriteableFile,
+          textKey: "actionUseLinuxLineEnds"),
+      PksEditAction(
+          id: "use-windows-lineends",
+          execute: _useWindowsLineEnds,
+          isEnabled: _hasWriteableFile,
+          textKey: "actionUseWindowsLineEnds"),
+      PksEditAction(
           id: "char-to-lower",
           execute: _charToLower,
           isEnabled: _hasWriteableSelection,
@@ -364,15 +375,36 @@ class PksEditActions {
     }
   }
 
+  void _useLinuxLineEnds() {
+    _withCurrentFile((file) {
+      file.updateLineBreak(TextLineBreak.lf);
+    });
+  }
+
+  void _useWindowsLineEnds() {
+    _withCurrentFile((file) {
+      file.updateLineBreak(TextLineBreak.crlf);
+    });
+  }
+  void _updateMatchSelection(OpenFile file) {
+    var sel = file.findController.currentMatchSelection;
+    if (sel != null) {
+      file.controller.selection = sel;
+      file.controller.makeCursorVisible();
+    }
+  }
+
   void _findAgainBackward() {
     _withCurrentFile((file) {
       file.findController.previousMatch();
+      _updateMatchSelection(file);
     });
   }
 
   void _findAgainForward() {
     _withCurrentFile((file) {
       file.findController.nextMatch();
+      _updateMatchSelection(file);
     });
   }
 

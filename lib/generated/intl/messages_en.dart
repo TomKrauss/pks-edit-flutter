@@ -94,6 +94,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionToggleComment":
             MessageLookupByLibrary.simpleMessage("Comment Single Line"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Undo"),
+        "actionUseLinuxLineEnds":
+            MessageLookupByLibrary.simpleMessage("Use LF for Line Ends"),
+        "actionUseWindowsLineEnds":
+            MessageLookupByLibrary.simpleMessage("Use CR+LF for Line Ends"),
         "anErrorOccurred": MessageLookupByLibrary.simpleMessage(
             "An error occurred executing the command"),
         "apply": MessageLookupByLibrary.simpleMessage("Apply"),

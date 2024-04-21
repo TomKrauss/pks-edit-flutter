@@ -470,6 +470,26 @@ class S {
     );
   }
 
+  /// `Use LF for Line Ends`
+  String get actionUseLinuxLineEnds {
+    return Intl.message(
+      'Use LF for Line Ends',
+      name: 'actionUseLinuxLineEnds',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Use CR+LF for Line Ends`
+  String get actionUseWindowsLineEnds {
+    return Intl.message(
+      'Use CR+LF for Line Ends',
+      name: 'actionUseWindowsLineEnds',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Exit PKS Edit`
   String get actionDescriptionExit {
     return Intl.message(

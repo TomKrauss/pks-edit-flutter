@@ -44,6 +44,8 @@
   "actionDescriptionCloseAllWindows": "Schließt alle Bearbeitungsfenster",
   "actionCloseAllButCurrentWindow": "Andere Fenster schließen",
   "actionDescriptionCloseAllButCurrentWindow": "Schließt alle Fenster außer dem aktuellen",
+  "actionUseLinuxLineEnds": "Linefeed als Zeilenende verwenden",
+  "actionUseWindowsLineEnds": "CR+LF als Zeilenende verwenden",
   "actionExit": "Ende",
   "actionDescriptionExit": "PKS Edit beenden",
   "actionDescriptionSaveCurrentFile": "Aktuelle Datei speichern",

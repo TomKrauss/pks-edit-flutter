@@ -89,9 +89,7 @@ class _SearchReplaceDialogState extends State<SearchReplaceDialog> {
     return Padding(padding: _padding, child: TextField(controller: controller,
         onSubmitted: (newValue) {
           onSubmitted();
-          if (searchField) {
-            _searchNode.requestFocus();
-          }
+          Navigator.of(context).pop();
         },
         focusNode: searchField ? _searchNode : null,
         autofocus: searchField,
