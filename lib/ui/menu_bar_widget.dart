@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/actions/action_bindings.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
+import 'package:pks_edit_flutter/generated/l10n.dart';
 
 ///
 /// Displays a menu bar containing the menu bar triggered actions of PKS EDIT
@@ -23,12 +24,14 @@ class MenuBarWidget extends StatelessWidget {
   final Iterable<MenuItemBinding> actions;
   const MenuBarWidget({super.key, required this.actions});
 
+  Widget _createLeadingIcon(BuildContext context, IconData? icon) => icon == null ?
+  SizedBox(width: Theme.of(context).menuButtonTheme.style?.iconSize?.resolve({MaterialState.selected}) ?? 24) :
+  Icon(icon);
+      
   Widget _createMenuButton(BuildContext context, String label, IconData? icon, MenuSerializableShortcut? shortcut,
       void Function()? onPressed) =>
       MenuItemButton(
-          leadingIcon: icon == null ?
-          SizedBox(width: Theme.of(context).menuButtonTheme.style?.iconSize?.resolve({MaterialState.selected}) ?? 24) :
-          Icon(icon),
+          leadingIcon: _createLeadingIcon(context, icon),
           onPressed: onPressed, shortcut: shortcut, child: Text(label));
 
   List<Widget> _buildChildren(BuildContext context, Iterable<MenuItemBinding> actions) {
@@ -44,7 +47,9 @@ class MenuBarWidget extends StatelessWidget {
           result.add(const Divider());
         }
         if (b.isHistoryMenu) {
-          result.add(SubmenuButton(menuChildren: _buildHistoryMenu(context), child: const Text("Recent Files")));
+          result.add(SubmenuButton(menuChildren: _buildHistoryMenu(context), 
+              leadingIcon: _createLeadingIcon(context, null),
+              child: Text(S.of(context).recentFiles)));
         }
       } else {
         final icon = b.iconData;

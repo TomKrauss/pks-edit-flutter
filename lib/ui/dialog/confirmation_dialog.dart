@@ -14,19 +14,26 @@
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
+import 'package:pks_edit_flutter/ui/dialog/dialog.dart';
 
 ///
 /// Brings up a dialog to ask for a confirmation with actions and the possible outcome of
 /// the confirmation as selected by the user.
 ///
 class ConfirmationDialog extends StatelessWidget {
+  static const actionCancel = "cancel";
+  static const actionSave = "save";
+  static const actionClose = "close";
+  static const actionYes = "yes";
+  static const actionNo = "no";
   final String? title;
   final String message;
   final IconData? icon;
   final Map<String, String?>? actions;
-  static Map<String, String?> get yesNoActions => {S.current.yes: "yes", S.current.no: "no"};
-  static Map<String, String?> get yesNoCancelActions => {S.current.yes: "yes", S.current.no: "no", S.current.cancel: null};
+  static Map<String, String?> get yesNoActions => {S.current.yes: actionYes, S.current.no: actionNo};
+  static Map<String, String?> get yesNoCancelActions => {S.current.yes: actionYes, S.current.no: actionNo, S.current.cancel: actionCancel};
 
   ///
   /// Show a confirmation dialog with the given [title], [message] and [actions] and an optional [icon]. The result is the value of the
@@ -40,6 +47,7 @@ class ConfirmationDialog extends StatelessWidget {
           IconData? icon}) =>
       showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (context) => ConfirmationDialog(
               title: title,
               message: message,
@@ -53,10 +61,34 @@ class ConfirmationDialog extends StatelessWidget {
       this.actions,
       super.key});
 
+  SingleActivator? forAction(String? action) {
+    switch(action) {
+      case actionYes:
+        return const SingleActivator(LogicalKeyboardKey.keyY);
+      case actionNo:
+        return const SingleActivator(LogicalKeyboardKey.keyN);
+      case actionCancel:
+        return const SingleActivator(LogicalKeyboardKey.escape);
+      case actionClose:
+        return const SingleActivator(LogicalKeyboardKey.keyC);
+      case actionSave:
+        return const SingleActivator(LogicalKeyboardKey.keyS);
+    }
+    return null;
+  }
   @override
   Widget build(BuildContext context) =>
-      SimpleDialog(title: Text(title ?? S.of(context).confirmation),
-          contentPadding: const EdgeInsets.all(25),
+      PksDialog(
+          title: Text(title ?? S.of(context).confirmation),
+          actions: (actions ?? yesNoCancelActions).entries
+              .mapIndexed((idx, e) => DialogAction(
+              text: e.key,
+              shortcut: forAction(e.value),
+              onPressed: () {
+                Navigator.of(context).pop(e.value);
+              },
+              autofocus: idx == 0))
+              .toList(),
           children: [
               Row(children: [
                 if (icon != null)
@@ -71,16 +103,5 @@ class ConfirmationDialog extends StatelessWidget {
                   softWrap: true,
                 )),
               ]),
-              const SizedBox(height: 20),
-              Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: (actions ?? yesNoCancelActions).entries
-                      .mapIndexed((idx, e) => ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).pop(e.value);
-                          },
-                          autofocus: idx == 0,
-                          child: Text(e.key)))
-                      .toList())
       ]);
 }

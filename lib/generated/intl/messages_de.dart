@@ -73,6 +73,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionErase":
             MessageLookupByLibrary.simpleMessage("Selection löschen"),
         "actionExit": MessageLookupByLibrary.simpleMessage("Ende"),
+        "actionFind": MessageLookupByLibrary.simpleMessage("Suchen..."),
+        "actionFindAgainForward":
+            MessageLookupByLibrary.simpleMessage("Suche wiederholen..."),
+        "actionFindBackward": MessageLookupByLibrary.simpleMessage(
+            "Suche rückwärts wiederholen..."),
         "actionGotoLine":
             MessageLookupByLibrary.simpleMessage("Gehe zu Zeile..."),
         "actionNewFile":
@@ -81,6 +86,7 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Datei öffnen..."),
         "actionPaste": MessageLookupByLibrary.simpleMessage("Einfügen"),
         "actionRedo": MessageLookupByLibrary.simpleMessage("Wiederholen"),
+        "actionReplace": MessageLookupByLibrary.simpleMessage("Ersetzen..."),
         "actionSaveFile":
             MessageLookupByLibrary.simpleMessage("Datei speichern"),
         "actionSaveFileAs":
@@ -100,21 +106,48 @@ class MessageLookup extends MessageLookupByLibrary {
             "Ein Fehler ist beim Ausführen des Kommandos aufgetreten"),
         "apply": MessageLookupByLibrary.simpleMessage("Anwenden"),
         "cancel": MessageLookupByLibrary.simpleMessage("Abbruch"),
+        "changeSettings":
+            MessageLookupByLibrary.simpleMessage("Einstellungen ändern"),
+        "closeWithoutSaving":
+            MessageLookupByLibrary.simpleMessage("Schließen ohne speichern"),
         "compactEditorTabs":
             MessageLookupByLibrary.simpleMessage("Editor Reiter kompakt"),
         "confirmation": MessageLookupByLibrary.simpleMessage("Bestätigung"),
         "copiedToClipboardHint": m0,
+        "enterTextToFind":
+            MessageLookupByLibrary.simpleMessage("Text eingeben zur Suche"),
+        "enterTextToReplace":
+            MessageLookupByLibrary.simpleMessage("Text eingeben zum Ersetzen"),
+        "exitPksEdit":
+            MessageLookupByLibrary.simpleMessage("PKS Edit verlassen"),
+        "exitWithoutSaving":
+            MessageLookupByLibrary.simpleMessage("Beenden ohne Speicherung"),
+        "fileName": MessageLookupByLibrary.simpleMessage("Dateinnamen"),
+        "filesChangedAndExit": MessageLookupByLibrary.simpleMessage(
+            "Einige Daeien wurden geändert und müssten gespeichert werden. Wie soll verfahren werden?"),
+        "find": MessageLookupByLibrary.simpleMessage("Suchen"),
         "gotoLine": MessageLookupByLibrary.simpleMessage("Gehe zu Zeile"),
         "iconSize": MessageLookupByLibrary.simpleMessage("Icongröße"),
+        "ignoreCase": MessageLookupByLibrary.simpleMessage(
+            "Groß-/Klein-Schreibung ignorieren"),
+        "initializeWithTemplate":
+            MessageLookupByLibrary.simpleMessage("Mit Template initialisieren"),
         "language": MessageLookupByLibrary.simpleMessage("Sprache"),
         "lineNumber": MessageLookupByLibrary.simpleMessage("Zeilennummer"),
         "lineNumberRangeHint": m1,
         "maximumNumberOfWindows":
             MessageLookupByLibrary.simpleMessage("Maximale Anzahl Fenster"),
+        "newFile": MessageLookupByLibrary.simpleMessage("Neue Datei"),
         "no": MessageLookupByLibrary.simpleMessage("Nein"),
         "reallyDiscardAllChanges": MessageLookupByLibrary.simpleMessage(
             "Willst Du wirklich alle Änderungen verwerfen?"),
+        "recentFiles": MessageLookupByLibrary.simpleMessage(
+            "Kürzlich bearbeitete Dateien"),
+        "regularExpressions":
+            MessageLookupByLibrary.simpleMessage("Reguläre Ausdrücke"),
         "reloadChangedFile": m2,
+        "replace": MessageLookupByLibrary.simpleMessage("Ersetzen"),
+        "replaceAll": MessageLookupByLibrary.simpleMessage("Alle ersetzen"),
         "resource1901": MessageLookupByLibrary.simpleMessage("Datei"),
         "resource1902": MessageLookupByLibrary.simpleMessage("Bearbeiten"),
         "resource1903": MessageLookupByLibrary.simpleMessage("Suchen"),
@@ -127,6 +160,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "resource1910": MessageLookupByLibrary.simpleMessage("Konvertieren"),
         "resource1911": MessageLookupByLibrary.simpleMessage("Überblick"),
         "resource1913": MessageLookupByLibrary.simpleMessage("Vergleichen"),
+        "save": MessageLookupByLibrary.simpleMessage("Speichern"),
+        "saveAllAndExit":
+            MessageLookupByLibrary.simpleMessage("All speichern und beenden"),
         "searchIncrementally": m3,
         "showStatusbar":
             MessageLookupByLibrary.simpleMessage("Statuszeile anzeigen"),

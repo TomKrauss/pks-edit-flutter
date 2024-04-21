@@ -14,7 +14,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pks_edit_flutter/actions/actions.dart';
-import 'package:pks_edit_flutter/generated/l10n.dart';
+import 'package:pks_edit_flutter/ui/dialog/dialog.dart';
 
 ///
 /// Arguments to pass on to the input dialog.
@@ -119,9 +119,17 @@ class _InputDialogState extends State<InputDialog> {
     return null;
   }
   @override
-  Widget build(BuildContext context) => SimpleDialog(
+  Widget build(BuildContext context) => PksDialog(
           title: Text(widget.arguments.title),
-          contentPadding: const EdgeInsets.all(25),
+          actions: [
+            DialogAction(
+                text: "OK",
+                onPressed: controller.text.isEmpty || _validationHint != null
+                    ? null
+                    : _submit,
+                ),
+            DialogAction.createCancelAction(context)
+          ],
           children: [
             Row(
                 children: [
@@ -129,7 +137,7 @@ class _InputDialogState extends State<InputDialog> {
               const SizedBox(width: 10),
               Expanded(
                   child: ConstrainedBox(
-                      constraints: const BoxConstraints(minWidth: 300, minHeight: 80),
+                      constraints: const BoxConstraints(minWidth: 300, minHeight: 50),
                       child:
                           TextField(controller: controller, autofocus: true,
                             keyboardType: widget.arguments.keyboardType,
@@ -142,21 +150,6 @@ class _InputDialogState extends State<InputDialog> {
             ]),
             const SizedBox(height: 10),
             ...buildOptions(),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                ElevatedButton(
-                    onPressed: controller.text.isEmpty || _validationHint != null
-                        ? null
-                        : _submit,
-                    child: const Text("OK")),
-                ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(null);
-                    },
-                    child: Text(S.of(context).cancel)),
-              ],
-            )
           ]);
 
   void _submit() {

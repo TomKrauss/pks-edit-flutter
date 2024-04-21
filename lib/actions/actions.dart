@@ -33,11 +33,11 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/controller_extension.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
+import 'package:pks_edit_flutter/generated/l10n.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/input_dialog.dart';
+import 'package:pks_edit_flutter/ui/dialog/search_replace_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/settings_dialog.dart';
-import 'package:re_editor/re_editor.dart';
-import 'package:pks_edit_flutter/generated/l10n.dart';
 
 ///
 /// Context used in actions to evaluate actions and action enablement.
@@ -191,6 +191,32 @@ class PksEditActions {
           isEnabled: _canRedo,
           textKey: "actionRedo"),
       PksEditAction(
+          id: "find-string",
+          execute: _find,
+          isEnabled: _hasFile,
+          textKey: "actionFind"),
+      PksEditAction(
+          id: "find-again-backward",
+          execute: _findAgainBackward,
+          isEnabled: _hasFile,
+          textKey: "actionFindAgainBackward"),
+      PksEditAction(
+          id: "find-again-forward",
+          execute: _findAgainForward,
+          isEnabled: _hasFile,
+          textKey: "actionFindAgainForward"),
+      // Currently an alias of find-again-forward.
+      PksEditAction(
+          id: "find-again",
+          execute: _findAgainForward,
+          isEnabled: _hasFile,
+          textKey: "actionFindAgainForward"),
+      PksEditAction(
+          id: "replace-string",
+          execute: _replace,
+          isEnabled: _hasWriteableFile,
+          textKey: "actionReplace"),
+      PksEditAction(
           id: "copy-to-clipboard",
           execute: _copy,
           isEnabled: _hasSelection,
@@ -331,21 +357,48 @@ class PksEditActions {
     }
   }
 
-  void _withCurrentFile(void Function(CodeLineEditingController controller) callback) {
+  void _replace() {
     var f = getActionContext().currentFile;
     if (f != null) {
-      callback(f.controller);
+      SearchReplaceDialog.show(context: getBuildContext(), arguments: SearchReplaceDialogArguments(findController: f.findController));
+    }
+  }
+
+  void _findAgainBackward() {
+    _withCurrentFile((file) {
+      file.findController.previousMatch();
+    });
+  }
+
+  void _findAgainForward() {
+    _withCurrentFile((file) {
+      file.findController.nextMatch();
+    });
+  }
+
+  void _find() {
+    _withCurrentFile((file) {
+      SearchReplaceDialog.show(context: getBuildContext(),
+          arguments: SearchReplaceDialogArguments(findController: file.findController, replace: false));
+    });
+  }
+
+  void _withCurrentFile(void Function(OpenFile file) callback) {
+    var f = getActionContext().currentFile;
+    if (f != null) {
+      callback(f);
     }
   }
 
   void _eraseSelection() {
-    _withCurrentFile((controller) {
-      controller.deleteSelection();
+    _withCurrentFile((file) {
+      file.controller.deleteSelection();
     });
   }
 
   void _copy() {
-    _withCurrentFile((controller) {
+    _withCurrentFile((file) {
+      final controller = file.controller;
       controller.copy();
       var s = controller.selectedText;
       if (s.isNotEmpty) {
@@ -355,55 +408,63 @@ class PksEditActions {
   }
 
   void _cut() {
-    _withCurrentFile((controller) {
+    _withCurrentFile((file) {
+      final controller = file.controller;
       controller.cut();
     });
   }
 
   void _paste() {
-    _withCurrentFile((controller) {
+    _withCurrentFile((file) {
+      final controller = file.controller;
       controller.paste();
     });
   }
 
   void _undo() {
-    _withCurrentFile((controller) {
+    _withCurrentFile((file) {
+      final controller = file.controller;
       controller.undo();
     });
   }
 
   void _commentLine() {
-    _withCurrentFile((controller) {
+    _withCurrentFile((file) {
       //controller.transposeCharacters();
     });
   }
 
   void _selectAll() {
-    _withCurrentFile((controller) {
+    _withCurrentFile((file) {
+      final controller = file.controller;
       controller.selectAll();
     });
   }
 
   void _redo() {
-    _withCurrentFile((controller) {
+    _withCurrentFile((file) {
+      final controller = file.controller;
       controller.redo();
     });
   }
 
   void _charToggleUpperLower() {
-    _withCurrentFile((controller) {
+    _withCurrentFile((file) {
+      final controller = file.controller;
       controller.charToggleUpperLower();
     });
   }
 
   void _charToUpper() {
-    _withCurrentFile((controller) {
+    _withCurrentFile((file) {
+      final controller = file.controller;
       controller.charToUpper();
     });
   }
 
   void _charToLower() {
-    _withCurrentFile((controller) {
+    _withCurrentFile((file) {
+      final controller = file.controller;
       controller.charToLower();
     });
   }
@@ -543,11 +604,12 @@ class PksEditActions {
 
   void _newFile() async {
     final actionContext = getActionContext();
-    final bloc = EditorBloc.of(getBuildContext());
+    final context = getBuildContext();
+    final bloc = EditorBloc.of(context);
     final newFilename = bloc.suggestNewFilename(actionContext.currentFile?.filename);
     final result = await InputDialog.show(context: getBuildContext(), arguments:
-    InputDialogArguments(context: actionContext, title: "New File", inputLabel: "File name",
-        options: {"Initialize with Template": true},
+    InputDialogArguments(context: actionContext, title: S.of(context).newFile, inputLabel: S.of(context).fileName,
+        options: {S.of(context).initializeWithTemplate: true},
         initialValue: path.basename(newFilename)));
     if (result != null) {
       handleCommandResult(await bloc.newFile(path.join(path.dirname(newFilename), result.selectedText), insertTemplate: result.firstOptionSelected));
@@ -556,20 +618,21 @@ class PksEditActions {
 
   Future<void> _closeWindows(List<OpenFile> files) async {
     // avoid concurrent modification exception.
-    final bloc = EditorBloc.of(getBuildContext());
+    final context = getBuildContext();
+    final bloc = EditorBloc.of(context);
     files = [...files];
     for (final file in files) {
       if (file.modified) {
-        var result = await ConfirmationDialog.show(context: getBuildContext(), message: "File ${file.filename} was modified.\nShould we save it before closing?",
+        var result = await ConfirmationDialog.show(context: context, message: "File ${file.filename} was modified.\nShould we save it before closing?",
             actions: {
-              "Save": "save",
-              "Close without Saving": "close",
-              "Cancel": null
+              S.of(context).save: ConfirmationDialog.actionSave,
+              S.of(context).closeWithoutSaving: ConfirmationDialog.actionClose,
+              S.of(context).cancel: ConfirmationDialog.actionCancel
             });
-        if (result == null) {
+        if (result == ConfirmationDialog.actionCancel) {
           break;
         }
-        if (result == "save") {
+        if (result == ConfirmationDialog.actionSave) {
           final commandResult = await bloc.saveAllModified();
           if (!commandResult.success) {
             handleCommandResult(commandResult);
@@ -612,20 +675,21 @@ class PksEditActions {
     }
     final bloc = EditorBloc.of(context);
     if (bloc.hasChangedWindows) {
+      final bundle = S.of(context);
       var result = await ConfirmationDialog.show(
           context: context,
-          title: "Exit PKS Edit",
+          title: bundle.exitPksEdit,
           message:
-          "Some files are changed and not yet saved. How should we proceed?",
+            bundle.filesChangedAndExit,
           actions: {
-            "Exit without Saving": "close",
-            "Save All and Exit": "save",
-            "Cancel": null
+            bundle.exitWithoutSaving: ConfirmationDialog.actionClose,
+            bundle.saveAllAndExit: ConfirmationDialog.actionSave,
+            bundle.cancel: ConfirmationDialog.actionCancel
           });
-      if (result == null) {
+      if (result == ConfirmationDialog.actionCancel) {
         return;
       }
-      if (result == "save") {
+      if (result == ConfirmationDialog.actionSave) {
         final result = await bloc.saveAllModified();
         if (!result.success) {
           handleCommandResult(result);

@@ -520,6 +520,46 @@ class S {
     );
   }
 
+  /// `Find...`
+  String get actionFind {
+    return Intl.message(
+      'Find...',
+      name: 'actionFind',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Find Next...`
+  String get actionFindAgainForward {
+    return Intl.message(
+      'Find Next...',
+      name: 'actionFindAgainForward',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Find Previous...`
+  String get actionFindBackward {
+    return Intl.message(
+      'Find Previous...',
+      name: 'actionFindBackward',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Replace...`
+  String get actionReplace {
+    return Intl.message(
+      'Replace...',
+      name: 'actionReplace',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Copy`
   String get actionCopy {
     return Intl.message(
@@ -697,6 +737,186 @@ class S {
       name: 'lineNumberRangeHint',
       desc: '',
       args: [lineCount],
+    );
+  }
+
+  /// `Change Settings`
+  String get changeSettings {
+    return Intl.message(
+      'Change Settings',
+      name: 'changeSettings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Initialize with Template`
+  String get initializeWithTemplate {
+    return Intl.message(
+      'Initialize with Template',
+      name: 'initializeWithTemplate',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `New File`
+  String get newFile {
+    return Intl.message(
+      'New File',
+      name: 'newFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `File name`
+  String get fileName {
+    return Intl.message(
+      'File name',
+      name: 'fileName',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save`
+  String get save {
+    return Intl.message(
+      'Save',
+      name: 'save',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Close without Saving`
+  String get closeWithoutSaving {
+    return Intl.message(
+      'Close without Saving',
+      name: 'closeWithoutSaving',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Save All and Exit`
+  String get saveAllAndExit {
+    return Intl.message(
+      'Save All and Exit',
+      name: 'saveAllAndExit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exit without Saving`
+  String get exitWithoutSaving {
+    return Intl.message(
+      'Exit without Saving',
+      name: 'exitWithoutSaving',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Exit PKS Edit`
+  String get exitPksEdit {
+    return Intl.message(
+      'Exit PKS Edit',
+      name: 'exitPksEdit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Some files are changed and not yet saved. How should we proceed?`
+  String get filesChangedAndExit {
+    return Intl.message(
+      'Some files are changed and not yet saved. How should we proceed?',
+      name: 'filesChangedAndExit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Recent Files`
+  String get recentFiles {
+    return Intl.message(
+      'Recent Files',
+      name: 'recentFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Find`
+  String get find {
+    return Intl.message(
+      'Find',
+      name: 'find',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Replace`
+  String get replace {
+    return Intl.message(
+      'Replace',
+      name: 'replace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Replace All`
+  String get replaceAll {
+    return Intl.message(
+      'Replace All',
+      name: 'replaceAll',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ignore Case`
+  String get ignoreCase {
+    return Intl.message(
+      'Ignore Case',
+      name: 'ignoreCase',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Regular Expressions`
+  String get regularExpressions {
+    return Intl.message(
+      'Regular Expressions',
+      name: 'regularExpressions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter text to find`
+  String get enterTextToFind {
+    return Intl.message(
+      'Enter text to find',
+      name: 'enterTextToFind',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Enter text to replace`
+  String get enterTextToReplace {
+    return Intl.message(
+      'Enter text to replace',
+      name: 'enterTextToReplace',
+      desc: '',
+      args: [],
     );
   }
 }

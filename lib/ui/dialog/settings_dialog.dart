@@ -17,6 +17,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
+import 'package:pks_edit_flutter/ui/dialog/dialog.dart';
 
 ///
 /// Display the settings to edit in PKS Edit.
@@ -27,6 +28,7 @@ class SettingsDialog extends StatefulWidget {
   static Future<void> show(
       {required BuildContext context}) =>
       showDialog(
+        barrierDismissible: false,
           context: context,
           builder: (context) => const SettingsDialog());
   @override
@@ -80,11 +82,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
   ///
   /// Create an editor to edit a config value consisting of enumeratable options.
   ///
-  Widget enumProperty<T>(String label, IconData? icon, List<T> values, T selected, void Function(T value) onSelect, {String Function(T)? toString}) =>
+  Widget enumProperty<T>(String label, IconData? icon, List<T> values, T selected, void Function(T value) onSelect, {String Function(T)? toString, bool? autofocus}) =>
       property(
           label,
           icon,
           DropdownButton<T>(
+            autofocus: autofocus ?? false,
               items: values
                   .map((e) => DropdownMenuItem(
                 value: e,
@@ -99,19 +102,29 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 }
               }));
 
-  Widget createButton(String text, void Function()? onPressed) => ElevatedButton(onPressed: onPressed, child: Text(text));
-
   @override
   Widget build(BuildContext context) {
     final bloc = EditorBloc.of(context);
     final themes = bloc.themes.supportedThemeNames;
     const iconSizes = IconSize.values;
     final conf = configuration.configuration;
-    return SimpleDialog(
-        contentPadding: const EdgeInsets.all(25),
+    return PksDialog(
+      title: Text(S.of(context).changeSettings),
+      actions: [
+        DialogAction(text: S.of(context).apply, onPressed: _changed ? () {
+          bloc.updateConfiguration(configuration);
+          configuration = configuration.copyWith();
+          changed = false;
+        } : null),
+        DialogAction(text: "OK", onPressed: _changed ? () {
+          bloc.updateConfiguration(configuration);
+          Navigator.of(context).pop();
+        } : null),
+        DialogAction.createCancelAction(context)
+      ],
         children: [
       enumProperty(
-          S.of(context).language, Icons.language, ApplicationConfiguration.supportedLanguages, conf.language, (newLang) => conf.language = newLang),
+          S.of(context).language, Icons.language, ApplicationConfiguration.supportedLanguages, conf.language, (newLang) => conf.language = newLang, autofocus: true),
       enumProperty(
           "Theme", Icons.palette, themes, bloc.themes.currentTheme.name, (newTheme) => conf.theme = newTheme),
       enumProperty(
@@ -122,22 +135,6 @@ class _SettingsDialogState extends State<SettingsDialog> {
       booleanProperty(S.of(context).showToolbar, Icons.border_top, conf.showToolbar, (newValue) {conf.showToolbar = newValue; }),
       booleanProperty(S.of(context).showStatusbar, Icons.border_bottom, conf.showStatusbar, (newValue) {conf.showStatusbar = newValue; }),
       intProperty(S.of(context).maximumNumberOfWindows, FontAwesomeIcons.windowMaximize, conf.maximumOpenWindows, (newValue) { conf.maximumOpenWindows = newValue; }),
-      Padding(padding: const EdgeInsets.only(top: 40), child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-        createButton(S.of(context).apply, _changed ? () {
-          bloc.updateConfiguration(configuration);
-          configuration = configuration.copyWith();
-          changed = false;
-        } : null),
-        createButton("OK", _changed ? () {
-          bloc.updateConfiguration(configuration);
-          Navigator.of(context).pop();
-        } : null),
-        createButton(S.of(context).cancel, () {
-          Navigator.of(context).pop();
-        }),
-      ],))
-    ]);
+      ]);
   }
 }

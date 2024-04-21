@@ -70,11 +70,17 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Refresh File Contents"),
         "actionErase": MessageLookupByLibrary.simpleMessage("Delete Selection"),
         "actionExit": MessageLookupByLibrary.simpleMessage("Exit"),
+        "actionFind": MessageLookupByLibrary.simpleMessage("Find..."),
+        "actionFindAgainForward":
+            MessageLookupByLibrary.simpleMessage("Find Next..."),
+        "actionFindBackward":
+            MessageLookupByLibrary.simpleMessage("Find Previous..."),
         "actionGotoLine": MessageLookupByLibrary.simpleMessage("Goto line..."),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("New File..."),
         "actionOpenFile": MessageLookupByLibrary.simpleMessage("Open File..."),
         "actionPaste": MessageLookupByLibrary.simpleMessage("Paste"),
         "actionRedo": MessageLookupByLibrary.simpleMessage("Redo"),
+        "actionReplace": MessageLookupByLibrary.simpleMessage("Replace..."),
         "actionSaveFile": MessageLookupByLibrary.simpleMessage("Save File"),
         "actionSaveFileAs":
             MessageLookupByLibrary.simpleMessage("Save File As..."),
@@ -92,21 +98,45 @@ class MessageLookup extends MessageLookupByLibrary {
             "An error occurred executing the command"),
         "apply": MessageLookupByLibrary.simpleMessage("Apply"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
+        "changeSettings":
+            MessageLookupByLibrary.simpleMessage("Change Settings"),
+        "closeWithoutSaving":
+            MessageLookupByLibrary.simpleMessage("Close without Saving"),
         "compactEditorTabs":
             MessageLookupByLibrary.simpleMessage("Compact Editor Tabs"),
         "confirmation": MessageLookupByLibrary.simpleMessage("Confirmation"),
         "copiedToClipboardHint": m0,
+        "enterTextToFind":
+            MessageLookupByLibrary.simpleMessage("Enter text to find"),
+        "enterTextToReplace":
+            MessageLookupByLibrary.simpleMessage("Enter text to replace"),
+        "exitPksEdit": MessageLookupByLibrary.simpleMessage("Exit PKS Edit"),
+        "exitWithoutSaving":
+            MessageLookupByLibrary.simpleMessage("Exit without Saving"),
+        "fileName": MessageLookupByLibrary.simpleMessage("File name"),
+        "filesChangedAndExit": MessageLookupByLibrary.simpleMessage(
+            "Some files are changed and not yet saved. How should we proceed?"),
+        "find": MessageLookupByLibrary.simpleMessage("Find"),
         "gotoLine": MessageLookupByLibrary.simpleMessage("Goto Line"),
         "iconSize": MessageLookupByLibrary.simpleMessage("Icon Size"),
+        "ignoreCase": MessageLookupByLibrary.simpleMessage("Ignore Case"),
+        "initializeWithTemplate":
+            MessageLookupByLibrary.simpleMessage("Initialize with Template"),
         "language": MessageLookupByLibrary.simpleMessage("Language"),
         "lineNumber": MessageLookupByLibrary.simpleMessage("Line number"),
         "lineNumberRangeHint": m1,
         "maximumNumberOfWindows":
             MessageLookupByLibrary.simpleMessage("Maximum Number of Windows"),
+        "newFile": MessageLookupByLibrary.simpleMessage("New File"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "reallyDiscardAllChanges": MessageLookupByLibrary.simpleMessage(
             "Do you really want to discard all changes?"),
+        "recentFiles": MessageLookupByLibrary.simpleMessage("Recent Files"),
+        "regularExpressions":
+            MessageLookupByLibrary.simpleMessage("Regular Expressions"),
         "reloadChangedFile": m2,
+        "replace": MessageLookupByLibrary.simpleMessage("Replace"),
+        "replaceAll": MessageLookupByLibrary.simpleMessage("Replace All"),
         "resource1901": MessageLookupByLibrary.simpleMessage("File"),
         "resource1902": MessageLookupByLibrary.simpleMessage("Edit"),
         "resource1903": MessageLookupByLibrary.simpleMessage("Find"),
@@ -119,6 +149,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "resource1910": MessageLookupByLibrary.simpleMessage("Convert"),
         "resource1911": MessageLookupByLibrary.simpleMessage("Overview"),
         "resource1913": MessageLookupByLibrary.simpleMessage("Diff"),
+        "save": MessageLookupByLibrary.simpleMessage("Save"),
+        "saveAllAndExit":
+            MessageLookupByLibrary.simpleMessage("Save All and Exit"),
         "searchIncrementally": m3,
         "showStatusbar": MessageLookupByLibrary.simpleMessage("Show Statusbar"),
         "showToolbar": MessageLookupByLibrary.simpleMessage("Show Toolbar"),
