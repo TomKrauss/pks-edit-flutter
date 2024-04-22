@@ -80,7 +80,7 @@ class _SettingsDialogState extends State<SettingsDialog> {
     });
 
   ///
-  /// Create an editor to edit a config value consisting of enumeratable options.
+  /// Create an editor to edit a config value consisting of enumerable options.
   ///
   Widget enumProperty<T>(String label, IconData? icon, List<T> values, T selected, void Function(T value) onSelect, {String Function(T)? toString, bool? autofocus}) =>
       property(
@@ -108,10 +108,11 @@ class _SettingsDialogState extends State<SettingsDialog> {
     final themes = bloc.themes.supportedThemeNames;
     const iconSizes = IconSize.values;
     final conf = configuration.configuration;
+    final bundle = S.of(context);
     return PksDialog(
-      title: Text(S.of(context).changeSettings),
+      title: Text(bundle.changeSettings),
       actions: [
-        DialogAction(text: S.of(context).apply, onPressed: _changed ? () {
+        DialogAction(text: bundle.apply, onPressed: _changed ? () {
           bloc.updateConfiguration(configuration);
           configuration = configuration.copyWith();
           changed = false;
@@ -124,17 +125,18 @@ class _SettingsDialogState extends State<SettingsDialog> {
       ],
         children: [
       enumProperty(
-          S.of(context).language, Icons.language, ApplicationConfiguration.supportedLanguages, conf.language, (newLang) => conf.language = newLang, autofocus: true),
+          bundle.language, Icons.language, ApplicationConfiguration.supportedLanguages, conf.language, (newLang) => conf.language = newLang, autofocus: true),
       enumProperty(
           "Theme", Icons.palette, themes, bloc.themes.currentTheme.name, (newTheme) => conf.theme = newTheme),
       enumProperty(
           "Text Font", Icons.font_download_rounded, ApplicationConfiguration.supportedFonts, conf.defaultFont, (newFont) => conf.defaultFont = newFont),
       enumProperty(
-        S.of(context).iconSize, FontAwesomeIcons.arrowUp91, iconSizes, conf.iconSize, (newIconSize) => conf.iconSize = newIconSize, toString: (s) => s.name),
-      booleanProperty(S.of(context).compactEditorTabs, FontAwesomeIcons.tableColumns, conf.compactEditorTabs, (newValue) {conf.compactEditorTabs = newValue; }),
-      booleanProperty(S.of(context).showToolbar, Icons.border_top, conf.showToolbar, (newValue) {conf.showToolbar = newValue; }),
-      booleanProperty(S.of(context).showStatusbar, Icons.border_bottom, conf.showStatusbar, (newValue) {conf.showStatusbar = newValue; }),
-      intProperty(S.of(context).maximumNumberOfWindows, FontAwesomeIcons.windowMaximize, conf.maximumOpenWindows, (newValue) { conf.maximumOpenWindows = newValue; }),
+        bundle.iconSize, FontAwesomeIcons.arrowUp91, iconSizes, conf.iconSize, (newIconSize) => conf.iconSize = newIconSize, toString: (s) => s.name),
+      booleanProperty(bundle.compactEditorTabs, FontAwesomeIcons.tableColumns, conf.compactEditorTabs, (newValue) {conf.compactEditorTabs = newValue; }),
+      booleanProperty(bundle.showToolbar, Icons.border_top, conf.showToolbar, (newValue) {conf.showToolbar = newValue; }),
+      booleanProperty(bundle.showStatusbar, Icons.border_bottom, conf.showStatusbar, (newValue) {conf.showStatusbar = newValue; }), 
+      booleanProperty(bundle.silentlyReloadFilesChangedExternally, Icons.refresh, conf.silentlyReloadChangedFiles, (newValue) {conf.silentlyReloadChangedFiles = newValue; }),
+      intProperty(bundle.maximumNumberOfWindows, FontAwesomeIcons.windowMaximize, conf.maximumOpenWindows, (newValue) { conf.maximumOpenWindows = newValue; }),
       ]);
   }
 }

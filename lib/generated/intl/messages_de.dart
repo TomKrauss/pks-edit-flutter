@@ -97,6 +97,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Vorheriges Fenster auswählen"),
         "actionSetOptions":
             MessageLookupByLibrary.simpleMessage("Einstellungen ändern..."),
+        "actionShiftRangeLeft":
+            MessageLookupByLibrary.simpleMessage("Bereich nach links rücken"),
+        "actionShiftRangeRight":
+            MessageLookupByLibrary.simpleMessage("Bereich nach rechts rücken"),
         "actionShowCopyright":
             MessageLookupByLibrary.simpleMessage("Über PKS Edit..."),
         "actionToggleComment":
@@ -171,6 +175,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "showStatusbar":
             MessageLookupByLibrary.simpleMessage("Statuszeile anzeigen"),
         "showToolbar": MessageLookupByLibrary.simpleMessage("Toolbar anzeigen"),
+        "silentlyReloadFilesChangedExternally":
+            MessageLookupByLibrary.simpleMessage(
+                "Extern geänderte Dateien ohne Abfrage neu laden"),
         "window": MessageLookupByLibrary.simpleMessage("Fenster"),
         "yes": MessageLookupByLibrary.simpleMessage("Ja")
       };

@@ -490,6 +490,26 @@ class S {
     );
   }
 
+  /// `Apply Outdent`
+  String get actionShiftRangeLeft {
+    return Intl.message(
+      'Apply Outdent',
+      name: 'actionShiftRangeLeft',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Apply Indent`
+  String get actionShiftRangeRight {
+    return Intl.message(
+      'Apply Indent',
+      name: 'actionShiftRangeRight',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Exit PKS Edit`
   String get actionDescriptionExit {
     return Intl.message(
@@ -935,6 +955,16 @@ class S {
     return Intl.message(
       'Enter text to replace',
       name: 'enterTextToReplace',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Silently reload files changed externally`
+  String get silentlyReloadFilesChangedExternally {
+    return Intl.message(
+      'Silently reload files changed externally',
+      name: 'silentlyReloadFilesChangedExternally',
       desc: '',
       args: [],
     );

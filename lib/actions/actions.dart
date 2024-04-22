@@ -228,6 +228,16 @@ class PksEditActions {
           isEnabled: _hasWriteableSelection,
           textKey: "actionErase"),
       PksEditAction(
+          id: "shift-range-left",
+          execute: _shiftRangeLeft,
+          isEnabled: _hasWriteableFile,
+          textKey: "actionShiftRangeLeft"),
+      PksEditAction(
+          id: "shift-range-right",
+          execute: _shiftRangeRight,
+          isEnabled: _hasWriteableFile,
+          textKey: "actionShiftRangeRight"),
+      PksEditAction(
           id: "use-linux-lineends",
           execute: _useLinuxLineEnds,
           isEnabled: _hasWriteableFile,
@@ -386,6 +396,7 @@ class PksEditActions {
       file.updateLineBreak(TextLineBreak.crlf);
     });
   }
+
   void _updateMatchSelection(OpenFile file) {
     var sel = file.findController.currentMatchSelection;
     if (sel != null) {
@@ -398,6 +409,18 @@ class PksEditActions {
     _withCurrentFile((file) {
       file.findController.previousMatch();
       _updateMatchSelection(file);
+    });
+  }
+
+  void _shiftRangeRight() {
+    _withCurrentFile((file) {
+      file.controller.applyIndent();
+    });
+  }
+
+  void _shiftRangeLeft() {
+    _withCurrentFile((file) {
+      file.controller.applyOutdent();
     });
   }
 

@@ -89,6 +89,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Cycle window backward"),
         "actionSetOptions":
             MessageLookupByLibrary.simpleMessage("Change Settings..."),
+        "actionShiftRangeLeft":
+            MessageLookupByLibrary.simpleMessage("Apply Outdent"),
+        "actionShiftRangeRight":
+            MessageLookupByLibrary.simpleMessage("Apply Indent"),
         "actionShowCopyright":
             MessageLookupByLibrary.simpleMessage("About PKS Edit..."),
         "actionToggleComment":
@@ -159,6 +163,9 @@ class MessageLookup extends MessageLookupByLibrary {
         "searchIncrementally": m3,
         "showStatusbar": MessageLookupByLibrary.simpleMessage("Show Statusbar"),
         "showToolbar": MessageLookupByLibrary.simpleMessage("Show Toolbar"),
+        "silentlyReloadFilesChangedExternally":
+            MessageLookupByLibrary.simpleMessage(
+                "Silently reload files changed externally"),
         "window": MessageLookupByLibrary.simpleMessage("Window"),
         "yes": MessageLookupByLibrary.simpleMessage("Yes")
       };

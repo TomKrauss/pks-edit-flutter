@@ -64,7 +64,9 @@ class _PksEditMainPageState extends State<PksEditMainPage>
         const SingleActivator(LogicalKeyboardKey.keyS, alt: true, control: true),
         _toggleSearchBarFocus);
     _externalFileSubscription = bloc.externalFileChangeStream.listen((event) async {
-        if ((await ConfirmationDialog.show(context: context, message: S.of(context).reloadChangedFile(event.title))) == 'yes') {
+        var config = PksIniConfiguration.of(context).configuration;
+        if ((config.silentlyReloadChangedFiles && !event.modified) ||
+            (await ConfirmationDialog.show(context: context, message: S.of(context).reloadChangedFile(event.title))) == 'yes') {
           final result = await bloc.abandonFile(event);
           _handleCommandResult(result);
         }

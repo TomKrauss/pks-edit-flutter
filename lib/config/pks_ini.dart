@@ -171,6 +171,9 @@ class ApplicationConfiguration {
   /// Whether autosaved files should be deleted on exit.
   @JsonKey(name: "cleanup-autosave-files")
   final bool cleanupAutosaveFiles;
+  /// Whether files changed externally should be silently reloaded.
+  @JsonKey(name: "silently-reload-changed-files")
+  bool silentlyReloadChangedFiles;
 
   //// Searching and handling compiler output formats
   /// The default search engine for performing a search for editor words.
@@ -188,6 +191,7 @@ class ApplicationConfiguration {
     this.compactEditorTabs = true,
     this.showErrorsInToast = true,
     this.playSoundOnError = false,
+    this.silentlyReloadChangedFiles = true,
     this.soundName = "default",
     this.compilerOutputPatterns = const [],
     this.formsFollowMouse = false,

@@ -12,3 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   improved to allow for more configuration options.
 - Added support for file system watches: PKS Edit detects now, that files currently edited were changed outside
   PKS Edit so the user may choose to update and integrate the changes. 
+- A new option was added: `silentlyReloadFilesChangedExternally`.
+- Various new functions like Find..., Find&Replace... and Outdent and Indent were added. Also find again
+  forward and backward will work in a way compatible to PKS EDIT Windows version.
+- L10N was improved and most texts are now available in English and German.
+

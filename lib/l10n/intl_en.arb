@@ -44,6 +44,8 @@
   "actionExit": "Exit",
   "actionUseLinuxLineEnds": "Use LF for Line Ends",
   "actionUseWindowsLineEnds": "Use CR+LF for Line Ends",
+  "actionShiftRangeLeft": "Apply Outdent",
+  "actionShiftRangeRight": "Apply Indent",
   "actionDescriptionExit": "Exit PKS Edit",
   "actionDescriptionSaveCurrentFile": "Save current file",
   "actionUndo": "Undo",
@@ -88,5 +90,6 @@
   "ignoreCase": "Ignore Case",
   "regularExpressions": "Regular Expressions",
   "enterTextToFind": "Enter text to find",
-  "enterTextToReplace": "Enter text to replace"
+  "enterTextToReplace": "Enter text to replace",
+  "silentlyReloadFilesChangedExternally": "Silently reload files changed externally"
 }

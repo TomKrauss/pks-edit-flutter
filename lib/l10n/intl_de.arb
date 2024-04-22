@@ -46,6 +46,8 @@
   "actionDescriptionCloseAllButCurrentWindow": "Schließt alle Fenster außer dem aktuellen",
   "actionUseLinuxLineEnds": "Linefeed als Zeilenende verwenden",
   "actionUseWindowsLineEnds": "CR+LF als Zeilenende verwenden",
+  "actionShiftRangeLeft": "Bereich nach links rücken",
+  "actionShiftRangeRight": "Bereich nach rechts rücken",
   "actionExit": "Ende",
   "actionDescriptionExit": "PKS Edit beenden",
   "actionDescriptionSaveCurrentFile": "Aktuelle Datei speichern",
@@ -88,5 +90,6 @@
   "ignoreCase": "Groß-/Klein-Schreibung ignorieren",
   "regularExpressions": "Reguläre Ausdrücke",
   "enterTextToFind": "Text eingeben zur Suche",
-  "enterTextToReplace": "Text eingeben zum Ersetzen"
+  "enterTextToReplace": "Text eingeben zum Ersetzen",
+  "silentlyReloadFilesChangedExternally": "Extern geänderte Dateien ohne Abfrage neu laden"
 }
