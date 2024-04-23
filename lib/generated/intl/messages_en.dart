@@ -75,6 +75,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Find Next..."),
         "actionFindBackward":
             MessageLookupByLibrary.simpleMessage("Find Previous..."),
+        "actionFindWordBackward": MessageLookupByLibrary.simpleMessage(
+            "Find current word backward..."),
+        "actionFindWordForward":
+            MessageLookupByLibrary.simpleMessage("Find current word..."),
         "actionGotoLine": MessageLookupByLibrary.simpleMessage("Goto line..."),
         "actionNewFile": MessageLookupByLibrary.simpleMessage("New File..."),
         "actionOpenFile": MessageLookupByLibrary.simpleMessage("Open File..."),

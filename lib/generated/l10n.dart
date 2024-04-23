@@ -590,6 +590,26 @@ class S {
     );
   }
 
+  /// `Find current word...`
+  String get actionFindWordForward {
+    return Intl.message(
+      'Find current word...',
+      name: 'actionFindWordForward',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Find current word backward...`
+  String get actionFindWordBackward {
+    return Intl.message(
+      'Find current word backward...',
+      name: 'actionFindWordBackward',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Replace...`
   String get actionReplace {
     return Intl.message(

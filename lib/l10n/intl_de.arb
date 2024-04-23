@@ -57,6 +57,8 @@
   "actionFind": "Suchen...",
   "actionFindAgainForward": "Suche wiederholen...",
   "actionFindBackward": "Suche rückwärts wiederholen...",
+  "actionFindWordForward": "Aktuelles Wort suchen...",
+  "actionFindWordBackward": "Wort rückwärts suchen...",
   "actionReplace": "Ersetzen...",
   "actionCopy": "Kopieren",
   "actionCut": "Ausschneiden",

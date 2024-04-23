@@ -54,6 +54,8 @@
   "actionFind": "Find...",
   "actionFindAgainForward": "Find Next...",
   "actionFindBackward": "Find Previous...",
+  "actionFindWordForward": "Find current word...",
+  "actionFindWordBackward": "Find current word backward...",
   "actionReplace": "Replace...",
   "actionCopy": "Copy",
   "actionCut": "Cut",

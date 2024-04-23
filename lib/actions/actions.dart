@@ -197,6 +197,16 @@ class PksEditActions {
           isEnabled: _hasFile,
           textKey: "actionFind"),
       PksEditAction(
+          id: "find-word-forward",
+          execute: _findWordForward,
+          isEnabled: _hasFile,
+          textKey: "actionFindWordForward"),
+      PksEditAction(
+          id: "find-word-back",
+          execute: _findWordBackward,
+          isEnabled: _hasFile,
+          textKey: "actionFindWordBackward"),
+      PksEditAction(
           id: "find-again-backward",
           execute: _findAgainBackward,
           isEnabled: _hasFile,
@@ -427,6 +437,22 @@ class PksEditActions {
   void _findAgainForward() {
     _withCurrentFile((file) {
       file.findController.nextMatch();
+      _updateMatchSelection(file);
+    });
+  }
+
+  void _findWordForward() {
+    _withCurrentFile((file) async {
+      await file.controller.matchWord(file.findController);
+      file.findController.nextMatch();
+      _updateMatchSelection(file);
+    });
+  }
+
+  void _findWordBackward() {
+    _withCurrentFile((file) async {
+      await file.controller.matchWord(file.findController);
+      file.findController.previousMatch();
       _updateMatchSelection(file);
     });
   }
