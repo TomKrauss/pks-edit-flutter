@@ -32,6 +32,8 @@ ApplicationConfiguration _$ApplicationConfigurationFromJson(
       compactEditorTabs: json['compact-editor-tabs'] as bool? ?? true,
       showErrorsInToast: json['show-error-toast'] as bool? ?? true,
       playSoundOnError: json['sound-on-error'] as bool? ?? false,
+      silentlyReloadChangedFiles:
+          json['silently-reload-changed-files'] as bool? ?? true,
       soundName: json['sound-name'] as String? ?? "default",
       compilerOutputPatterns:
           (json['compiler-output-patterns'] as List<dynamic>?)
@@ -106,6 +108,7 @@ Map<String, dynamic> _$ApplicationConfigurationToJson(
   val['undo-enabled'] = instance.undoEnabled;
   val['undo-history'] = instance.undoHistory;
   val['cleanup-autosave-files'] = instance.cleanupAutosaveFiles;
+  val['silently-reload-changed-files'] = instance.silentlyReloadChangedFiles;
   val['search-engine'] = instance.searchEngine;
   val['include-path'] = instance.includePath;
   val['compiler-output-patterns'] = instance.compilerOutputPatterns;

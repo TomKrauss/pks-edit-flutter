@@ -14,6 +14,9 @@ EditingConfiguration _$EditingConfigurationFromJson(
       rightMargin: json['rightMargin'] as int? ?? 80,
       tabSize: json['tabSize'] as int? ?? 4,
       expandTabsWith: json['expandTabsWith'] as String?,
+      backupExtension: json['backupExtension'] as String? ?? "bak",
+      wordTokenExpression: json['wordTokenExpression'] as String? ??
+          r'[a-zA-ZöäüÖÄÜß][a-zA-Z0-9_öäüÖÄÜß]*',
     );
 
 Map<String, dynamic> _$EditingConfigurationToJson(
@@ -32,6 +35,8 @@ Map<String, dynamic> _$EditingConfigurationToJson(
   }
 
   writeNotNull('expandTabsWith', instance.expandTabsWith);
+  val['wordTokenExpression'] = instance.wordTokenExpression;
+  val['backupExtension'] = instance.backupExtension;
   return val;
 }
 

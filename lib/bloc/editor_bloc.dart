@@ -308,6 +308,24 @@ class EditorBloc {
   }
 
   ///
+  /// Match the word 'under the current caret position' and start a search for this word.
+  ///
+  Future<void> matchWord(OpenFile file) async {
+    var controller = file.controller;
+    var matches = file.editingConfiguration.wordTokenRE.allMatches(controller.startLine.text);
+    var start = controller.selection.startOffset;
+    for (var m in matches) {
+      if (m.start <= start && m.end >= start) {
+        file.findController.findInputController.text = controller.startLine.substring(m.start, m.end);
+        break;
+      }
+    }
+    // hack: need to wait until the find event has been processed. Processing
+    // is triggered asynchronously, but cannot be awaited.
+    await Future<void>.delayed(const Duration(milliseconds: 30));
+  }
+
+  ///
   /// Can be used to "cycle" through the list of open windows. If [delta] is positive we cycle
   /// forward, otherwise backward.
   ///

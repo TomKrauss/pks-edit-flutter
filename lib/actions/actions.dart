@@ -443,7 +443,9 @@ class PksEditActions {
 
   void _findWordForward() {
     _withCurrentFile((file) async {
-      await file.controller.matchWord(file.findController);
+      var context = getBuildContext();
+      final bloc = EditorBloc.of(context);
+      await bloc.matchWord(file);
       file.findController.nextMatch();
       _updateMatchSelection(file);
     });
@@ -451,7 +453,9 @@ class PksEditActions {
 
   void _findWordBackward() {
     _withCurrentFile((file) async {
-      await file.controller.matchWord(file.findController);
+      var context = getBuildContext();
+      final bloc = EditorBloc.of(context);
+      await bloc.matchWord(file);
       file.findController.previousMatch();
       _updateMatchSelection(file);
     });

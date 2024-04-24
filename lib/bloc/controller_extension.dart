@@ -17,7 +17,6 @@ import 'package:re_editor/re_editor.dart';
 /// Provides additional methods in the text controller to modify text etc...
 ///
 extension TextEditingControllerExtension on CodeLineEditingController {
-  static final wordRegExp = RegExp(r'[a-zA-ZöäüÖÄÜß][a-zA-Z0-9_öäüÖÄÜß]*');
 
   void _upperLowerCase(String Function(String) replace) {
     var text = selectedText;
@@ -33,33 +32,6 @@ extension TextEditingControllerExtension on CodeLineEditingController {
     selection = originalSelection;
   }
 
-  Future<void> matchWord(CodeFindController findController) async {
-    var start = selection.startOffset;
-    var end = start+1;
-    while(start > 0) {
-      var c = startLine.substring(start-1, end);
-      if (wordRegExp.matchAsPrefix(c) == null) {
-        break;
-      }
-      start--;
-    }
-    while(end < startLine.length) {
-      var c = startLine.substring(start, end);
-      var m = wordRegExp.matchAsPrefix(c);
-      if (m == null || (m.end+start) != end) {
-        end--;
-        break;
-      }
-      end++;
-    }
-    if (end <= start) {
-      return;
-    }
-    findController.findInputController.text = startLine.substring(start, end);
-    // hack: need to wait until the find event has been processed. Processing
-    // is triggered asynchronously, but cannot be awaited.
-    await Future<void>.delayed(const Duration(milliseconds: 30));
-  }
   void charToUpper() {
     _upperLowerCase((p0) => p0.toUpperCase());
   }

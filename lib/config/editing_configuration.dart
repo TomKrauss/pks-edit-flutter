@@ -35,8 +35,17 @@ class EditingConfiguration {
   final int tabSize;
   /// When inserting a tabulator - replace with this (fill character). If null - tabs are not expanded.
   final String? expandTabsWith;
+  /// Returns the regular expression used to match a word for the described document type.
+  final String wordTokenExpression;
+  /// Returns the regular expression used to match a word for the described document type.
+  RegExp get wordTokenRE => RegExp(wordTokenExpression);
+  /// The filename extension used, when creating backup files during save.
+  final String backupExtension;
 
-  const EditingConfiguration({this.name = "default", this.leftMargin = 0, this.rightMargin = 80, this.tabSize = 4, this.expandTabsWith});
+  const EditingConfiguration({this.name = "default", this.leftMargin = 0,
+    this.rightMargin = 80, this.tabSize = 4, this.expandTabsWith,
+    this.backupExtension = "bak",
+    this.wordTokenExpression = r'[a-zA-ZöäüÖÄÜß][a-zA-Z0-9_öäüÖÄÜß]*'});
 
   static const EditingConfiguration defaultConfiguration = EditingConfiguration(name: "default");
 
