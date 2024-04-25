@@ -14,6 +14,7 @@
 import 'package:flutter/material.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/actions/action_bindings.dart';
+import 'package:pks_edit_flutter/actions/actions.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
 
@@ -28,11 +29,23 @@ class MenuBarWidget extends StatelessWidget {
   SizedBox(width: Theme.of(context).menuButtonTheme.style?.iconSize?.resolve({MaterialState.selected}) ?? 24) :
   Icon(icon);
       
-  Widget _createMenuButton(BuildContext context, String label, IconData? icon, MenuSerializableShortcut? shortcut,
-      void Function()? onPressed) =>
+  Widget _createMenuButton(BuildContext context, MenuItemBinding binding) {
+    final action = binding.action;
+    final icon = action?.icon;
+    final label = binding.title;
+    final shortcut = action?.shortcut;
+    final onPressed = action?.onPressed;
+    if (action is PksEditActionWithState) {
+      return CheckboxMenuButton(value: action.isChecked(),
+          onChanged: (action.onPressed == null) ? null : (state) {
+            action.onPressed!();
+          }, shortcut: shortcut, child: Text(label));
+    }
+    return
       MenuItemButton(
           leadingIcon: _createLeadingIcon(context, icon),
           onPressed: onPressed, shortcut: shortcut, child: Text(label));
+  }
 
   List<Widget> _buildChildren(BuildContext context, Iterable<MenuItemBinding> actions) {
     var result = <Widget>[];
@@ -52,8 +65,7 @@ class MenuBarWidget extends StatelessWidget {
               child: Text(S.of(context).recentFiles)));
         }
       } else {
-        final icon = b.iconData;
-        var element = _createMenuButton(context, b.title, icon, b.action?.shortcut, b.action?.onPressed);
+        var element = _createMenuButton(context, b);
         result.add(element);
       }
     }
@@ -82,9 +94,12 @@ class MenuBarWidget extends StatelessWidget {
     final subMenu = <Widget>[];
     final bloc = EditorBloc.of(context);
     for (var of in bloc.openFiles) {
-      subMenu.add(_createMenuButton(context, _shortenFileName(of), null, null,  () {
+      final action = PksEditAction(id: "open-files", execute: () {
         bloc.openFile(of);
-      }));
+      });
+      final binding = MenuItemBinding(label: _shortenFileName(of));
+      binding.action = action;
+      subMenu.add(_createMenuButton(context, binding));
     }
     return subMenu;
   }

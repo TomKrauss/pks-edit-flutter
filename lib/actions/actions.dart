@@ -33,6 +33,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/controller_extension.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
+import 'package:pks_edit_flutter/config/editing_configuration.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/input_dialog.dart';
@@ -105,12 +106,34 @@ class PksEditAction {
 
   static bool _alwaysEnabled() => true;
 
-    PksEditAction({required this.id, this.isEnabled = _alwaysEnabled,
+    PksEditAction({
+      required this.id,
+      this.isEnabled = _alwaysEnabled,
       required this.execute,
       this.textKey,
       this.shortcut,
       this.descriptionKey,
       String? text, String? description}) : _text = text, _description = description;
+}
+
+///
+/// Special action which represents a state which can be changed. Simple version is a toggle action, which
+/// is represented in a menu for instance using a checkbox menu item.
+///
+class PksEditActionWithState extends PksEditAction {
+  /// Returns true, if this action should currently be represented in a checked state.
+  final bool Function() isChecked;
+  PksEditActionWithState({
+    required super.id,
+    required super.execute,
+    required this.isChecked,
+    super.description,
+    super.descriptionKey,
+    super.isEnabled,
+    super.shortcut,
+    super.text,
+    super.textKey});
+
 }
 
 ///
@@ -292,6 +315,18 @@ class PksEditActions {
           execute: _commentLine,
           isEnabled: _hasFile,
           textKey: "actionToggleComment"),
+      PksEditActionWithState(
+          id: "toggle-show-linenumbers",
+          isChecked: () => editingConfiguration?.showLineNumbers == true,
+          execute: _toggleShowLineNumbers,
+          isEnabled: _hasFile,
+          textKey: "actionToggleShowLineNumbers"),
+      PksEditActionWithState(
+          id: "toggle-syntax-highlighting",
+          isChecked: () => editingConfiguration?.showSyntaxHighlight == true,
+          execute: _toggleSyntaxHighlighting,
+          isEnabled: _hasFile,
+          textKey: "actionToggleSyntaxHighlighting"),
       PksEditAction(
           id: "cycle-window",
           execute: _cycleWindowForward,
@@ -341,28 +376,51 @@ class PksEditActions {
     actions.forEach(_registerAction);
   }
 
+  OpenFile? get currentFile => getActionContext().currentFile;
+
+  EditingConfiguration? get editingConfiguration => currentFile?.editingConfiguration;
+
   bool _hasFile() =>
-      getActionContext().currentFile != null;
+      currentFile != null;
 
   bool _hasSelection() =>
-      getActionContext().currentFile?.controller.selection.isCollapsed == false;
+      currentFile?.controller.selection.isCollapsed == false;
 
   bool _hasWriteableSelection() {
-    var f = getActionContext().currentFile;
+    var f = currentFile;
     return f != null && !f.readOnly && !f.controller.selection.isCollapsed;
   }
 
   bool _hasWriteableFile() {
-    var f = getActionContext().currentFile;
+    var f = currentFile;
     return f != null && !f.readOnly;
   }
 
   bool _canRedo() {
-    var f = getActionContext().currentFile;
+    var f = currentFile;
     if (f != null) {
       return f.controller.canRedo;
     }
     return false;
+  }
+
+  void _toggleShowLineNumbers() {
+    _withCurrentFile((file) {
+      var newVal = !file.editingConfiguration.showLineNumbers;
+      file.runCommand(() {
+        file.editingConfiguration = file.editingConfiguration.copyWith(showLineNumbers: newVal);
+      });
+    });
+  }
+
+  void _toggleSyntaxHighlighting() {
+    _withCurrentFile((file) {
+      var newVal = !file.editingConfiguration.showSyntaxHighlight;
+      file.runCommand(() {
+        file.editingConfiguration =
+            file.editingConfiguration.copyWith(showSyntaxHighlight: newVal);
+      });
+    });
   }
 
   void _showAbout() async {
@@ -389,7 +447,7 @@ class PksEditActions {
   }
 
   void _replace() {
-    var f = getActionContext().currentFile;
+    var f = currentFile;
     if (f != null) {
       SearchReplaceDialog.show(context: getBuildContext(), arguments: SearchReplaceDialogArguments(findController: f.findController));
     }
@@ -469,7 +527,7 @@ class PksEditActions {
   }
 
   void _withCurrentFile(void Function(OpenFile file) callback) {
-    var f = getActionContext().currentFile;
+    var f = currentFile;
     if (f != null) {
       callback(f);
     }
@@ -562,7 +620,7 @@ class PksEditActions {
       getActionContext().openFileState?.currentFile?.modified == true;
 
   bool _canUndo() {
-    var f = getActionContext().currentFile;
+    var f = currentFile;
     if (f != null) {
       return f.controller.canUndo;
     }
@@ -572,7 +630,7 @@ class PksEditActions {
   void _discardChangesInFile() async {
     var context = getBuildContext();
     final bloc = EditorBloc.of(context);
-    var f = getActionContext().currentFile;
+    var f = currentFile;
     if (f != null && f.modified) {
       if ((await ConfirmationDialog.show(context: context, message: S.of(context).reallyDiscardAllChanges, actions: ConfirmationDialog.yesNoActions)) == "yes") {
         bloc.abandonFile(f);
@@ -621,8 +679,12 @@ class PksEditActions {
 
 
   void _saveFileAs() async {
+    final f = currentFile;
+    if (f == null) {
+      return;
+    }
     final bloc = EditorBloc.of(getBuildContext());
-    final filename = bloc.suggestNewFilename(getActionContext().currentFile!.filename);
+    final filename = bloc.suggestNewFilename(f.filename);
     final String initialDirectory = path.dirname(filename);
     final result = await getSaveLocation(
         initialDirectory: initialDirectory,
@@ -641,7 +703,7 @@ class PksEditActions {
 
 
   void _gotoLine() async {
-    var controller = getActionContext().currentFile?.controller;
+    var controller = currentFile?.controller;
     if (controller == null) {
       return;
     }
@@ -680,7 +742,7 @@ class PksEditActions {
     final String initialDirectory = File(".").absolute.path;
     final result = await openFile(
         initialDirectory: initialDirectory,
-        acceptedTypeGroups: bloc.editingConfigurations.getFileGroups(getActionContext().currentFile?.filename ?? ""),
+        acceptedTypeGroups: bloc.editingConfigurations.getFileGroups(currentFile?.filename ?? ""),
         confirmButtonText: "Open");
     if (result != null) {
       await handleCommandResult(await bloc.openFile(result.path));
@@ -745,7 +807,7 @@ class PksEditActions {
   }
 
   void _closeWindow() {
-    var file = getActionContext().currentFile;
+    var file = currentFile;
     if (file == null) {
       return;
     }

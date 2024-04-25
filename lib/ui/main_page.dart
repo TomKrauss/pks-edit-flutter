@@ -296,6 +296,7 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
         indicatorBuilder:
             (context, editingController, chunkController, notifier) => Row(
           children: [
+            if (file.editingConfiguration.showLineNumbers)
             DefaultCodeLineNumber(
               controller: editingController,
               notifier: notifier,
@@ -307,14 +308,14 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
         controller: file.controller,
         style: CodeEditorStyle(
             fontFamily: configuration.defaultFont,
-            codeTheme: CodeHighlightTheme(
+            codeTheme: file.editingConfiguration.showSyntaxHighlight ? CodeHighlightTheme(
                 theme: bloc.themes.currentTheme.isDark
                     ? atomOneDarkTheme
                     : atomOneLightTheme,
                 languages: {
                   file.language.name:
                   CodeHighlightThemeMode(mode: file.language.mode)
-                })));
+                }) : null));
   }
 
   @override

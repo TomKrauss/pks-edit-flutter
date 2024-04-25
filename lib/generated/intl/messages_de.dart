@@ -109,6 +109,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Über PKS Edit..."),
         "actionToggleComment":
             MessageLookupByLibrary.simpleMessage("Kommentare umschalten"),
+        "actionToggleShowLineNumbers":
+            MessageLookupByLibrary.simpleMessage("Zeilennummern anzeigen"),
+        "actionToggleSyntaxHighlighting":
+            MessageLookupByLibrary.simpleMessage("Syntax Highlighting"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Rückgängig"),
         "actionUseLinuxLineEnds": MessageLookupByLibrary.simpleMessage(
             "Linefeed als Zeilenende verwenden"),

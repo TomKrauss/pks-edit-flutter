@@ -48,6 +48,8 @@
   "actionUseWindowsLineEnds": "CR+LF als Zeilenende verwenden",
   "actionShiftRangeLeft": "Bereich nach links rücken",
   "actionShiftRangeRight": "Bereich nach rechts rücken",
+  "actionToggleShowLineNumbers": "Zeilennummern anzeigen",
+  "actionToggleSyntaxHighlighting": "Syntax Highlighting",
   "actionExit": "Ende",
   "actionDescriptionExit": "PKS Edit beenden",
   "actionDescriptionSaveCurrentFile": "Aktuelle Datei speichern",

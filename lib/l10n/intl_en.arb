@@ -46,6 +46,8 @@
   "actionUseWindowsLineEnds": "Use CR+LF for Line Ends",
   "actionShiftRangeLeft": "Apply Outdent",
   "actionShiftRangeRight": "Apply Indent",
+  "actionToggleShowLineNumbers": "Show Line Numbers",
+  "actionToggleSyntaxHighlighting": "Syntax Highlighting",
   "actionDescriptionExit": "Exit PKS Edit",
   "actionDescriptionSaveCurrentFile": "Save current file",
   "actionUndo": "Undo",

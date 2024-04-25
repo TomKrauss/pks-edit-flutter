@@ -23,6 +23,7 @@ part 'editing_configuration.g.dart';
 
 ///
 /// A configuration to be applied to files opened defining modes, how the files are edited.
+/// Can be changed during runtime.
 ///
 @JsonSerializable(includeIfNull: false)
 class EditingConfiguration {
@@ -41,11 +42,44 @@ class EditingConfiguration {
   RegExp get wordTokenRE => RegExp(wordTokenExpression);
   /// The filename extension used, when creating backup files during save.
   final String backupExtension;
+  /// Whether line numbers should be displayed.
+  final bool showLineNumbers;
+  /// Whether syntax highlighting should be performed.
+  final bool showSyntaxHighlight;
 
-  const EditingConfiguration({this.name = "default", this.leftMargin = 0,
-    this.rightMargin = 80, this.tabSize = 4, this.expandTabsWith,
+  const EditingConfiguration({
+    this.name = "default",
+    this.leftMargin = 0,
+    this.rightMargin = 80,
+    this.tabSize = 4,
+    this.expandTabsWith,
+    this.showLineNumbers = true,
+    this.showSyntaxHighlight = true,
     this.backupExtension = "bak",
     this.wordTokenExpression = r'[a-zA-ZöäüÖÄÜß][a-zA-Z0-9_öäüÖÄÜß]*'});
+
+  ///
+  /// To modify the current editing configuration use this copy constructor.
+  ///
+  EditingConfiguration copyWith({
+    int? leftMargin,
+    int? rightMargin,
+    int? tabSize,
+    String? expandTabsWith,
+    bool? showLineNumbers,
+    bool? showSyntaxHighlight,
+    String? backupExtension,
+    String? wordTokenExpression}) => EditingConfiguration(
+      name: name,
+      leftMargin: leftMargin ?? this.leftMargin,
+      rightMargin: rightMargin ?? this.rightMargin,
+      tabSize: tabSize ?? this.tabSize,
+      expandTabsWith: expandTabsWith ?? this.expandTabsWith,
+      showLineNumbers: showLineNumbers ?? this.showLineNumbers,
+      showSyntaxHighlight: showSyntaxHighlight ?? this.showSyntaxHighlight,
+      backupExtension: backupExtension ?? this.backupExtension,
+      wordTokenExpression: wordTokenExpression ?? this.wordTokenExpression
+  );
 
   static const EditingConfiguration defaultConfiguration = EditingConfiguration(name: "default");
 

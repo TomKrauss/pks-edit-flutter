@@ -510,6 +510,26 @@ class S {
     );
   }
 
+  /// `Show Line Numbers`
+  String get actionToggleShowLineNumbers {
+    return Intl.message(
+      'Show Line Numbers',
+      name: 'actionToggleShowLineNumbers',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Syntax Highlighting`
+  String get actionToggleSyntaxHighlighting {
+    return Intl.message(
+      'Syntax Highlighting',
+      name: 'actionToggleSyntaxHighlighting',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Exit PKS Edit`
   String get actionDescriptionExit {
     return Intl.message(
