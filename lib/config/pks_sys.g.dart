@@ -8,12 +8,12 @@ part of 'pks_sys.dart';
 
 MainWindowPlacement _$MainWindowPlacementFromJson(Map<String, dynamic> json) =>
     MainWindowPlacement(
-      flags: json['flags'] as int? ?? 0,
-      show: json['show'] as int? ?? 1,
-      top: json['top'] as int? ?? 0,
-      left: json['left'] as int? ?? 0,
-      right: json['right'] as int? ?? 1000,
-      bottom: json['bottom'] as int? ?? 1000,
+      flags: (json['flags'] as num?)?.toInt() ?? 0,
+      show: (json['show'] as num?)?.toInt() ?? 1,
+      top: (json['top'] as num?)?.toInt() ?? 0,
+      left: (json['left'] as num?)?.toInt() ?? 0,
+      right: (json['right'] as num?)?.toInt() ?? 1000,
+      bottom: (json['bottom'] as num?)?.toInt() ?? 1000,
     );
 
 Map<String, dynamic> _$MainWindowPlacementToJson(
@@ -47,9 +47,9 @@ Map<String, dynamic> _$MainFrameDockToJson(MainFrameDock instance) =>
 
 PksEditSession _$PksEditSessionFromJson(Map<String, dynamic> json) =>
     PksEditSession(
-      screenWidth: json['screen-width'] as int,
-      screenHeight: json['screen-height'] as int,
-      searchReplaceOptions: json['search-replace-options'] as int,
+      screenWidth: (json['screen-width'] as num).toInt(),
+      screenHeight: (json['screen-height'] as num).toInt(),
+      searchReplaceOptions: (json['search-replace-options'] as num).toInt(),
       mainWindowPlacement: MainWindowPlacement.fromJson(
           json['main-window-placement'] as Map<String, dynamic>),
       dock1:

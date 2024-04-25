@@ -37,7 +37,7 @@ MenuItemBinding _$MenuItemBindingFromJson(Map<String, dynamic> json) =>
       isSeparator: json['separator'] as bool? ?? false,
       isHistoryMenu: json['history-menu'] as bool? ?? false,
       isMacroCommand: json['macro-menu'] as bool? ?? false,
-      labelId: json['label-id'] as int?,
+      labelId: (json['label-id'] as num?)?.toInt(),
       label: json['label'] as String?,
       children: (json['sub-menu'] as List<dynamic>?)
           ?.map((e) => MenuItemBinding.fromJson(e as Map<String, dynamic>))

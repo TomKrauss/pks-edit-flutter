@@ -46,12 +46,18 @@ class EditingConfiguration {
   final bool showLineNumbers;
   /// Whether syntax highlighting should be performed.
   final bool showSyntaxHighlight;
+  /// Toggle the editor window to display the document using a hex editing component.
+  final bool hexMode;
+  /// For document types supporting a what you see is what you get display, open the preview editor.
+  final bool showWysiwyg;
 
   const EditingConfiguration({
     this.name = "default",
     this.leftMargin = 0,
     this.rightMargin = 80,
     this.tabSize = 4,
+    this.hexMode = false,
+    this.showWysiwyg = false,
     this.expandTabsWith,
     this.showLineNumbers = true,
     this.showSyntaxHighlight = true,
@@ -65,12 +71,16 @@ class EditingConfiguration {
     int? leftMargin,
     int? rightMargin,
     int? tabSize,
+    bool? hexMode,
+    bool? showWysiwyg,
     String? expandTabsWith,
     bool? showLineNumbers,
     bool? showSyntaxHighlight,
     String? backupExtension,
     String? wordTokenExpression}) => EditingConfiguration(
       name: name,
+      hexMode: hexMode ?? this.hexMode,
+      showWysiwyg: showWysiwyg ?? this.showWysiwyg,
       leftMargin: leftMargin ?? this.leftMargin,
       rightMargin: rightMargin ?? this.rightMargin,
       tabSize: tabSize ?? this.tabSize,

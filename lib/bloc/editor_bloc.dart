@@ -12,18 +12,18 @@
 //
 
 import 'dart:async';
-import 'dart:convert';
+import 'dart:convert' as convert;
 import 'dart:io';
 import 'dart:math';
 import 'dart:ui';
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/actions/action_bindings.dart';
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
+import 'package:pks_edit_flutter/bloc/file_io.dart';
 import 'package:pks_edit_flutter/bloc/templates.dart';
 import 'package:pks_edit_flutter/config/editing_configuration.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
@@ -103,29 +103,6 @@ class FileIcons {
 }
 
 ///
-/// The Byte Order Mark, which was used during read / should be written for a file.
-///
-enum BomType {
-  /// File has no BOM
-  none([]),
-  /// File has a UTF8 BOM
-  utf8([0xEF, 0xBB, 0xBF]),
-  /// File has a UTF16 Big Endian Architecture BOM
-  utf16be([0xFE, 0xFF]),
-  /// File has a UTF32 Big Endian Architecture BOM
-  utf32be([0, 0, 0xFE, 0xFF]),
-  /// File has a UTF16 Little Endian Architecture BOM
-  utf16le([0xFF, 0xFE]),
-  /// File has a UTF32 Little Endian Architecture BOM
-  utf32le([0xFF, 0xFE, 0, 0]);
-  ///
-  /// The bytes representing the BomType
-  ///
-  final List<int> bytes;
-  const BomType(this.bytes);
-}
-
-///
 /// Represents one open file.
 ///
 class OpenFile {
@@ -154,7 +131,7 @@ class OpenFile {
   ///
   /// The character encoding.
   ///
-  final Encoding encoding;
+  final convert.Encoding encoding;
   BomType bomType;
 
   ///
@@ -277,7 +254,7 @@ class OpenFile {
     this.readOnly = false,
     DateTime? modificationTime,
     this.modified = false,
-    this.encoding = utf8,
+    this.encoding = convert.utf8,
     this.bomType = BomType.none,
     required this.isNew,
     int? initialLineNumber}) {
@@ -460,8 +437,9 @@ class EditorBloc {
       final stat = file.statSync();
       openFile.readOnly = stat.readOnly;
       openFile.modificationTime = stat.modified;
-      final result = await _detectEncoding(file);
-      openFile.controller.text = file.readAsStringSync(encoding: result.encoding);
+      const fileIO = FileIO();
+      final result = await fileIO.detectEncoding(file);
+      openFile.controller.text = fileIO.readContents(file, result);
       openFile.unchanged();
       _refreshFiles();
       return CommandResult(success: true);
@@ -556,84 +534,6 @@ class EditorBloc {
     return CommandResult(success: true);
   }
 
-  ({Encoding encoding, TextLineBreak lineBreak, BomType bomType}) _parseBytesToDetectEncoding(List<int> pData) {
-    var i = 0;
-    final end = pData.length;
-    int nLength;
-    var lb = TextLineBreak.lf;
-    Encoding encoding = latin1;
-    var bomType = BomType.none;
-    for (var t in BomType.values) {
-      if (t.bytes.isNotEmpty && end > t.bytes.length && const ListEquality<int>().equals(t.bytes, pData.sublist(0, t.bytes.length))) {
-        bomType = t;
-        break;
-      }
-    }
-    while (i < end) {
-      int byte = pData[i++];
-      if (byte == 13 && i < end && pData[i] == 10) {
-        lb = TextLineBreak.crlf;
-      }
-      if (byte <= 0x7F || i >= end) {
-        /* 1 byte sequence: U+0000..U+007F */
-        continue;
-      }
-      if (0xC2 <= byte && byte <= 0xDF) {
-        nLength = 1;
-      } else if (0xE0 <= byte && byte <= 0xEF) {
-        nLength = 2;
-      } else if (0xF0 <= byte && byte <= 0xF4) {
-        nLength = 3;
-      } else {
-        continue;
-      }
-      if (i + nLength >= end) {
-        /* truncated string or invalid byte sequence */
-        return (encoding: encoding, lineBreak: lb, bomType: bomType);
-      }
-
-      /* Check continuation bytes: bit 7 should be set, bit 6 should be unset (b10xxxxxx). */
-      for (i = 0; i < nLength; i++) {
-        if ((pData[i] & 0xC0) != 0x80) {
-          return (encoding: encoding, lineBreak: lb, bomType: bomType);
-        }
-        if (nLength == 1) {
-          return (encoding: utf8, lineBreak: lb, bomType: bomType);
-        } else if (nLength == 2) {
-          /* 3 bytes sequence: U+0800..U+FFFF */
-          int ch = ((pData[0] & 0x0f) << 12) + ((pData[1] & 0x3f) << 6) +
-              (pData[2] & 0x3f);
-          /* (0xff & 0x0f) << 12 | (0xff & 0x3f) << 6 | (0xff & 0x3f) = 0xffff, so ch <= 0xffff */
-          if (ch < 0x0800) {
-            return (encoding: encoding, lineBreak: lb, bomType: bomType);
-          }
-          /* surrogates (U+D800-U+DFFF) are invalid in UTF-8: test if (0xD800 <= ch && ch <= 0xDFFF) */
-          if ((ch >> 11) == 0x1b) {
-            return (encoding: encoding, lineBreak: lb, bomType: bomType);
-          }
-          return (encoding: utf8, lineBreak: lb, bomType: bomType);
-        } else if (nLength == 3) {
-          /* 4 bytes sequence: U+10000..U+10FFFF */
-          int ch = ((pData[0] & 0x07) << 18) + ((pData[1] & 0x3f) << 12) +
-              ((pData[2] & 0x3f) << 6) + (pData[3] & 0x3f);
-          if ((ch < 0x10000) || (0x10FFFF < ch)) {
-            return (encoding: encoding, lineBreak: lb, bomType: bomType);
-          }
-          return (encoding: utf8, lineBreak: lb, bomType: bomType);
-        }
-        i += nLength;
-      }
-    }
-    return (encoding: encoding, lineBreak: lb, bomType: bomType);
-  }
-
-
-  Future<({Encoding encoding, TextLineBreak lineBreak, BomType bomType})> _detectEncoding(File file) async {
-    final size = min(4096, await file.length());
-    final tester = file.openRead(0, size);
-    return _parseBytesToDetectEncoding(await tester.first);
-  }
-
   ///
   /// Open a file with the given [filename]. If a [dock] is passed, the file is opened
   /// in the corresponding dock on the screen otherwise on the default dock.
@@ -649,14 +549,9 @@ class EditorBloc {
           Uri.file(filename, windows: Platform.isWindows));
       final stat = file.statSync();
       final readOnly = stat.readOnly;
-      final result = await _detectEncoding(file);
-      String? text;
-      if (result.bomType != BomType.none) {
-        var bytes = file.readAsBytesSync();
-        text = result.encoding.decode(bytes.sublist(result.bomType.bytes.length));
-      } else {
-        text = file.readAsStringSync(encoding: result.encoding);
-      }
+      const fileIO = FileIO();
+      final result = await fileIO.detectEncoding(file);
+      String? text = fileIO.readContents(file, result);
       openFiles.remove(filename);
       openFiles.insert(0, filename);
       if (openFiles.length > 10) {

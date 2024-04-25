@@ -10,10 +10,14 @@ EditingConfiguration _$EditingConfigurationFromJson(
         Map<String, dynamic> json) =>
     EditingConfiguration(
       name: json['name'] as String? ?? "default",
-      leftMargin: json['leftMargin'] as int? ?? 0,
-      rightMargin: json['rightMargin'] as int? ?? 80,
-      tabSize: json['tabSize'] as int? ?? 4,
+      leftMargin: (json['leftMargin'] as num?)?.toInt() ?? 0,
+      rightMargin: (json['rightMargin'] as num?)?.toInt() ?? 80,
+      tabSize: (json['tabSize'] as num?)?.toInt() ?? 4,
+      hexMode: json['hexMode'] as bool? ?? false,
+      showWysiwyg: json['showWysiwyg'] as bool? ?? false,
       expandTabsWith: json['expandTabsWith'] as String?,
+      showLineNumbers: json['showLineNumbers'] as bool? ?? true,
+      showSyntaxHighlight: json['showSyntaxHighlight'] as bool? ?? true,
       backupExtension: json['backupExtension'] as String? ?? "bak",
       wordTokenExpression: json['wordTokenExpression'] as String? ??
           r'[a-zA-ZöäüÖÄÜß][a-zA-Z0-9_öäüÖÄÜß]*',
@@ -37,6 +41,10 @@ Map<String, dynamic> _$EditingConfigurationToJson(
   writeNotNull('expandTabsWith', instance.expandTabsWith);
   val['wordTokenExpression'] = instance.wordTokenExpression;
   val['backupExtension'] = instance.backupExtension;
+  val['showLineNumbers'] = instance.showLineNumbers;
+  val['showSyntaxHighlight'] = instance.showSyntaxHighlight;
+  val['hexMode'] = instance.hexMode;
+  val['showWysiwyg'] = instance.showWysiwyg;
   return val;
 }
 

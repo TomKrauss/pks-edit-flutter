@@ -11,9 +11,9 @@ CompilerOutputPattern _$CompilerOutputPatternFromJson(
     CompilerOutputPattern(
       name: json['name'] as String,
       pattern: json['pattern'] as String,
-      filenameCapture: json['filename-capture'] as int? ?? 1,
-      lineNumberCapture: json['linenumber-capture'] as int? ?? 2,
-      commentCapture: json['comment-capture'] as int? ?? 3,
+      filenameCapture: (json['filename-capture'] as num?)?.toInt() ?? 1,
+      lineNumberCapture: (json['linenumber-capture'] as num?)?.toInt() ?? 2,
+      commentCapture: (json['comment-capture'] as num?)?.toInt() ?? 3,
     );
 
 Map<String, dynamic> _$CompilerOutputPatternToJson(
@@ -47,13 +47,13 @@ ApplicationConfiguration _$ApplicationConfigurationFromJson(
       hideSelectionOnMove: json['hide-selection-on-move'] as bool? ?? true,
       theme: json['theme'] as String? ?? "dark",
       cleanupAutosaveFiles: json['cleanup-autosave-files'] as bool? ?? true,
-      undoHistory: json['undo-history'] as int? ?? 100,
+      undoHistory: (json['undo-history'] as num?)?.toInt() ?? 100,
       includePath: json['include-path'] as String? ?? "includes;inc",
       language: json['language'] as String? ?? "English",
-      maximumOpenWindows: json['maximum-open-windows'] as int? ?? -1,
+      maximumOpenWindows: (json['maximum-open-windows'] as num?)?.toInt() ?? -1,
       iconSize: $enumDecodeNullable(_$IconSizeEnumMap, json['icon-size']) ??
           IconSize.small,
-      autosaveTimeSeconds: json['autosave-time'] as int?,
+      autosaveTimeSeconds: (json['autosave-time'] as num?)?.toInt(),
       undoEnabled: json['undo-enabled'] as bool? ?? true,
       showStatusbar: json['show-statusbar'] as bool? ?? true,
       showToolbar: json['show-toolbar'] as bool? ?? true,

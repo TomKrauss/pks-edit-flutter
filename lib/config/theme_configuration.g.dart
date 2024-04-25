@@ -12,7 +12,7 @@ ThemeConfiguration _$ThemeConfigurationFromJson(Map<String, dynamic> json) =>
       backgroundColor: json['backgroundColor'] == null
           ? Colors.black
           : ThemeConfiguration._parseColor(json['backgroundColor'] as String),
-      darkMode: json['darkMode'] as int? ?? 0,
+      darkMode: (json['darkMode'] as num?)?.toInt() ?? 0,
       dialogLightBackground: json['dialogLightBackground'] == null
           ? Colors.black26
           : ThemeConfiguration._parseColor(
