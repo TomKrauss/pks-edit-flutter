@@ -11,6 +11,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 
+import 'package:pks_edit_flutter/renderer/renderers.dart';
 import 'package:re_highlight/languages/asciidoc.dart';
 import 'package:re_highlight/languages/bash.dart';
 import 'package:re_highlight/languages/basic.dart';
@@ -41,17 +42,24 @@ import 'package:re_highlight/languages/yaml.dart';
 import 'package:re_highlight/re_highlight.dart';
 
 ///
-/// Represents a language in which it is assumed, that the file
+/// Represents a "document language" which specifies, how documents can be rendered and edited
+/// and the preferred ways of analyzing their syntax and the like.
+///
 class Language {
-  final Mode mode;
   final String name;
-  const Language({required this.name, required this.mode});
+  /// Defines the mode for highlighting the text during code editing.
+  final Mode mode;
+  /// The renderer to use to alternatively "render" documents with this type
+  final RendererType renderer;
+  bool get supportsWysiwyg => renderer != RendererType.none;
+  const Language({required this.name, required this.mode, this.renderer = RendererType.none});
 }
 
 ///
 /// Support for programming languages.
 ///
 class Languages {
+  final Language defaultLanguage = Language(name: "no-language", mode: Mode(name: "No Language"));
   static final Languages singleton = Languages._();
   Languages._();
   final Map<RegExp, Language> _languageMappings = {
@@ -74,7 +82,7 @@ class Languages {
     RegExp(r".*\.c"): Language(name: "c", mode: langC),
     RegExp(r".*\.(c\+\+|cpp)"): Language(name: "c++", mode: langCpp),
     RegExp(r".*\.(html|xhtml|htm)"): Language(name: "html", mode: langXml),
-    RegExp(r".*\.md"): Language(name: "markdown", mode: langMarkdown),
+    RegExp(r".*\.md"): Language(name: "markdown", mode: langMarkdown, renderer: RendererType.markdown),
     RegExp(r".*\.bat"): Language(name: "batch", mode: langDos),
     RegExp(r".*\.(xml|pom)"): Language(name: "xml", mode: langXml),
     RegExp(r".*\.groovy"): Language(name: "groovy", mode: langGroovy),
@@ -85,7 +93,6 @@ class Languages {
     RegExp(r".*\.(csh|bash|sh)"): Language(name: "shell", mode: langBash),
     RegExp(r"[^.]+"): Language(name: "sysconfig", mode: langProperties),
   };
-  final Language defaultLanguage = Language(name: "no-language", mode: Mode(name: "No Language"));
 
   Language modeForFilename(String fileName) {
     for (var e in _languageMappings.entries) {

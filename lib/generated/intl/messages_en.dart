@@ -47,6 +47,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionCloseWindow":
             MessageLookupByLibrary.simpleMessage("Close Window"),
         "actionCopy": MessageLookupByLibrary.simpleMessage("Copy"),
+        "actionCursorWordLeft":
+            MessageLookupByLibrary.simpleMessage("Cursor word left"),
+        "actionCursorWordRight":
+            MessageLookupByLibrary.simpleMessage("Cursor word right"),
         "actionCut": MessageLookupByLibrary.simpleMessage("Cut"),
         "actionCycleWindow":
             MessageLookupByLibrary.simpleMessage("Cycle window forward"),
@@ -89,6 +93,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionSaveFileAs":
             MessageLookupByLibrary.simpleMessage("Save File As..."),
         "actionSelectAll": MessageLookupByLibrary.simpleMessage("Select All"),
+        "actionSelectCursorWordLeft":
+            MessageLookupByLibrary.simpleMessage("Select word left"),
+        "actionSelectCursorWordRight":
+            MessageLookupByLibrary.simpleMessage("Select word right"),
         "actionSelectPreviousWindow":
             MessageLookupByLibrary.simpleMessage("Cycle window backward"),
         "actionSetOptions":
@@ -105,6 +113,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Show Line Numbers"),
         "actionToggleSyntaxHighlighting":
             MessageLookupByLibrary.simpleMessage("Syntax Highlighting"),
+        "actionToggleWysiwyg":
+            MessageLookupByLibrary.simpleMessage("Show Wysiwyg"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Undo"),
         "actionUseLinuxLineEnds":
             MessageLookupByLibrary.simpleMessage("Use LF for Line Ends"),

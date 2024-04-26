@@ -70,12 +70,6 @@ const Map<CodeShortcutType, List<ShortcutActivator>> _kDefaultCommonCodeShortcut
   CodeShortcutType.cursorMovePageEnd: [
     SingleActivator(LogicalKeyboardKey.end, control: true)
   ],
-  CodeShortcutType.cursorMoveWordBoundaryForward: [
-    SingleActivator(LogicalKeyboardKey.arrowLeft, control: true)
-  ],
-  CodeShortcutType.cursorMoveWordBoundaryBackward: [
-    SingleActivator(LogicalKeyboardKey.arrowRight, control: true)
-  ],
   CodeShortcutType.selectionExtendUp: [
     SingleActivator(LogicalKeyboardKey.arrowUp, shift: true)
   ],

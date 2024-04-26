@@ -294,6 +294,12 @@ class CommandResult {
   CommandResult({required this.success, this.message});
 }
 
+class _NextCaretMatch {
+  final int line;
+  final int start;
+  _NextCaretMatch({required this.line, required this.start});
+}
+
 ///
 /// Implements the commands for PKS EDIT.
 ///
@@ -319,6 +325,87 @@ class EditorBloc {
 
   void _refreshFiles() {
     _openFileSubject.add(_openFileState);
+  }
+
+  _NextCaretMatch? _findNextWord(OpenFile file, int line, int start, int direction) {
+    final controller = file.controller;
+    var found = false;
+    while(!found) {
+      var text = controller.codeLines[line].text;
+      var matches = file.editingConfiguration.wordTokenRE.allMatches(text).toList();
+      var matched = false;
+      if (matches.isNotEmpty) {
+        if (direction > 0 && start < matches.first.start) {
+          start = matches.first.start;
+          break;
+        }
+        if (start == text.length) {
+          start = matches.last.start;
+          break;
+        }
+      }
+      for (int i = 0; i < matches.length; i++) {
+        final m = matches[i];
+        if (m.start <= start && m.end > start) {
+          if (direction < 0) {
+            if (m.start < start) {
+              start = m.start;
+              matched = true;
+            } else if (i > 0) {
+              start = matches[i - 1].start;
+              matched = true;
+            }
+          } else {
+            if (i + 1 < matches.length) {
+              start = matches[i + 1].start;
+              matched = true;
+            }
+          }
+          break;
+        }
+      }
+      if (!matched) {
+        if (direction < 0) {
+          line--;
+          if (line < 0) {
+            return null;
+          }
+          start = controller.codeLines[line].text.length;
+        } else {
+          line++;
+          start = -1;
+          if (line >= controller.lineCount) {
+            return null;
+          }
+        }
+      } else {
+        found = matched;
+      }
+    }
+    return _NextCaretMatch(line: line, start: start);
+  }
+
+  void navigateWord(OpenFile file, int direction) {
+    var controller = file.controller;
+    var line = controller.selection.startIndex;
+    var start = controller.selection.startOffset;
+    var match = _findNextWord(file, line, start, direction);
+    if (match != null) {
+      controller.selection =
+          CodeLineSelection.collapsed(index: match.line, offset: match.start);
+    }
+  }
+
+  void selectWord(OpenFile file, int direction) {
+    var controller = file.controller;
+    var line = controller.selection.endIndex;
+    var start = controller.selection.endOffset;
+    var match = _findNextWord(file, line, start, direction);
+    if (match != null) {
+      var oldSel = controller.selection;
+      controller.selection =
+          CodeLineSelection(baseIndex: oldSel.baseIndex, baseOffset: oldSel.baseOffset, extentIndex: match.line, extentOffset: match.start);
+    }
   }
 
   ///

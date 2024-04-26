@@ -48,6 +48,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionCloseWindow":
             MessageLookupByLibrary.simpleMessage("Fenster schließen"),
         "actionCopy": MessageLookupByLibrary.simpleMessage("Kopieren"),
+        "actionCursorWordLeft":
+            MessageLookupByLibrary.simpleMessage("Cursor Wort nach links"),
+        "actionCursorWordRight":
+            MessageLookupByLibrary.simpleMessage("Cursor Wort nach rechts"),
         "actionCut": MessageLookupByLibrary.simpleMessage("Ausschneiden"),
         "actionCycleWindow":
             MessageLookupByLibrary.simpleMessage("Nächstes Fester auswählen"),
@@ -97,6 +101,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Datei speichern unter..."),
         "actionSelectAll":
             MessageLookupByLibrary.simpleMessage("Alles auswählen"),
+        "actionSelectCursorWordLeft":
+            MessageLookupByLibrary.simpleMessage("Wort links selektieren"),
+        "actionSelectCursorWordRight":
+            MessageLookupByLibrary.simpleMessage("Wort rechts selektieren"),
         "actionSelectPreviousWindow": MessageLookupByLibrary.simpleMessage(
             "Vorheriges Fenster auswählen"),
         "actionSetOptions":
@@ -113,6 +121,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Zeilennummern anzeigen"),
         "actionToggleSyntaxHighlighting":
             MessageLookupByLibrary.simpleMessage("Syntax Highlighting"),
+        "actionToggleWysiwyg":
+            MessageLookupByLibrary.simpleMessage("Wysiwyg Darstellung"),
         "actionUndo": MessageLookupByLibrary.simpleMessage("Rückgängig"),
         "actionUseLinuxLineEnds": MessageLookupByLibrary.simpleMessage(
             "Linefeed als Zeilenende verwenden"),

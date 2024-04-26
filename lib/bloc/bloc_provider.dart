@@ -69,8 +69,8 @@ class SimpleBlocState<S extends SimpleBlocProvider> extends State<S> {
   @override
   void dispose() {
     bloc.dispose();
-    super.dispose();
     _initialized = false;
+    super.dispose();
   }
 
   @override

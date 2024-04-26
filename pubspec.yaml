@@ -20,6 +20,7 @@ dependencies:
   re_highlight: ^0.0.3
   collection: ^1.18.0
   path: ^1.8.2
+  flutter_markdown: ^0.7.1
   sound_library: ^0.2.0
   font_awesome_flutter: ^10.6.0
   font_awesome_flutter_named: ^1.1.2+1

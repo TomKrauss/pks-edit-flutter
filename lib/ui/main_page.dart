@@ -24,6 +24,7 @@ import 'package:pks_edit_flutter/actions/shortcuts.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
+import 'package:pks_edit_flutter/renderer/renderers.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/context_menu_widget.dart';
 import 'package:pks_edit_flutter/ui/menu_bar_widget.dart';
@@ -284,6 +285,9 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
     final bloc = EditorBloc.of(context);
     file.adjustCaret();
     final configuration = PksIniConfiguration.of(context).configuration;
+    if (file.editingConfiguration.showWysiwyg) {
+      return Renderers.singleton.createWidget(file.language.renderer, file.text);
+    }
     return CodeEditor(
         autofocus: true,
         readOnly: file.readOnly,

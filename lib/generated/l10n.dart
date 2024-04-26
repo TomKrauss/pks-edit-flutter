@@ -530,6 +530,16 @@ class S {
     );
   }
 
+  /// `Show Wysiwyg`
+  String get actionToggleWysiwyg {
+    return Intl.message(
+      'Show Wysiwyg',
+      name: 'actionToggleWysiwyg',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Exit PKS Edit`
   String get actionDescriptionExit {
     return Intl.message(
@@ -625,6 +635,46 @@ class S {
     return Intl.message(
       'Find current word backward...',
       name: 'actionFindWordBackward',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cursor word left`
+  String get actionCursorWordLeft {
+    return Intl.message(
+      'Cursor word left',
+      name: 'actionCursorWordLeft',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Cursor word right`
+  String get actionCursorWordRight {
+    return Intl.message(
+      'Cursor word right',
+      name: 'actionCursorWordRight',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select word left`
+  String get actionSelectCursorWordLeft {
+    return Intl.message(
+      'Select word left',
+      name: 'actionSelectCursorWordLeft',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Select word right`
+  String get actionSelectCursorWordRight {
+    return Intl.message(
+      'Select word right',
+      name: 'actionSelectCursorWordRight',
       desc: '',
       args: [],
     );

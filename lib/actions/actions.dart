@@ -281,6 +281,26 @@ class PksEditActions {
           isEnabled: _hasWriteableFile,
           textKey: "actionUseWindowsLineEnds"),
       PksEditAction(
+          id: "cursor-left-word",
+          execute: _moveCursorWordLeft,
+          isEnabled: _hasFile,
+          textKey: "actionCursorWordLeft"),
+      PksEditAction(
+          id: "cursor-right-word",
+          execute: _moveCursorWordRight,
+          isEnabled: _hasFile,
+          textKey: "actionCursorWordRight"),
+      PksEditAction(
+          id: "select-left-word",
+          execute: _selectCursorWordLeft,
+          isEnabled: _hasFile,
+          textKey: "actionSelectCursorWordLeft"),
+      PksEditAction(
+          id: "select-right-word",
+          execute: _selectCursorWordRight,
+          isEnabled: _hasFile,
+          textKey: "actionSelectCursorWordRight"),
+      PksEditAction(
           id: "char-to-lower",
           execute: _charToLower,
           isEnabled: _hasWriteableSelection,
@@ -327,6 +347,12 @@ class PksEditActions {
           execute: _toggleSyntaxHighlighting,
           isEnabled: _hasFile,
           textKey: "actionToggleSyntaxHighlighting"),
+      PksEditActionWithState(
+          id: "toggle-show-wysiwyg",
+          isChecked: () => editingConfiguration?.showWysiwyg == true,
+          execute: _toggleWysiwyg,
+          isEnabled: _supportsWysiwyg,
+          textKey: "actionToggleWysiwyg"),
       PksEditAction(
           id: "cycle-window",
           execute: _cycleWindowForward,
@@ -383,6 +409,13 @@ class PksEditActions {
   bool _hasFile() =>
       currentFile != null;
 
+  bool _supportsWysiwyg() {
+    var f = currentFile;
+    if (f == null) {
+      return false;
+    }
+    return f.language.supportsWysiwyg;
+  }
   bool _hasSelection() =>
       currentFile?.controller.selection.isCollapsed == false;
 
@@ -419,6 +452,16 @@ class PksEditActions {
       file.runCommand(() {
         file.editingConfiguration =
             file.editingConfiguration.copyWith(showSyntaxHighlight: newVal);
+      });
+    });
+  }
+
+  void _toggleWysiwyg() {
+    _withCurrentFile((file) {
+      var newVal = !file.editingConfiguration.showWysiwyg;
+      file.runCommand(() {
+        file.editingConfiguration =
+            file.editingConfiguration.copyWith(showWysiwyg: newVal);
       });
     });
   }
@@ -499,10 +542,30 @@ class PksEditActions {
     });
   }
 
+  void _moveCursorWordRight() {
+    _withCurrentFileAndBloc((bloc, file) async {
+      bloc.navigateWord(file, 1);
+    });
+  }
+  void _moveCursorWordLeft() {
+    _withCurrentFileAndBloc((bloc, file) async {
+      bloc.navigateWord(file, -1);
+    });
+  }
+
+  void _selectCursorWordRight() {
+    _withCurrentFileAndBloc((bloc, file) async {
+      bloc.selectWord(file, 1);
+    });
+  }
+  void _selectCursorWordLeft() {
+    _withCurrentFileAndBloc((bloc, file) async {
+      bloc.selectWord(file, -1);
+    });
+  }
+
   void _findWordForward() {
-    _withCurrentFile((file) async {
-      var context = getBuildContext();
-      final bloc = EditorBloc.of(context);
+    _withCurrentFileAndBloc((bloc, file) async {
       await bloc.matchWord(file);
       file.findController.nextMatch();
       _updateMatchSelection(file);
@@ -510,9 +573,7 @@ class PksEditActions {
   }
 
   void _findWordBackward() {
-    _withCurrentFile((file) async {
-      var context = getBuildContext();
-      final bloc = EditorBloc.of(context);
+    _withCurrentFileAndBloc((bloc, file) async {
       await bloc.matchWord(file);
       file.findController.previousMatch();
       _updateMatchSelection(file);
@@ -530,6 +591,14 @@ class PksEditActions {
     var f = currentFile;
     if (f != null) {
       callback(f);
+    }
+  }
+
+  void _withCurrentFileAndBloc(void Function(EditorBloc bloc, OpenFile file) callback) {
+    var f = currentFile;
+    if (f != null) {
+      final bloc = EditorBloc.of(getBuildContext());
+      callback(bloc, f);
     }
   }
 

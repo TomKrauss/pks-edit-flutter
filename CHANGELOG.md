@@ -18,4 +18,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - L10N was improved and most texts are now available in English and German.
 - Byte Order Mark detection and handling was added.
 - New View Options (show/hide highlight, show/hide line numbers) were added.
+- Added "Word"-wise caret movement and selection
+- Support for renderers depending on document type added.
 
