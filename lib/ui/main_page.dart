@@ -192,10 +192,11 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                       mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
+                        if (!configuration.fullscreen)
                         SizedBox(
                             width: double.infinity,
                             child: MenuBarWidget(actions: bloc.actionBindings.menu)),
-                        if (configuration.showToolbar)
+                        if (!configuration.fullscreen && configuration.showToolbar)
                         ToolBarWidget(currentFile: files.currentFile, actions: bloc.actionBindings.toolbar,
                           focusNode: _searchbarFocusNode,
                           ),
@@ -203,7 +204,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                           _actionContext = PksEditActionContext(openFileState: files, currentFile: file);
                           actions.execute(PksEditActions.actionCloseWindow);
                         })),
-                        if (configuration.showStatusbar)
+                        if (!configuration.fullscreen && configuration.showStatusbar)
                         StatusBarWidget(fileState: files)
                       ],
                     )))));
@@ -282,44 +283,53 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
       .toList();
 
   Widget _buildEditor(OpenFile file) {
+    final factor = file.scalingFactor;
     final bloc = EditorBloc.of(context);
     file.adjustCaret();
     final configuration = PksIniConfiguration.of(context).configuration;
+    Widget child;
     if (file.editingConfiguration.showWysiwyg) {
-      return Renderers.singleton.createWidget(file.language.renderer, file.text);
+      child = Renderers.singleton.createWidget(file.language.renderer, widget.editorFocusNode, file.text);
+    } else {
+      child = CodeEditor(
+          autofocus: true,
+          readOnly: file.readOnly,
+          onChanged: file.onChanged,
+          toolbarController: ContextMenuControllerImpl(menuItems: bloc.actionBindings.contextMenu),
+          shortcutsActivatorsBuilder: const PksEditCodeShortcutsActivatorsBuilder(),
+          border: Border(top: BorderSide(color: Theme.of(context).appBarTheme.backgroundColor ?? Colors.transparent)),
+          focusNode: widget.editorFocusNode,
+          findController: file.findController,
+          indicatorBuilder:
+              (context, editingController, chunkController, notifier) => Row(
+            children: [
+              if (file.editingConfiguration.showLineNumbers)
+                DefaultCodeLineNumber(
+                  controller: editingController,
+                  notifier: notifier,
+                ),
+              DefaultCodeChunkIndicator(
+                  width: 20, controller: chunkController, notifier: notifier)
+            ],
+          ),
+          controller: file.controller,
+          style: CodeEditorStyle(
+              fontFamily: configuration.defaultFont,
+              codeTheme: file.editingConfiguration.showSyntaxHighlight ? CodeHighlightTheme(
+                  theme: bloc.themes.currentTheme.isDark
+                      ? atomOneDarkTheme
+                      : atomOneLightTheme,
+                  languages: {
+                    file.language.name:
+                    CodeHighlightThemeMode(mode: file.language.mode)
+                  }) : null));
     }
-    return CodeEditor(
-        autofocus: true,
-        readOnly: file.readOnly,
-        onChanged: file.onChanged,
-        toolbarController: ContextMenuControllerImpl(menuItems: bloc.actionBindings.contextMenu),
-        shortcutsActivatorsBuilder: const PksEditCodeShortcutsActivatorsBuilder(),
-        border: Border(top: BorderSide(color: Theme.of(context).appBarTheme.backgroundColor ?? Colors.transparent)),
-        focusNode: widget.editorFocusNode,
-        findController: file.findController,
-        indicatorBuilder:
-            (context, editingController, chunkController, notifier) => Row(
-          children: [
-            if (file.editingConfiguration.showLineNumbers)
-            DefaultCodeLineNumber(
-              controller: editingController,
-              notifier: notifier,
-            ),
-            DefaultCodeChunkIndicator(
-                width: 20, controller: chunkController, notifier: notifier)
-          ],
-        ),
-        controller: file.controller,
-        style: CodeEditorStyle(
-            fontFamily: configuration.defaultFont,
-            codeTheme: file.editingConfiguration.showSyntaxHighlight ? CodeHighlightTheme(
-                theme: bloc.themes.currentTheme.isDark
-                    ? atomOneDarkTheme
-                    : atomOneLightTheme,
-                languages: {
-                  file.language.name:
-                  CodeHighlightThemeMode(mode: file.language.mode)
-                }) : null));
+    return FractionallySizedBox(
+        heightFactor: 1 / factor,
+        widthFactor: 1 / factor,
+        child: Transform.scale(
+        scale: factor,
+        child: child));
   }
 
   @override

@@ -140,6 +140,11 @@ class OpenFile {
   IconData get icon => FileIcons.singleton.getIcon(filename);
 
   ///
+  /// The factor by which the font/text is enlarged in the editor displaying this file.
+  ///
+  double scalingFactor = 1.0;
+
+  ///
   /// Whether this is a new file.
   ///
   bool isNew;

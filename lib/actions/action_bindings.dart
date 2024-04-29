@@ -49,7 +49,8 @@ final _logicalKeyMapping = <String, LogicalKeyboardKey>{
   "asterisk": LogicalKeyboardKey.asterisk,
   "divide": LogicalKeyboardKey.numpadDivide,
   "multiply": LogicalKeyboardKey.numpadMultiply,
-  "plus": LogicalKeyboardKey.add,
+  // Bug on Flutter Desktop: + on German Keyboard mapped to logical key =
+  "plus": LogicalKeyboardKey.equal,
   "minus": LogicalKeyboardKey.minus,
   "down": LogicalKeyboardKey.arrowDown,
   "left": LogicalKeyboardKey.arrowLeft,
@@ -270,7 +271,7 @@ class KeyBinding extends Binding {
     bool shift = false;
     bool control = false;
     bool meta = false;
-    var logicalKey = LogicalKeyboardKey.add;
+    LogicalKeyboardKey? logicalKey;
     for (var segment in split) {
       var s = segment.toLowerCase();
       if (s == 'alt') {
@@ -291,11 +292,12 @@ class KeyBinding extends Binding {
         final k = _logicalKeyMapping[s];
         if (k == null) {
           _logger.w("Cannot determine logical key for $s");
+        } else {
+          logicalKey = k;
         }
-        logicalKey = k ?? LogicalKeyboardKey.add;
       }
     }
-    return SingleActivator(logicalKey, alt: alt, shift: shift, meta: meta || (control && convertControl), control: control && !convertControl);
+    return SingleActivator(logicalKey ?? LogicalKeyboardKey.avrInput, alt: alt, shift: shift, meta: meta || (control && convertControl), control: control && !convertControl);
   }
 
   KeyBinding({required this.key, super.context, super.commandReference}) {

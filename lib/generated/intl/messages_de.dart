@@ -117,6 +117,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Über PKS Edit..."),
         "actionToggleComment":
             MessageLookupByLibrary.simpleMessage("Kommentare umschalten"),
+        "actionToggleFullScreen":
+            MessageLookupByLibrary.simpleMessage("Vollbild umschalten"),
         "actionToggleShowLineNumbers":
             MessageLookupByLibrary.simpleMessage("Zeilennummern anzeigen"),
         "actionToggleSyntaxHighlighting":
@@ -128,6 +130,10 @@ class MessageLookup extends MessageLookupByLibrary {
             "Linefeed als Zeilenende verwenden"),
         "actionUseWindowsLineEnds": MessageLookupByLibrary.simpleMessage(
             "CR+LF als Zeilenende verwenden"),
+        "actionZoomDecrease":
+            MessageLookupByLibrary.simpleMessage("Font verkleinern"),
+        "actionZoomIncrease":
+            MessageLookupByLibrary.simpleMessage("Font vergrößern"),
         "anErrorOccurred": MessageLookupByLibrary.simpleMessage(
             "Ein Fehler ist beim Ausführen des Kommandos aufgetreten"),
         "apply": MessageLookupByLibrary.simpleMessage("Anwenden"),

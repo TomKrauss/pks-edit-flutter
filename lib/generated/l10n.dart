@@ -680,6 +680,36 @@ class S {
     );
   }
 
+  /// `Toggle Full-screen`
+  String get actionToggleFullScreen {
+    return Intl.message(
+      'Toggle Full-screen',
+      name: 'actionToggleFullScreen',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Increase zoom factor`
+  String get actionZoomIncrease {
+    return Intl.message(
+      'Increase zoom factor',
+      name: 'actionZoomIncrease',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Decrease zoom factor`
+  String get actionZoomDecrease {
+    return Intl.message(
+      'Decrease zoom factor',
+      name: 'actionZoomDecrease',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Replace...`
   String get actionReplace {
     return Intl.message(

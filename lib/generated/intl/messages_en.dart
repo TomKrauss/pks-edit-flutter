@@ -109,6 +109,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("About PKS Edit..."),
         "actionToggleComment":
             MessageLookupByLibrary.simpleMessage("Comment Single Line"),
+        "actionToggleFullScreen":
+            MessageLookupByLibrary.simpleMessage("Toggle Full-screen"),
         "actionToggleShowLineNumbers":
             MessageLookupByLibrary.simpleMessage("Show Line Numbers"),
         "actionToggleSyntaxHighlighting":
@@ -120,6 +122,10 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Use LF for Line Ends"),
         "actionUseWindowsLineEnds":
             MessageLookupByLibrary.simpleMessage("Use CR+LF for Line Ends"),
+        "actionZoomDecrease":
+            MessageLookupByLibrary.simpleMessage("Decrease zoom factor"),
+        "actionZoomIncrease":
+            MessageLookupByLibrary.simpleMessage("Increase zoom factor"),
         "anErrorOccurred": MessageLookupByLibrary.simpleMessage(
             "An error occurred executing the command"),
         "apply": MessageLookupByLibrary.simpleMessage("Apply"),

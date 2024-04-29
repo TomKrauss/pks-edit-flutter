@@ -112,6 +112,14 @@ class ApplicationConfiguration {
   @JsonKey(name: "forms-follow-mouse")
   final bool formsFollowMouse;
 
+  /// Whether PKS-Edit displays in full screen mode (not menu-/statusbar etc..)
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  bool fullscreen = false;
+
+  /// The font-size used in the code editor.
+  @JsonKey(includeToJson: false, includeFromJson: false)
+  int fontSize = 14;
+
   @JsonKey(name: "show-error-toast")
   final bool showErrorsInToast;
   /// The name of the sound to play on errors.

@@ -40,6 +40,7 @@ import 'package:pks_edit_flutter/ui/dialog/input_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/search_replace_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/settings_dialog.dart';
 import 'package:re_editor/re_editor.dart';
+import 'package:window_manager/window_manager.dart';
 
 ///
 /// Context used in actions to evaluate actions and action enablement.
@@ -395,6 +396,18 @@ class PksEditActions {
           execute: _changeSettings,
           textKey: "actionSetOptions"),
       PksEditAction(
+          id: "toggle-full-screen",
+          execute: _toggleFullScreen,
+          textKey: "actionToggleFullScreen"),
+      PksEditAction(
+          id: "zoom-increase",
+          execute: _zoomIncrease,
+          textKey: "actionZoomIncrease"),
+      PksEditAction(
+          id: "zoom-decrease",
+          execute: _zoomDecrease,
+          textKey: "actionZoomDecrease"),
+      PksEditAction(
           id: "show-copyright",
           execute: _showAbout,
           textKey: "actionShowCopyright"),
@@ -435,6 +448,38 @@ class PksEditActions {
       return f.controller.canRedo;
     }
     return false;
+  }
+
+  void _zoomIncrease() {
+    _withCurrentFile((file) {
+      var newVal = file.scalingFactor * 1.2;
+      file.runCommand(() {
+        file.scalingFactor = newVal;
+      });
+    });
+  }
+
+  void _zoomDecrease() {
+    _withCurrentFile((file) {
+      var newVal = file.scalingFactor / 1.2;
+      file.runCommand(() {
+        file.scalingFactor = newVal;
+      });
+    });
+  }
+
+  Future<void> _toggleFullScreen() async {
+    final bloc = EditorBloc.of(getBuildContext());
+    var configuration = (await bloc.pksIniStream.first);
+    var oldFullScreen = configuration.configuration.fullscreen;
+    configuration = configuration.copyWith();
+    configuration.configuration.fullscreen = !oldFullScreen;
+    bloc.updateConfiguration(configuration);
+    if (oldFullScreen) {
+      windowManager.setFullScreen(false);
+    } else {
+      windowManager.setFullScreen(true);
+    }
   }
 
   void _toggleShowLineNumbers() {
