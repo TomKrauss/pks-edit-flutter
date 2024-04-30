@@ -110,7 +110,7 @@ class ApplicationConfiguration {
   bool compactEditorTabs;
   /// Whether all forms/dialogs are opened close to the mouse position.
   @JsonKey(name: "forms-follow-mouse")
-  final bool formsFollowMouse;
+  bool formsFollowMouse;
 
   /// Whether PKS-Edit displays in full screen mode (not menu-/statusbar etc..)
   @JsonKey(includeToJson: false, includeFromJson: false)
@@ -121,7 +121,7 @@ class ApplicationConfiguration {
   int fontSize = 14;
 
   @JsonKey(name: "show-error-toast")
-  final bool showErrorsInToast;
+  bool showErrorsInToast;
   /// The name of the sound to play on errors.
   @JsonKey(name: "sound-name")
   final String soundName;
@@ -137,7 +137,7 @@ class ApplicationConfiguration {
     return Sounds.deleted;
   }
   @JsonKey(name: "sound-on-error")
-  final bool playSoundOnError;
+  bool playSoundOnError;
 
   /// The maximum number of open windows before starting to close windows automatically. If <= 0 - not limit.
   @JsonKey(name: "maximum-open-windows")
@@ -159,7 +159,7 @@ class ApplicationConfiguration {
   final bool autoSaveToTemp;
   /// Automatically save changed files when closing editor / exiting PKS-Edit.
   @JsonKey(name: "autosave-on-exit")
-  final bool autoSaveOnExit;
+  bool autoSaveOnExit;
   @JsonKey(name: "create-back-in-temp-path")
   final bool createBackInTempPath;
   /// Whether opened files will be locked.
@@ -170,7 +170,7 @@ class ApplicationConfiguration {
   final bool hideSelectionOnMove;
   /// The time in seconds after which changed files are automatically saved.
   @JsonKey(name: "autosave-time")
-  final int? autosaveTimeSeconds;
+  int? autosaveTimeSeconds;
   @JsonKey(name: "undo-enabled")
   final bool undoEnabled;
   /// The number of undo steps available

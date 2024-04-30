@@ -1089,6 +1089,76 @@ class S {
       args: [],
     );
   }
+
+  /// `Saving`
+  String get saving {
+    return Intl.message(
+      'Saving',
+      name: 'saving',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Hints`
+  String get warnings {
+    return Intl.message(
+      'Hints',
+      name: 'warnings',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Layout`
+  String get layout {
+    return Intl.message(
+      'Layout',
+      name: 'layout',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Autosave files on exit`
+  String get autosaveFilesOnExit {
+    return Intl.message(
+      'Autosave files on exit',
+      name: 'autosaveFilesOnExit',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Autosave time in seconds`
+  String get autosaveTimeInSeconds {
+    return Intl.message(
+      'Autosave time in seconds',
+      name: 'autosaveTimeInSeconds',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Play sound on error`
+  String get playSoundOnError {
+    return Intl.message(
+      'Play sound on error',
+      name: 'playSoundOnError',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Show errors in toast popup`
+  String get showErrorsInToastPopup {
+    return Intl.message(
+      'Show errors in toast popup',
+      name: 'showErrorsInToastPopup',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

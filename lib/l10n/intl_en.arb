@@ -103,5 +103,12 @@
   "regularExpressions": "Regular Expressions",
   "enterTextToFind": "Enter text to find",
   "enterTextToReplace": "Enter text to replace",
-  "silentlyReloadFilesChangedExternally": "Silently reload files changed externally"
+  "silentlyReloadFilesChangedExternally": "Silently reload files changed externally",
+  "saving": "Saving",
+  "warnings": "Hints",
+  "layout": "Layout",
+  "autosaveFilesOnExit": "Autosave files on exit",
+  "autosaveTimeInSeconds": "Autosave time in seconds",
+  "playSoundOnError": "Play sound on error",
+  "showErrorsInToastPopup": "Show errors in toast popup"
 }

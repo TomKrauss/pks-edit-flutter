@@ -129,6 +129,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "anErrorOccurred": MessageLookupByLibrary.simpleMessage(
             "An error occurred executing the command"),
         "apply": MessageLookupByLibrary.simpleMessage("Apply"),
+        "autosaveFilesOnExit":
+            MessageLookupByLibrary.simpleMessage("Autosave files on exit"),
+        "autosaveTimeInSeconds":
+            MessageLookupByLibrary.simpleMessage("Autosave time in seconds"),
         "cancel": MessageLookupByLibrary.simpleMessage("Cancel"),
         "changeSettings":
             MessageLookupByLibrary.simpleMessage("Change Settings"),
@@ -155,12 +159,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "initializeWithTemplate":
             MessageLookupByLibrary.simpleMessage("Initialize with Template"),
         "language": MessageLookupByLibrary.simpleMessage("Language"),
+        "layout": MessageLookupByLibrary.simpleMessage("Layout"),
         "lineNumber": MessageLookupByLibrary.simpleMessage("Line number"),
         "lineNumberRangeHint": m1,
         "maximumNumberOfWindows":
             MessageLookupByLibrary.simpleMessage("Maximum Number of Windows"),
         "newFile": MessageLookupByLibrary.simpleMessage("New File"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
+        "playSoundOnError":
+            MessageLookupByLibrary.simpleMessage("Play sound on error"),
         "reallyDiscardAllChanges": MessageLookupByLibrary.simpleMessage(
             "Do you really want to discard all changes?"),
         "recentFiles": MessageLookupByLibrary.simpleMessage("Recent Files"),
@@ -184,12 +191,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "save": MessageLookupByLibrary.simpleMessage("Save"),
         "saveAllAndExit":
             MessageLookupByLibrary.simpleMessage("Save All and Exit"),
+        "saving": MessageLookupByLibrary.simpleMessage("Saving"),
         "searchIncrementally": m3,
+        "showErrorsInToastPopup":
+            MessageLookupByLibrary.simpleMessage("Show errors in toast popup"),
         "showStatusbar": MessageLookupByLibrary.simpleMessage("Show Statusbar"),
         "showToolbar": MessageLookupByLibrary.simpleMessage("Show Toolbar"),
         "silentlyReloadFilesChangedExternally":
             MessageLookupByLibrary.simpleMessage(
                 "Silently reload files changed externally"),
+        "warnings": MessageLookupByLibrary.simpleMessage("Hints"),
         "window": MessageLookupByLibrary.simpleMessage("Window"),
         "yes": MessageLookupByLibrary.simpleMessage("Yes")
       };

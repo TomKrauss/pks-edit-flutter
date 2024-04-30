@@ -61,7 +61,9 @@ class _SettingsDialogState extends State<SettingsDialog> {
             style: Theme.of(context).listTileTheme.titleTextStyle)])), Expanded(child: editor)]);
 
   Widget intProperty(String label, IconData? icon, int originalValue, void Function(int newValue) assignValue) =>
-    property(label, icon, TextField(controller: TextEditingController(text: "$originalValue"), inputFormatters: [FilteringTextInputFormatter.digitsOnly], onChanged: (newValue) {
+    property(label, icon, TextField(controller: TextEditingController(text: "$originalValue"),
+      textAlign: TextAlign.right,
+      inputFormatters: [FilteringTextInputFormatter.digitsOnly], onChanged: (newValue) {
       var newIntValue = int.tryParse(newValue);
       if (newIntValue != null) {
         changed = true;
@@ -72,10 +74,12 @@ class _SettingsDialogState extends State<SettingsDialog> {
   Widget booleanProperty(String label, IconData? icon, bool checked, void Function(bool newValue) onCheck) =>
     CheckboxListTile(
         secondary: Icon(icon),
-        title: Text(label), contentPadding: EdgeInsets.zero, value: checked, onChanged: (val) {
+        title: Text(label, softWrap: true,), contentPadding: EdgeInsets.zero, value: checked, onChanged: (val) {
       if (val != null) {
-        changed = true;
-        onCheck(val);
+        setState(() {
+          changed = true;
+          onCheck(val);
+        });
       }
     });
 
@@ -102,6 +106,10 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 }
               }));
 
+  Widget _tab(IconData icon, String text) => Tab(child: Row(children: [Icon(icon), const SizedBox(width: 10), Text(text)]));
+
+  Widget _tabPage(List<Widget> children) => Padding(padding: const EdgeInsets.all(10), child: Column(children: children,));
+
   @override
   Widget build(BuildContext context) {
     final bloc = EditorBloc.of(context);
@@ -124,19 +132,39 @@ class _SettingsDialogState extends State<SettingsDialog> {
         DialogAction.createCancelAction(context)
       ],
         children: [
-      enumProperty(
-          bundle.language, Icons.language, ApplicationConfiguration.supportedLanguages, conf.language, (newLang) => conf.language = newLang, autofocus: true),
-      enumProperty(
-          "Theme", Icons.palette, themes, bloc.themes.currentTheme.name, (newTheme) => conf.theme = newTheme),
-      enumProperty(
-          "Text Font", Icons.font_download_rounded, ApplicationConfiguration.supportedFonts, conf.defaultFont, (newFont) => conf.defaultFont = newFont),
-      enumProperty(
-        bundle.iconSize, FontAwesomeIcons.arrowUp91, iconSizes, conf.iconSize, (newIconSize) => conf.iconSize = newIconSize, toString: (s) => s.name),
-      booleanProperty(bundle.compactEditorTabs, FontAwesomeIcons.tableColumns, conf.compactEditorTabs, (newValue) {conf.compactEditorTabs = newValue; }),
-      booleanProperty(bundle.showToolbar, Icons.border_top, conf.showToolbar, (newValue) {conf.showToolbar = newValue; }),
-      booleanProperty(bundle.showStatusbar, Icons.border_bottom, conf.showStatusbar, (newValue) {conf.showStatusbar = newValue; }), 
-      booleanProperty(bundle.silentlyReloadFilesChangedExternally, Icons.refresh, conf.silentlyReloadChangedFiles, (newValue) {conf.silentlyReloadChangedFiles = newValue; }),
-      intProperty(bundle.maximumNumberOfWindows, FontAwesomeIcons.windowMaximize, conf.maximumOpenWindows, (newValue) { conf.maximumOpenWindows = newValue; }),
+          SizedBox(height: 450, width: 600, child: DefaultTabController(length: 3, child: Column(children: [
+            TabBar(tabs: [
+              _tab(Icons.save, S.of(context).saving),
+              _tab(Icons.notification_important_rounded, S.of(context).warnings),
+              _tab(FontAwesomeIcons.palette, S.of(context).layout),
+            ]),
+            Expanded(child: TabBarView(
+                children: [
+              _tabPage([
+                booleanProperty(bundle.silentlyReloadFilesChangedExternally, Icons.refresh, conf.silentlyReloadChangedFiles, (newValue) {conf.silentlyReloadChangedFiles = newValue; }),
+                booleanProperty(S.of(context).autosaveFilesOnExit, Icons.refresh, conf.autoSaveOnExit, (newValue) {conf.autoSaveOnExit = newValue; }),
+                intProperty(bundle.maximumNumberOfWindows, FontAwesomeIcons.windowMaximize, conf.maximumOpenWindows, (newValue) { conf.maximumOpenWindows = newValue; }),
+                intProperty(S.of(context).autosaveTimeInSeconds, Icons.auto_awesome, conf.autosaveTimeSeconds??0, (newValue) { conf.autosaveTimeSeconds = newValue; }),
+              ]),
+              _tabPage([
+                booleanProperty(S.of(context).playSoundOnError, FontAwesomeIcons.bell, conf.playSoundOnError, (newValue) { conf.playSoundOnError = newValue;}),
+                booleanProperty(S.of(context).showErrorsInToastPopup, FontAwesomeIcons.circleInfo, conf.showErrorsInToast, (newValue) { conf.showErrorsInToast = newValue;})
+              ]),
+              _tabPage([
+                enumProperty(
+                    bundle.language, Icons.language, ApplicationConfiguration.supportedLanguages, conf.language, (newLang) => conf.language = newLang, autofocus: true),
+                enumProperty(
+                    "Theme", Icons.palette, themes, bloc.themes.currentTheme.name, (newTheme) => conf.theme = newTheme),
+                enumProperty(
+                    "Text Font", Icons.font_download_rounded, ApplicationConfiguration.supportedFonts, conf.defaultFont, (newFont) => conf.defaultFont = newFont),
+                enumProperty(
+                    bundle.iconSize, FontAwesomeIcons.arrowUp91, iconSizes, conf.iconSize, (newIconSize) => conf.iconSize = newIconSize, toString: (s) => s.name),
+                booleanProperty(bundle.compactEditorTabs, FontAwesomeIcons.tableColumns, conf.compactEditorTabs, (newValue) {conf.compactEditorTabs = newValue; }),
+                booleanProperty(bundle.showToolbar, Icons.border_top, conf.showToolbar, (newValue) {conf.showToolbar = newValue; }),
+                booleanProperty(bundle.showStatusbar, Icons.border_bottom, conf.showStatusbar, (newValue) {conf.showStatusbar = newValue; }),
+              ]),
+            ]))
+          ],)))
       ]);
   }
 }

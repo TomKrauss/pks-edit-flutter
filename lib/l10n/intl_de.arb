@@ -103,5 +103,12 @@
   "regularExpressions": "Reguläre Ausdrücke",
   "enterTextToFind": "Text eingeben zur Suche",
   "enterTextToReplace": "Text eingeben zum Ersetzen",
-  "silentlyReloadFilesChangedExternally": "Extern geänderte Dateien ohne Abfrage neu laden"
+  "silentlyReloadFilesChangedExternally": "Extern geänderte Dateien ohne Abfrage neu laden",
+  "saving": "Speichern",
+  "warnings": "Hinweise",
+  "layout": "Darstellung",
+  "autosaveFilesOnExit": "Auomatisch speichern beim Verlassen",
+  "autosaveTimeInSeconds": "Auomatisch speichern nach [sek]",
+  "playSoundOnError": "Warnungston abspielen",
+  "showErrorsInToastPopup": "Warnungen in einem Toast anzeigen"
 }

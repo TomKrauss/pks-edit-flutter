@@ -137,6 +137,10 @@ class MessageLookup extends MessageLookupByLibrary {
         "anErrorOccurred": MessageLookupByLibrary.simpleMessage(
             "Ein Fehler ist beim Ausführen des Kommandos aufgetreten"),
         "apply": MessageLookupByLibrary.simpleMessage("Anwenden"),
+        "autosaveFilesOnExit": MessageLookupByLibrary.simpleMessage(
+            "Auomatisch speichern beim Verlassen"),
+        "autosaveTimeInSeconds": MessageLookupByLibrary.simpleMessage(
+            "Auomatisch speichern nach [sek]"),
         "cancel": MessageLookupByLibrary.simpleMessage("Abbruch"),
         "changeSettings":
             MessageLookupByLibrary.simpleMessage("Einstellungen ändern"),
@@ -165,12 +169,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "initializeWithTemplate":
             MessageLookupByLibrary.simpleMessage("Mit Template initialisieren"),
         "language": MessageLookupByLibrary.simpleMessage("Sprache"),
+        "layout": MessageLookupByLibrary.simpleMessage("Darstellung"),
         "lineNumber": MessageLookupByLibrary.simpleMessage("Zeilennummer"),
         "lineNumberRangeHint": m1,
         "maximumNumberOfWindows":
             MessageLookupByLibrary.simpleMessage("Maximale Anzahl Fenster"),
         "newFile": MessageLookupByLibrary.simpleMessage("Neue Datei"),
         "no": MessageLookupByLibrary.simpleMessage("Nein"),
+        "playSoundOnError":
+            MessageLookupByLibrary.simpleMessage("Warnungston abspielen"),
         "reallyDiscardAllChanges": MessageLookupByLibrary.simpleMessage(
             "Willst Du wirklich alle Änderungen verwerfen?"),
         "recentFiles": MessageLookupByLibrary.simpleMessage(
@@ -195,13 +202,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "save": MessageLookupByLibrary.simpleMessage("Speichern"),
         "saveAllAndExit":
             MessageLookupByLibrary.simpleMessage("All speichern und beenden"),
+        "saving": MessageLookupByLibrary.simpleMessage("Speichern"),
         "searchIncrementally": m3,
+        "showErrorsInToastPopup": MessageLookupByLibrary.simpleMessage(
+            "Warnungen in einem Toast anzeigen"),
         "showStatusbar":
             MessageLookupByLibrary.simpleMessage("Statuszeile anzeigen"),
         "showToolbar": MessageLookupByLibrary.simpleMessage("Toolbar anzeigen"),
         "silentlyReloadFilesChangedExternally":
             MessageLookupByLibrary.simpleMessage(
                 "Extern geänderte Dateien ohne Abfrage neu laden"),
+        "warnings": MessageLookupByLibrary.simpleMessage("Hinweise"),
         "window": MessageLookupByLibrary.simpleMessage("Fenster"),
         "yes": MessageLookupByLibrary.simpleMessage("Ja")
       };
