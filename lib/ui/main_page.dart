@@ -289,7 +289,7 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
     final configuration = PksIniConfiguration.of(context).configuration;
     Widget child;
     if (file.editingConfiguration.showWysiwyg) {
-      child = Renderers.singleton.createWidget(file.language.renderer, widget.editorFocusNode, file.text);
+      child = Renderers.singleton.createWidget(file.language.renderer, widget.editorFocusNode, file, bloc);
     } else {
       child = CodeEditor(
           autofocus: true,

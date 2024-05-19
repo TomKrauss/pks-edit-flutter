@@ -78,7 +78,7 @@ class SimpleBlocState<S extends SimpleBlocProvider> extends State<S> {
     if (!snapshot.hasData) {
       if (snapshot.connectionState == ConnectionState.waiting) {
         return Theme(
-            data: ThemeData(colorScheme: const ColorScheme.light(background: Colors.white), useMaterial3: false),
+            data: ThemeData(colorScheme: const ColorScheme.light(surface: Colors.white), useMaterial3: false),
             child: const Center(child: CircularProgressIndicator()));
       }
       if (snapshot.hasError) {

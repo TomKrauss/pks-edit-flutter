@@ -26,7 +26,7 @@ class MenuBarWidget extends StatelessWidget {
   const MenuBarWidget({super.key, required this.actions});
 
   Widget _createLeadingIcon(BuildContext context, IconData? icon) => icon == null ?
-  SizedBox(width: Theme.of(context).menuButtonTheme.style?.iconSize?.resolve({MaterialState.selected}) ?? 24) :
+  SizedBox(width: Theme.of(context).menuButtonTheme.style?.iconSize?.resolve({WidgetState.selected}) ?? 24) :
   Icon(icon);
       
   Widget _createMenuButton(BuildContext context, MenuItemBinding binding) {

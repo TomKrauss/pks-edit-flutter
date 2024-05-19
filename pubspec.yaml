@@ -13,13 +13,15 @@ dependencies:
   json_annotation: ^4.9.0
   charset: ^2.0.1
   rxdart: ^0.27.4
-  package_info_plus: ^6.0.0
-  re_editor: ^0.2.0
-  multi_split_view: ^2.4.0
+  url_launcher: ^6.2.6
+  package_info_plus: ^8.0.0
+  re_editor: ^0.3.0
+  multi_split_view: ^3.1.0
   window_manager: ^0.3.8
   re_highlight: ^0.0.3
   collection: ^1.18.0
   path: ^1.8.2
+  flutter_svg: ^2.0.10+1
   flutter_markdown: ^0.7.1
   sound_library: ^0.2.0
   font_awesome_flutter: ^10.6.0
@@ -30,14 +32,14 @@ dependencies:
   flutter_highlight: ^0.7.0
   super_drag_and_drop: ^0.8.11
   intl_utils: ^2.8.7
-  intl: ^0.18.0
+  intl: ^0.19.0
   flutter:
     sdk: flutter
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^4.0.0
   json_serializable: ^6.8.0
   build_runner: ^2.3.3
 
