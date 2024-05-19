@@ -66,7 +66,7 @@ class SearchBarWidgetState extends State<SearchBarWidget> {
     final fontSize = (height/2).toDouble();
     final constraints = BoxConstraints(maxHeight: height+4);
     return Tooltip(message: "Type text to search\nPress Enter to navigate matches\nPress Ctrl+Up/Ctrl+Down to change navigation direction",
-        child: SizedBox(width: 450, child: CallbackShortcuts(
+        child: CallbackShortcuts(
             bindings: {
               const SingleActivator(LogicalKeyboardKey.arrowDown, control: true): () => searchDirection = AxisDirection.down,
               const SingleActivator(LogicalKeyboardKey.arrowUp, control: true): () => searchDirection = AxisDirection.up,
@@ -93,7 +93,7 @@ class SearchBarWidgetState extends State<SearchBarWidget> {
                   suffixIcon: Icon(_searchDirection == AxisDirection.down ? Icons.arrow_downward : Icons.arrow_upward, color: color, size: fontSize+4,),
                   hintText: S.of(context).searchIncrementally("Ctrl+Alt+S"),
                   hintStyle: theme.textTheme.bodySmall?.copyWith(color: color, fontSize: fontSize),
-                  contentPadding: const EdgeInsets.all(6), isDense: true),))));
+                  contentPadding: const EdgeInsets.all(6), isDense: true),)));
   }
 
 }
@@ -155,8 +155,8 @@ class ToolBarWidgetState extends State<ToolBarWidget> {
     result.addAll(_buildItems(config, iconColor));
     final findController = widget.currentFile?.findController;
     if (findController != null) {
-      result.add(const Expanded(child: SizedBox()));
-      result.add(SearchBarWidget(focusNode: widget.focusNode, findController: findController));
+      result.add(const Spacer());
+      result.add(Expanded(flex: 3, child: SearchBarWidget(focusNode: widget.focusNode, findController: findController)));
     }
     return result;
   }
