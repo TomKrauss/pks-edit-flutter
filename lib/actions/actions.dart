@@ -317,7 +317,7 @@ class PksEditActions {
           isEnabled: _hasWriteableSelection,
           textKey: "actionCharToggleUpperLower"),
       PksEditAction(
-          id: "delete-selection",
+          id: "cut-to-clipboard",
           execute: _cut,
           isEnabled: _hasWriteableSelection,
           textKey: "actionCut"),
