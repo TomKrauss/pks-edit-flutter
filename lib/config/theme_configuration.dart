@@ -92,7 +92,7 @@ class Themes {
     if (themes.isEmpty) {
       throw "At least one theme configuration must be defined.";
     }
-    for (var t in themes) {
+    for (final t in themes) {
       _themeMap[t.name] = t;
     }
     _currentTheme = themes.first;

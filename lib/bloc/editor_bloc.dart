@@ -420,7 +420,7 @@ class EditorBloc {
     var controller = file.controller;
     var matches = file.editingConfiguration.wordTokenRE.allMatches(controller.startLine.text);
     var start = controller.selection.startOffset;
-    for (var m in matches) {
+    for (final m in matches) {
       if (m.start <= start && m.end >= start) {
         file.findController.findInputController.text = controller.startLine.substring(m.start, m.end);
         break;
@@ -545,7 +545,7 @@ class EditorBloc {
   ///
   Future<CommandResult> saveAllModified() async {
     int nSaved = 0;
-    for (var handle in _openFileState.files) {
+    for (final handle in _openFileState.files) {
       if (handle.modified) {
         var result = await _saveFile(handle);
         if (!result.success) {
@@ -736,7 +736,7 @@ class EditorBloc {
   ///
   Future<void> initialize({required List<String> arguments}) async {
     _openFileState = OpenFileState(files: [], currentIndex: -1, currentChanged: _refreshFiles);
-    for (var arg in arguments) {
+    for (final arg in arguments) {
       if (!arg.startsWith("-")) {
         _addErrorResult(await openFile(arg));
       } else {
@@ -755,7 +755,7 @@ class EditorBloc {
     int idx = 0;
     if (applicationConfiguration.preserveHistory) {
       _logger.i("Restoring file from previous session...");
-      for (var f in session.openEditors) {
+      for (final f in session.openEditors) {
         if (f.active) {
           active = idx;
         }
@@ -793,9 +793,9 @@ class EditorBloc {
   }
 
   Future<void> dispose() async {
-    _openFileSubject.close();
-    _externalFileChanges.close();
-    _errorResults.close();
+    await _openFileSubject.close();
+    await _externalFileChanges.close();
+    await _errorResults.close();
   }
 
   ///
@@ -809,7 +809,7 @@ class EditorBloc {
     }
     final session = await current.prepareSave(context: context, state: _openFileState);
     _logger.i("Saving current session.");
-    PksConfiguration.singleton.saveSession(session);
+    await PksConfiguration.singleton.saveSession(session);
   }
 
   ///
@@ -817,6 +817,8 @@ class EditorBloc {
   ///
   Future<void> exitApp(BuildContext context) async {
     await _saveSession(context);
-    windowManager.destroy();
+    await windowManager.hide();
+    await windowManager.destroy();
+    exit(0);
   }
 }

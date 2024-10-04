@@ -128,7 +128,7 @@ class PksEditCodeShortcutsActivatorsBuilder extends CodeShortcutsActivatorsBuild
   List<ShortcutActivator>? build(CodeShortcutType type) {
     if (!initialized) {
       if (Platform.isMacOS) {
-        for (var entry in _kDefaultCommonCodeShortcutsActivators.entries) {
+        for (final entry in _kDefaultCommonCodeShortcutsActivators.entries) {
           _kDefaultCommonCodeShortcutsActivators[entry.key] = entry.value.map((e) {
             if ((e as SingleActivator).control) {
               return SingleActivator(e.trigger, shift: e.shift, meta: true, control: false, alt: e.alt);

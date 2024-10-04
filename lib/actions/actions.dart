@@ -476,9 +476,9 @@ class PksEditActions {
     configuration.configuration.fullscreen = !oldFullScreen;
     bloc.updateConfiguration(configuration);
     if (oldFullScreen) {
-      windowManager.setFullScreen(false);
+      await windowManager.setFullScreen(false);
     } else {
-      windowManager.setFullScreen(true);
+      await windowManager.setFullScreen(true);
     }
   }
 
@@ -511,7 +511,7 @@ class PksEditActions {
     });
   }
 
-  void _showAbout() async {
+  Future<void> _showAbout() async {
     final context = getBuildContext();
     final info = await PackageInfo.fromPlatform();
     if (context.mounted) {
@@ -741,13 +741,13 @@ class PksEditActions {
     return false;
   }
 
-  void _discardChangesInFile() async {
+  Future<void> _discardChangesInFile() async {
     var context = getBuildContext();
     final bloc = EditorBloc.of(context);
     var f = currentFile;
     if (f != null && f.modified) {
       if ((await ConfirmationDialog.show(context: context, message: S.of(context).reallyDiscardAllChanges, actions: ConfirmationDialog.yesNoActions)) == "yes") {
-        bloc.abandonFile(f);
+        await bloc.abandonFile(f);
       }
     }
   }
@@ -792,7 +792,7 @@ class PksEditActions {
   }
 
 
-  void _saveFileAs() async {
+  Future<void> _saveFileAs() async {
     final f = currentFile;
     if (f == null) {
       return;
@@ -806,17 +806,17 @@ class PksEditActions {
         acceptedTypeGroups: bloc.editingConfigurations.getFileGroups(filename),
         confirmButtonText: "Save");
     if (result != null) {
-      handleCommandResult(await bloc.saveActiveFile(filename: result.path));
+      await handleCommandResult(await bloc.saveActiveFile(filename: result.path));
     }
   }
 
-  void _saveFile() async {
+  Future<void> _saveFile() async {
     final bloc = EditorBloc.of(getBuildContext());
-    handleCommandResult(await bloc.saveActiveFile());
+    await handleCommandResult(await bloc.saveActiveFile());
   }
 
 
-  void _gotoLine() async {
+  Future<void> _gotoLine() async {
     var controller = currentFile?.controller;
     if (controller == null) {
       return;
@@ -863,7 +863,7 @@ class PksEditActions {
     }
   }
 
-  void _newFile() async {
+  Future<void> _newFile() async {
     final actionContext = getActionContext();
     final context = getBuildContext();
     final bloc = EditorBloc.of(context);
@@ -873,7 +873,7 @@ class PksEditActions {
         options: {S.of(context).initializeWithTemplate: true},
         initialValue: path.basename(newFilename)));
     if (result != null) {
-      handleCommandResult(await bloc.newFile(path.join(path.dirname(newFilename), result.selectedText), insertTemplate: result.firstOptionSelected));
+      await handleCommandResult(await bloc.newFile(path.join(path.dirname(newFilename), result.selectedText), insertTemplate: result.firstOptionSelected));
     }
   }
 
@@ -882,13 +882,14 @@ class PksEditActions {
     final context = getBuildContext();
     final bloc = EditorBloc.of(context);
     files = [...files];
+    final intl = S.of(context);
     for (final file in files) {
-      if (file.modified) {
+      if (file.modified && context.mounted) {
         var result = await ConfirmationDialog.show(context: context, message: "File ${file.filename} was modified.\nShould we save it before closing?",
             actions: {
-              S.of(context).save: ConfirmationDialog.actionSave,
-              S.of(context).closeWithoutSaving: ConfirmationDialog.actionClose,
-              S.of(context).cancel: ConfirmationDialog.actionCancel
+              intl.save: ConfirmationDialog.actionSave,
+              intl.closeWithoutSaving: ConfirmationDialog.actionClose,
+              intl.cancel: ConfirmationDialog.actionCancel
             });
         if (result == ConfirmationDialog.actionCancel) {
           break;
@@ -896,12 +897,12 @@ class PksEditActions {
         if (result == ConfirmationDialog.actionSave) {
           final commandResult = await bloc.saveAllModified();
           if (!commandResult.success) {
-            handleCommandResult(commandResult);
+            await handleCommandResult(commandResult);
             return;
           }
         }
       }
-      bloc.closeFile(file);
+      await bloc.closeFile(file);
     }
   }
 
@@ -929,7 +930,7 @@ class PksEditActions {
   }
 
 
-  void _exit() async {
+  Future<void> _exit() async {
     var context = getBuildContext();
     if (!context.mounted) {
       return;
@@ -953,13 +954,13 @@ class PksEditActions {
       if (result == ConfirmationDialog.actionSave) {
         final result = await bloc.saveAllModified();
         if (!result.success) {
-          handleCommandResult(result);
+          await handleCommandResult(result);
           return;
         }
       }
     }
     if (context.mounted) {
-      bloc.exitApp(context);
+      await bloc.exitApp(context);
     }
   }
 

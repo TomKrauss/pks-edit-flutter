@@ -49,7 +49,7 @@ class MenuBarWidget extends StatelessWidget {
 
   List<Widget> _buildChildren(BuildContext context, Iterable<MenuItemBinding> actions) {
     var result = <Widget>[];
-    for (var b in actions) {
+    for (final b in actions) {
       if (b.children != null && b.children!.isNotEmpty) {
         result.add(SubmenuButton(
           menuChildren: _buildChildren(context, b.children!),
@@ -93,7 +93,7 @@ class MenuBarWidget extends StatelessWidget {
   List<Widget> _buildHistoryMenu(BuildContext context) {
     final subMenu = <Widget>[];
     final bloc = EditorBloc.of(context);
-    for (var of in bloc.openFiles) {
+    for (final of in bloc.openFiles) {
       final action = PksEditAction(id: "open-files", execute: () {
         bloc.openFile(of);
       });

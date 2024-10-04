@@ -272,7 +272,7 @@ class KeyBinding extends Binding {
     bool control = false;
     bool meta = false;
     LogicalKeyboardKey? logicalKey;
-    for (var segment in split) {
+    for (final segment in split) {
       var s = segment.toLowerCase();
       if (s == 'alt') {
         alt = true;
@@ -343,7 +343,7 @@ class ActionBindings {
 
   List<T> _processBindings<T extends Binding>(PksEditActions actions, List<T> bindings) {
     final result = <T>[];
-    for (var b in bindings) {
+    for (final b in bindings) {
       final command = b.commandReference;
       if (b is MenuItemBinding && b.isHistoryMenu) {
         result.add(b);

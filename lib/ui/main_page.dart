@@ -65,11 +65,17 @@ class _PksEditMainPageState extends State<PksEditMainPage>
         const SingleActivator(LogicalKeyboardKey.keyS, alt: true, control: true),
         _toggleSearchBarFocus);
     _externalFileSubscription = bloc.externalFileChangeStream.listen((event) async {
-        var config = PksIniConfiguration.of(context).configuration;
-        if ((config.silentlyReloadChangedFiles && !event.modified) ||
-            (await ConfirmationDialog.show(context: context, message: S.of(context).reloadChangedFile(event.title))) == 'yes') {
-          final result = await bloc.abandonFile(event);
-          _handleCommandResult(result);
+        if (mounted) {
+          var config = PksIniConfiguration
+              .of(context)
+              .configuration;
+          if ((config.silentlyReloadChangedFiles && !event.modified) ||
+              (await ConfirmationDialog.show(context: context,
+                  message: S.of(context).reloadChangedFile(event.title))) ==
+                  'yes') {
+            final result = await bloc.abandonFile(event);
+            await _handleCommandResult(result);
+          }
         }
     });
     _errorSubscription = bloc.errorResultStream.listen(_handleCommandResult);
@@ -98,11 +104,11 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   }
 
   @override
-  void onWindowClose() async {
+  Future<void> onWindowClose() async {
     if (!mounted) {
       return;
     }
-    actions.execute(PksEditActions.actionExit);
+    await actions.execute(PksEditActions.actionExit);
   }
 
   ///
@@ -123,10 +129,14 @@ class _PksEditMainPageState extends State<PksEditMainPage>
       }
     } else {
       var config = PksIniConfiguration.of(context).configuration;
+      final intl = S.of(context);
       if (config.playSoundOnError) {
-        SoundPlayer.play(config.errorSound);
+        await SoundPlayer.play(config.errorSound);
       }
-      message ??= S.of(context).anErrorOccurred;
+      if (!mounted) {
+        return;
+      }
+      message ??= intl.anErrorOccurred;
       if (config.showErrorsInToast) {
         ScaffoldMessenger.of(context)
             .showSnackBar(SnackBar(content: Text(message), backgroundColor: Theme.of(context).colorScheme.errorContainer,));
@@ -165,7 +175,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
             (e) async {
               e.dataReader?.getValue(Formats.fileUri, (value) async {
                 if (value is Uri) {
-                  _handleCommandResult(await bloc.openFile(value.toFilePath(windows: Platform.isWindows)));
+                  await _handleCommandResult(await bloc.openFile(value.toFilePath(windows: Platform.isWindows)));
                 }
               });
             }

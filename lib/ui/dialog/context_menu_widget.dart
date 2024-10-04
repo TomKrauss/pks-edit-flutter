@@ -55,7 +55,7 @@ class ContextMenuControllerImpl implements SelectionToolbarController {
     required ValueNotifier<bool> visibility,
   }) {
     var items = <PopupMenuEntry<dynamic>>[];
-    for (var e in menuItems) {
+    for (final e in menuItems) {
       if (e.isSeparator) {
         if (items.lastOrNull is PopupMenuDivider) {
           continue;

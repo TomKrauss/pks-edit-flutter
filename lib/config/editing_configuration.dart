@@ -144,7 +144,7 @@ class EditingConfigurations {
   late final Map<String,DocumentType> _documentTypeByExtensionLookup;
   EditingConfigurations({this.documentTypes = const [ DocumentType.defaultConfiguration], this.editorConfigurations = const[ EditingConfiguration.defaultConfiguration]}) {
     _editingConfigLookup = {};
-    for (var e in editorConfigurations) {
+    for (final e in editorConfigurations) {
       _editingConfigLookup[e.name] = e;
     }
     _documentTypeByExtensionLookup = {};
@@ -176,14 +176,14 @@ class EditingConfigurations {
   }
 
   Future<DocumentType> _findDocumentType(String filename) async {
-    for (var dt in documentTypes) {
+    for (final dt in documentTypes) {
       if (dt.firstLineMatch != null) {
         final s = await File(filename).openRead().transform(utf8.decoder).transform(const LineSplitter()).first;
         if (RegExp(dt.firstLineMatch!).hasMatch(s)) {
           return dt;
         }
       }
-      for (var pattern in dt.filePatterns) {
+      for (final pattern in dt.filePatterns) {
         /// todo: implement complete file name match.
         if ((pattern == "*" && path.extension(filename).isEmpty) || pattern == "*.*") {
           return dt;
@@ -202,7 +202,7 @@ class EditingConfigurations {
     if (ext.startsWith(".")) {
       ext = ext.substring(1);
     }
-    for (var e in documentTypes) {
+    for (final e in documentTypes) {
       if (e.filePatterns.isNotEmpty) {
         var patterns = e.filePatterns;
         if (patterns.contains("*.*")) {

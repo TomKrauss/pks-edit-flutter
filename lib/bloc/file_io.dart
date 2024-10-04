@@ -67,7 +67,7 @@ class FileIO {
     var lb = TextLineBreak.lf;
     convert.Encoding encoding = convert.latin1;
     var bomType = BomType.none;
-    for (var t in BomType.values) {
+    for (final t in BomType.values) {
       if (t.bytes.isNotEmpty && end > t.bytes.length && const ListEquality<int>().equals(t.bytes, pData.sublist(0, t.bytes.length))) {
         bomType = t;
         encoding = t.defaultEncoding;

@@ -12,6 +12,11 @@ linter:
     - camel_case_types
     - implicit_call_tearoffs
     - prefer_expression_function_bodies
+    - always_declare_return_types
     - unnecessary_late
     - unnecessary_lambdas
     - type_annotate_public_apis
+    - avoid_void_async
+    - prefer_final_in_for_each
+    - avoid_unnecessary_containers
+    - unawaited_futures

@@ -132,7 +132,7 @@ class ToolBarWidgetState extends State<ToolBarWidget> {
   Iterable<Widget> _buildItems(ApplicationConfiguration config, Color iconColor) {
     var result = <Widget>[];
     Widget? previous;
-    for (var e in widget.actions) {
+    for (final e in widget.actions) {
       var widget =
       e.isSeparator ? VerticalDivider(
         indent: 3,

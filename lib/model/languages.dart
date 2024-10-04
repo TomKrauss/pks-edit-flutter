@@ -95,7 +95,7 @@ class Languages {
   };
 
   Language modeForFilename(String fileName) {
-    for (var e in _languageMappings.entries) {
+    for (final e in _languageMappings.entries) {
       if (e.key.hasMatch(fileName)) {
         return e.value;
       }

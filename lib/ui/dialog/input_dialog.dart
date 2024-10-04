@@ -99,7 +99,7 @@ class _InputDialogState extends State<InputDialog> {
   ///
   List<Widget> buildOptions() {
     var result = <Widget>[];
-    for (var entry in selectedOptions.entries) {
+    for (final entry in selectedOptions.entries) {
       result.add(CheckboxListTile(
         contentPadding: EdgeInsets.zero,
           title: Text(entry.key), value: entry.value, onChanged: (newSel) {

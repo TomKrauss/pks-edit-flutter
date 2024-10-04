@@ -31,7 +31,7 @@ class Templates {
   String _evaluate(Template template) => template.text;
 
   String generateInitialContent(String fileName) {
-    for (var e in _templates.entries) {
+    for (final e in _templates.entries) {
       if (e.key.hasMatch(fileName)) {
         return _evaluate(e.value);
       }
