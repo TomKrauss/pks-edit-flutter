@@ -13,22 +13,22 @@ dependencies:
   json_annotation: ^4.9.0
   charset: ^2.0.1
   rxdart: ^0.28.0
-  http: ^1.2.1
-  url_launcher: ^6.3.0
-  package_info_plus: ^8.0.2
+  http: ^1.2.2
+  url_launcher: ^6.3.1
+  package_info_plus: ^8.1.1
   re_editor: ^0.6.0
-  multi_split_view: ^3.1.0
+  multi_split_view: ^3.6.0
   window_manager: ^0.4.3
   re_highlight: ^0.0.3
   collection: ^1.18.0
   path: ^1.9.0
-  jovial_svg: ^1.1.23
+  jovial_svg: ^1.1.24
   flutter_markdown: ^0.7.4+1
   sound_library: ^1.0.0
   font_awesome_flutter: ^10.8.0
   font_awesome_flutter_named: ^1.1.2+1
   material_icons_named: ^3.16.0
-  logger: ^2.4.0
+  logger: ^2.5.0
   file_selector: ^1.0.3
   flutter_highlight: ^0.7.0
   super_drag_and_drop: ^0.8.24
@@ -41,7 +41,7 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^5.0.0
-  json_serializable: ^6.8.0
+  json_serializable: ^6.9.0
   build_runner: ^2.4.13
 
 flutter_intl:
