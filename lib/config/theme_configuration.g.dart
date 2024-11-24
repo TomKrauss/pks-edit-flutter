@@ -12,7 +12,7 @@ ThemeConfiguration _$ThemeConfigurationFromJson(Map<String, dynamic> json) =>
       backgroundColor: json['backgroundColor'] == null
           ? Colors.black
           : ThemeConfiguration._parseColor(json['backgroundColor'] as String),
-      darkMode: (json['darkMode'] as num?)?.toInt() ?? 0,
+      darkMode: (json['darkMode'] as num?)?.toInt(),
       dialogLightBackground: json['dialogLightBackground'] == null
           ? Colors.black26
           : ThemeConfiguration._parseColor(
@@ -33,30 +33,23 @@ ThemeConfiguration _$ThemeConfigurationFromJson(Map<String, dynamic> json) =>
           : ThemeConfiguration._parseColor(json['iconColor'] as String),
     );
 
-Map<String, dynamic> _$ThemeConfigurationToJson(ThemeConfiguration instance) {
-  final val = <String, dynamic>{
-    'name': instance.name,
-    'darkMode': instance.darkMode,
-    'backgroundColor': ThemeConfiguration._printColor(instance.backgroundColor),
-    'iconColor': ThemeConfiguration._printColor(instance.iconColor),
-    'changedLineColor':
-        ThemeConfiguration._printColor(instance.changedLineColor),
-    'dialogLightBackground':
-        ThemeConfiguration._printColor(instance.dialogLightBackground),
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('dialogBackground',
-      ThemeConfiguration._printOptColor(instance.optDialogBackground));
-  val['dialogLight'] = ThemeConfiguration._printColor(instance.dialogLight);
-  val['dialogBorder'] = ThemeConfiguration._printColor(instance.dialogBorder);
-  return val;
-}
+Map<String, dynamic> _$ThemeConfigurationToJson(ThemeConfiguration instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      if (instance.darkMode case final value?) 'darkMode': value,
+      'backgroundColor':
+          ThemeConfiguration._printColor(instance.backgroundColor),
+      'iconColor': ThemeConfiguration._printColor(instance.iconColor),
+      'changedLineColor':
+          ThemeConfiguration._printColor(instance.changedLineColor),
+      'dialogLightBackground':
+          ThemeConfiguration._printColor(instance.dialogLightBackground),
+      if (ThemeConfiguration._printOptColor(instance.optDialogBackground)
+          case final value?)
+        'dialogBackground': value,
+      'dialogLight': ThemeConfiguration._printColor(instance.dialogLight),
+      'dialogBorder': ThemeConfiguration._printColor(instance.dialogBorder),
+    };
 
 Themes _$ThemesFromJson(Map<String, dynamic> json) => Themes(
       themes: (json['themes'] as List<dynamic>)

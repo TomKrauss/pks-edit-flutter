@@ -24,29 +24,20 @@ EditingConfiguration _$EditingConfigurationFromJson(
     );
 
 Map<String, dynamic> _$EditingConfigurationToJson(
-    EditingConfiguration instance) {
-  final val = <String, dynamic>{
-    'name': instance.name,
-    'leftMargin': instance.leftMargin,
-    'rightMargin': instance.rightMargin,
-    'tabSize': instance.tabSize,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('expandTabsWith', instance.expandTabsWith);
-  val['wordTokenExpression'] = instance.wordTokenExpression;
-  val['backupExtension'] = instance.backupExtension;
-  val['showLineNumbers'] = instance.showLineNumbers;
-  val['showSyntaxHighlight'] = instance.showSyntaxHighlight;
-  val['hexMode'] = instance.hexMode;
-  val['showWysiwyg'] = instance.showWysiwyg;
-  return val;
-}
+        EditingConfiguration instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'leftMargin': instance.leftMargin,
+      'rightMargin': instance.rightMargin,
+      'tabSize': instance.tabSize,
+      if (instance.expandTabsWith case final value?) 'expandTabsWith': value,
+      'wordTokenExpression': instance.wordTokenExpression,
+      'backupExtension': instance.backupExtension,
+      'showLineNumbers': instance.showLineNumbers,
+      'showSyntaxHighlight': instance.showSyntaxHighlight,
+      'hexMode': instance.hexMode,
+      'showWysiwyg': instance.showWysiwyg,
+    };
 
 DocumentType _$DocumentTypeFromJson(Map<String, dynamic> json) => DocumentType(
       name: json['name'] as String,
@@ -61,25 +52,16 @@ DocumentType _$DocumentTypeFromJson(Map<String, dynamic> json) => DocumentType(
       firstLineMatch: json['firstLineMatch'] as String?,
     );
 
-Map<String, dynamic> _$DocumentTypeToJson(DocumentType instance) {
-  final val = <String, dynamic>{
-    'name': instance.name,
-    'grammar': instance.grammar,
-    'languages': instance.languages,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('description', instance.description);
-  val['filenamePatterns'] = instance.filenamePatterns;
-  val['editorConfiguration'] = instance.editorConfiguration;
-  writeNotNull('firstLineMatch', instance.firstLineMatch);
-  return val;
-}
+Map<String, dynamic> _$DocumentTypeToJson(DocumentType instance) =>
+    <String, dynamic>{
+      'name': instance.name,
+      'grammar': instance.grammar,
+      'languages': instance.languages,
+      if (instance.description case final value?) 'description': value,
+      'filenamePatterns': instance.filenamePatterns,
+      'editorConfiguration': instance.editorConfiguration,
+      if (instance.firstLineMatch case final value?) 'firstLineMatch': value,
+    };
 
 EditingConfigurations _$EditingConfigurationsFromJson(
         Map<String, dynamic> json) =>

@@ -71,49 +71,41 @@ ApplicationConfiguration _$ApplicationConfigurationFromJson(
     );
 
 Map<String, dynamic> _$ApplicationConfigurationToJson(
-    ApplicationConfiguration instance) {
-  final val = <String, dynamic>{
-    'theme': instance.theme,
-    'language': instance.language,
-    'default-font': instance.defaultFont,
-    'icon-size': _$IconSizeEnumMap[instance.iconSize]!,
-    'show-statusbar': instance.showStatusbar,
-    'show-functionkeys': instance.showFunctionKeys,
-    'show-optionbar': instance.showOptionBar,
-    'show-toolbar': instance.showToolbar,
-    'compact-editor-tabs': instance.compactEditorTabs,
-    'forms-follow-mouse': instance.formsFollowMouse,
-    'show-error-toast': instance.showErrorsInToast,
-    'sound-name': instance.soundName,
-    'sound-on-error': instance.playSoundOnError,
-    'maximum-open-windows': instance.maximumOpenWindows,
-    'preserve-history': instance.preserveHistory,
-    'reuse-application-running-instance':
-        instance.reuseApplicationRunningInstance,
-    'maintain-clipboard-history': instance.maintainClipboardHistory,
-    'autosave-to-temp': instance.autoSaveToTemp,
-    'autosave-on-exit': instance.autoSaveOnExit,
-    'create-back-in-temp-path': instance.createBackInTempPath,
-    'lock-files-for-edit': instance.lockFilesForEdit,
-    'hide-selection-on-move': instance.hideSelectionOnMove,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('autosave-time', instance.autosaveTimeSeconds);
-  val['undo-enabled'] = instance.undoEnabled;
-  val['undo-history'] = instance.undoHistory;
-  val['cleanup-autosave-files'] = instance.cleanupAutosaveFiles;
-  val['silently-reload-changed-files'] = instance.silentlyReloadChangedFiles;
-  val['search-engine'] = instance.searchEngine;
-  val['include-path'] = instance.includePath;
-  val['compiler-output-patterns'] = instance.compilerOutputPatterns;
-  return val;
-}
+        ApplicationConfiguration instance) =>
+    <String, dynamic>{
+      'theme': instance.theme,
+      'language': instance.language,
+      'default-font': instance.defaultFont,
+      'icon-size': _$IconSizeEnumMap[instance.iconSize]!,
+      'show-statusbar': instance.showStatusbar,
+      'show-functionkeys': instance.showFunctionKeys,
+      'show-optionbar': instance.showOptionBar,
+      'show-toolbar': instance.showToolbar,
+      'compact-editor-tabs': instance.compactEditorTabs,
+      'forms-follow-mouse': instance.formsFollowMouse,
+      'show-error-toast': instance.showErrorsInToast,
+      'sound-name': instance.soundName,
+      'sound-on-error': instance.playSoundOnError,
+      'maximum-open-windows': instance.maximumOpenWindows,
+      'preserve-history': instance.preserveHistory,
+      'reuse-application-running-instance':
+          instance.reuseApplicationRunningInstance,
+      'maintain-clipboard-history': instance.maintainClipboardHistory,
+      'autosave-to-temp': instance.autoSaveToTemp,
+      'autosave-on-exit': instance.autoSaveOnExit,
+      'create-back-in-temp-path': instance.createBackInTempPath,
+      'lock-files-for-edit': instance.lockFilesForEdit,
+      'hide-selection-on-move': instance.hideSelectionOnMove,
+      if (instance.autosaveTimeSeconds case final value?)
+        'autosave-time': value,
+      'undo-enabled': instance.undoEnabled,
+      'undo-history': instance.undoHistory,
+      'cleanup-autosave-files': instance.cleanupAutosaveFiles,
+      'silently-reload-changed-files': instance.silentlyReloadChangedFiles,
+      'search-engine': instance.searchEngine,
+      'include-path': instance.includePath,
+      'compiler-output-patterns': instance.compilerOutputPatterns,
+    };
 
 const _$IconSizeEnumMap = {
   IconSize.small: 'small',

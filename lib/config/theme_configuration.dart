@@ -12,6 +12,7 @@
 //
 
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'theme_configuration.g.dart';
@@ -23,8 +24,14 @@ part 'theme_configuration.g.dart';
 class ThemeConfiguration {
   final String name;
   @JsonKey()
-  final int darkMode;
-  bool get isDark => darkMode != 0;
+  final int? darkMode;
+  bool get isDark {
+    if (darkMode == 1) {
+      return true;
+    }
+    var brightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
+    return brightness == Brightness.dark;
+  }
   @JsonKey(fromJson: _parseColor, toJson: _printColor)
   final Color backgroundColor;
   @JsonKey(fromJson: _parseColor, toJson: _printColor)
@@ -65,7 +72,7 @@ class ThemeConfiguration {
 
   ThemeConfiguration({this.name = "default",
     this.backgroundColor = Colors.black,
-    this.darkMode = 0,
+    this.darkMode,
     this.dialogLightBackground = Colors.black26,
     this.optDialogBackground,
     this.dialogLight = Colors.white38,

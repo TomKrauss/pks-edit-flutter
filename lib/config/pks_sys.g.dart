@@ -75,27 +75,18 @@ PksEditSession _$PksEditSessionFromJson(Map<String, dynamic> json) =>
           : PksEditSession._panelsFromString(json['open-editors'] as List),
     );
 
-Map<String, dynamic> _$PksEditSessionToJson(PksEditSession instance) {
-  final val = <String, dynamic>{
-    'screen-width': instance.screenWidth,
-    'screen-height': instance.screenHeight,
-    'search-replace-options': instance.searchReplaceOptions,
-    'open-files': instance.openFiles,
-    'search-patterns': instance.searchPatterns,
-    'replace-patterns': instance.replacePatterns,
-    'file-patterns': instance.filePatterns,
-    'open-editors': PksEditSession._panelsToString(instance.openEditors),
-    'main-window-placement': instance.mainWindowPlacement.toJson(),
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('dock1', instance.dock1?.toJson());
-  writeNotNull('dock2', instance.dock2?.toJson());
-  writeNotNull('dock3', instance.dock3?.toJson());
-  return val;
-}
+Map<String, dynamic> _$PksEditSessionToJson(PksEditSession instance) =>
+    <String, dynamic>{
+      'screen-width': instance.screenWidth,
+      'screen-height': instance.screenHeight,
+      'search-replace-options': instance.searchReplaceOptions,
+      'open-files': instance.openFiles,
+      'search-patterns': instance.searchPatterns,
+      'replace-patterns': instance.replacePatterns,
+      'file-patterns': instance.filePatterns,
+      'open-editors': PksEditSession._panelsToString(instance.openEditors),
+      'main-window-placement': instance.mainWindowPlacement.toJson(),
+      if (instance.dock1?.toJson() case final value?) 'dock1': value,
+      if (instance.dock2?.toJson() case final value?) 'dock2': value,
+      if (instance.dock3?.toJson() case final value?) 'dock3': value,
+    };

@@ -15,22 +15,14 @@ ToolbarItemBinding _$ToolbarItemBindingFromJson(Map<String, dynamic> json) =>
       commandReference: json['command'] as String?,
     );
 
-Map<String, dynamic> _$ToolbarItemBindingToJson(ToolbarItemBinding instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('context', instance.context);
-  writeNotNull('command', instance.commandReference);
-  writeNotNull('icon', instance.icon);
-  writeNotNull('label', instance.label);
-  val['separator'] = instance.isSeparator;
-  return val;
-}
+Map<String, dynamic> _$ToolbarItemBindingToJson(ToolbarItemBinding instance) =>
+    <String, dynamic>{
+      if (instance.context case final value?) 'context': value,
+      if (instance.commandReference case final value?) 'command': value,
+      if (instance.icon case final value?) 'icon': value,
+      if (instance.label case final value?) 'label': value,
+      'separator': instance.isSeparator,
+    };
 
 MenuItemBinding _$MenuItemBindingFromJson(Map<String, dynamic> json) =>
     MenuItemBinding(
@@ -47,26 +39,18 @@ MenuItemBinding _$MenuItemBindingFromJson(Map<String, dynamic> json) =>
       commandReference: json['command'] as String?,
     );
 
-Map<String, dynamic> _$MenuItemBindingToJson(MenuItemBinding instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('context', instance.context);
-  writeNotNull('command', instance.commandReference);
-  writeNotNull('icon', instance.icon);
-  writeNotNull('label', instance.label);
-  writeNotNull('label-id', instance.labelId);
-  val['separator'] = instance.isSeparator;
-  val['history-menu'] = instance.isHistoryMenu;
-  val['macro-menu'] = instance.isMacroCommand;
-  writeNotNull('sub-menu', instance.children);
-  return val;
-}
+Map<String, dynamic> _$MenuItemBindingToJson(MenuItemBinding instance) =>
+    <String, dynamic>{
+      if (instance.context case final value?) 'context': value,
+      if (instance.commandReference case final value?) 'command': value,
+      if (instance.icon case final value?) 'icon': value,
+      if (instance.label case final value?) 'label': value,
+      if (instance.labelId case final value?) 'label-id': value,
+      'separator': instance.isSeparator,
+      'history-menu': instance.isHistoryMenu,
+      'macro-menu': instance.isMacroCommand,
+      if (instance.children case final value?) 'sub-menu': value,
+    };
 
 KeyBinding _$KeyBindingFromJson(Map<String, dynamic> json) => KeyBinding(
       key: json['key'] as String,
@@ -74,20 +58,12 @@ KeyBinding _$KeyBindingFromJson(Map<String, dynamic> json) => KeyBinding(
       commandReference: json['command'] as String?,
     );
 
-Map<String, dynamic> _$KeyBindingToJson(KeyBinding instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('context', instance.context);
-  writeNotNull('command', instance.commandReference);
-  val['key'] = instance.key;
-  return val;
-}
+Map<String, dynamic> _$KeyBindingToJson(KeyBinding instance) =>
+    <String, dynamic>{
+      if (instance.context case final value?) 'context': value,
+      if (instance.commandReference case final value?) 'command': value,
+      'key': instance.key,
+    };
 
 MouseBinding _$MouseBindingFromJson(Map<String, dynamic> json) =>
     MouseBinding();
