@@ -286,14 +286,24 @@ class KeyBinding extends Binding {
       } else if (s == 'control' || s == 'ctrl') {
         control = true;
       } else {
-        if (s.startsWith("oem_")) {
-          s = s.substring(4);
-        }
-        final k = _logicalKeyMapping[s];
-        if (k == null) {
-          _logger.w("Cannot determine logical key for $s");
+        if (s.startsWith("\\")) {
+          final code = int.tryParse(s.substring(1));
+          final key = code == null ? null : PhysicalKeyboardKey.findKeyByCode(code);
+          if (key == null) {
+            _logger.w("Cannot determine physical key for keycode==$code. Keybinding will not work.");
+            continue;
+          }
+          logicalKey = HardwareKeyboard.instance.lookUpLayout(key);
         } else {
-          logicalKey = k;
+          if (s.startsWith("oem_")) {
+            s = s.substring(4);
+          }
+          final k = _logicalKeyMapping[s];
+          if (k == null) {
+            _logger.w("Cannot determine logical key for $s");
+          } else {
+            logicalKey = k;
+          }
         }
       }
     }
