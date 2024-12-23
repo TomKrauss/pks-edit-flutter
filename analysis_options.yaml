@@ -12,11 +12,36 @@ linter:
     - camel_case_types
     - implicit_call_tearoffs
     - prefer_expression_function_bodies
-    - always_declare_return_types
     - unnecessary_late
     - unnecessary_lambdas
     - type_annotate_public_apis
-    - avoid_void_async
-    - prefer_final_in_for_each
+    - always_declare_return_types
     - avoid_unnecessary_containers
+    - avoid_void_async
+    - avoid_bool_literals_in_conditional_expressions
+    - no_literal_bool_comparisons
+    - noop_primitive_operations
+    - avoid_catching_errors
     - unawaited_futures
+    - always_put_control_body_on_new_line
+    - always_use_package_imports
+    - annotate_redeclares
+    - avoid_double_and_int_checks
+    - avoid_empty_else
+    - avoid_slow_async_io
+    - avoid_escaping_inner_quotes
+    - only_throw_errors
+    - leading_newlines_in_multiline_strings
+    - avoid_type_to_string
+    - unnecessary_raw_strings
+    - avoid_types_as_parameter_names
+    - avoid_unused_constructor_parameters
+    - collection_methods_unrelated_type
+    - empty_statements
+    - file_names
+    - prefer_final_in_for_each
+    - prefer_inlined_adds
+    - prefer_iterable_whereType
+    - prefer_spread_collections
+    - flutter_style_todos
+    - avoid_single_cascade_in_expression_statements

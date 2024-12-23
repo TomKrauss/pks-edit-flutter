@@ -62,7 +62,7 @@ class EditingConfiguration {
     this.showLineNumbers = true,
     this.showSyntaxHighlight = true,
     this.backupExtension = "bak",
-    this.wordTokenExpression = r'[a-zA-ZöäüÖÄÜß][a-zA-Z0-9_öäüÖÄÜß]*'});
+    this.wordTokenExpression = '[a-zA-ZöäüÖÄÜß][a-zA-Z0-9_öäüÖÄÜß]*'});
 
   ///
   /// To modify the current editing configuration use this copy constructor.
@@ -184,7 +184,7 @@ class EditingConfigurations {
         }
       }
       for (final pattern in dt.filePatterns) {
-        /// todo: implement complete file name match.
+        // TODO(alphacentauri4711): implement complete file name match.
         if ((pattern == "*" && path.extension(filename).isEmpty) || pattern == "*.*") {
           return dt;
         }

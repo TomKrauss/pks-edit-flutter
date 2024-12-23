@@ -347,7 +347,8 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
     updateTabs(widget.files);
     var config = PksIniConfiguration.of(context).configuration;
     var labelStyle = Theme.of(context).textTheme.bodySmall;
-    var unselectedLabelStyle = labelStyle?.copyWith(color: Theme.of(context).dividerColor);
+    final color = TabBarTheme.of(context).unselectedLabelColor;
+    var unselectedLabelStyle = labelStyle?.copyWith(color: color);
     labelStyle = labelStyle?.copyWith(fontWeight: FontWeight.bold);
     return Column(children: [
       TabBar(

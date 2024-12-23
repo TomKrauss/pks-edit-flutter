@@ -18,7 +18,7 @@ import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/ui/main_page.dart';
 import 'package:window_manager/window_manager.dart';
-import 'generated/l10n.dart';
+import 'package:pks_edit_flutter/generated/l10n.dart';
 
 ///
 /// Start the PKS Edit application

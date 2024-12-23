@@ -29,6 +29,9 @@ class ThemeConfiguration {
     if (darkMode == 1) {
       return true;
     }
+    if (darkMode == 0) {
+      return false;
+    }
     var brightness = SchedulerBinding.instance.platformDispatcher.platformBrightness;
     return brightness == Brightness.dark;
   }
@@ -68,12 +71,13 @@ class ThemeConfiguration {
 
   static String? _printOptColor(Color? color) => color == null ? null : _printColor(color);
 
+  // ignore: deprecated_member_use
   static String _printColor(Color color) => color.value.toRadixString(16);
 
-  ThemeConfiguration({this.name = "default",
-    this.backgroundColor = Colors.black,
+  ThemeConfiguration({this.name = "system default",
+    this.backgroundColor = Colors.white,
     this.darkMode,
-    this.dialogLightBackground = Colors.black26,
+    this.dialogLightBackground = Colors.black12,
     this.optDialogBackground,
     this.dialogLight = Colors.white38,
     this.dialogBorder = Colors.black12,
@@ -97,10 +101,15 @@ class Themes {
 
   Themes({required this.themes}) {
     if (themes.isEmpty) {
-      throw "At least one theme configuration must be defined.";
+      throw Exception("At least one theme configuration must be defined.");
     }
     for (final t in themes) {
       _themeMap[t.name] = t;
+    }
+    final sysDefault = ThemeConfiguration();
+    if (!_themeMap.containsKey(sysDefault.name)) {
+      themes.insert(0, sysDefault);
+      _themeMap[sysDefault.name] = sysDefault;
     }
     _currentTheme = themes.first;
   }

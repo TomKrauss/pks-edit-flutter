@@ -266,7 +266,7 @@ class KeyBinding extends Binding {
   late final SingleActivator activator;
 
   SingleActivator _calculateActivator(String key) {
-    var split = key.split(r"+");
+    var split = key.split("+");
     bool alt = false;
     bool shift = false;
     bool control = false;

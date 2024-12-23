@@ -63,7 +63,7 @@ class SearchBarWidgetState extends State<SearchBarWidget> {
     final height = PksIniConfiguration.of(context).configuration.iconSize.size;
     final theme = Theme.of(context);
     final color = ThemeData.estimateBrightnessForColor(theme.primaryColor) == Brightness.light ? Colors.black87 : Colors.white70;
-    final fontSize = (height/2).toDouble();
+    final fontSize = (height/2);
     final constraints = BoxConstraints(maxHeight: height+4);
     return Tooltip(message: "Type text to search\nPress Enter to navigate matches\nPress Ctrl+Up/Ctrl+Down to change navigation direction",
         child: CallbackShortcuts(

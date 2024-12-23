@@ -72,11 +72,11 @@ class Languages {
     RegExp(r".*\.(json|jsonx)"): Language(name: "json", mode: langJson),
     RegExp(r".*\.(yaml|yml)"): Language(name: "yaml", mode: langYaml),
     RegExp(r".*\.adoc"): Language(name: "adoc", mode: langAsciidoc),
-    RegExp(r"Dockerfile"): Language(name: "docker", mode: langDockerfile),
+    RegExp("Dockerfile"): Language(name: "docker", mode: langDockerfile),
     RegExp(r".*\.js"): Language(name: "javascript", mode: langJavascript),
     RegExp(r".*\.ts"): Language(name: "typescript", mode: langTypescript),
     RegExp(r".*\.css"): Language(name: "css", mode: langCss),
-    RegExp(r"makefile"): Language(name: "makefile", mode: langCmake),
+    RegExp("makefile"): Language(name: "makefile", mode: langCmake),
     RegExp(r".*\.cs"): Language(name: "csharp", mode: langCsharp),
     RegExp(r".*\.csv"): Language(name: "csv", mode: langExcel),
     RegExp(r".*\.c"): Language(name: "c", mode: langC),
@@ -91,7 +91,7 @@ class Languages {
     RegExp(r".*\.(erl|hrl)"): Language(name: "erlang", mode: langErlang),
     RegExp(r".*\.py"): Language(name: "python", mode: langPython),
     RegExp(r".*\.(csh|bash|sh)"): Language(name: "shell", mode: langBash),
-    RegExp(r"[^.]+"): Language(name: "sysconfig", mode: langProperties),
+    RegExp("[^.]+"): Language(name: "sysconfig", mode: langProperties),
   };
 
   Language modeForFilename(String fileName) {

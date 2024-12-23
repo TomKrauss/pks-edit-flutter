@@ -33,7 +33,7 @@ part 'pks_sys.g.dart';
 ///
 class OpenEditorPanel {
   static final pksEditSearchListFormat =
-      RegExp(r'"([^"]+)", line ([0-9]+): *(.*)');
+      RegExp('"([^"]+)", line ([0-9]+): *(.*)');
   ///
   /// The file path of the file edited.
   ///
@@ -66,7 +66,7 @@ class OpenEditorPanel {
   OpenEditorPanel(
       {required this.path, required this.lineNumber, required this.dock, this.active = false, this.focus = false, this.cloned = false, this.displayMode = -1});
 
-  String encodeJson() => "\"$path\", line $lineNumber: $dock ${active ? 'active': '-'} ${focus ? 'focus': '-'} ${cloned ? 'cloned': '-'} ${displayMode.toRadixString(16)}";
+  String encodeJson() => '"$path", line $lineNumber: $dock ${active ? 'active': '-'} ${focus ? 'focus': '-'} ${cloned ? 'cloned': '-'} ${displayMode.toRadixString(16)}';
 
   static OpenEditorPanel? parse(String string) {
     var match = pksEditSearchListFormat.firstMatch(string);

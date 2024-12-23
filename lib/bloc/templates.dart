@@ -21,10 +21,10 @@ class Templates {
   static final Templates singleton = Templates._();
   Templates._();
   final Map<RegExp, Template> _templates = {
-    RegExp(r".*\.java"): Template(useCopyright: true, text: "public void main(String[] args)\n    System.out.println(\"hello world\");\n}"),
+    RegExp(r".*\.java"): Template(useCopyright: true, text: 'public void main(String[] args)\n    System.out.println("hello world");\n}'),
     RegExp(r".*\.dart"): Template(useCopyright: true, text: "void main(args) {\n   print('hello world');\n}"),
     RegExp(r".*\.(yaml|yml)"): Template(useCopyright: false, text: "sample:\n  property: hello"),
-    RegExp(r".*\.(html|xhtml|htm)"): Template(useCopyright: false, text: "<!DOCTYPE HTML PUBLIC \"-//W3C//DTD HTML 3.2 Final//EN\">\n<html>\n</html>"),
+    RegExp(r".*\.(html|xhtml|htm)"): Template(useCopyright: false, text: '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<html>\n</html>'),
     RegExp(r".*\.py"): Template(useCopyright: false, text:""),
   };
 

@@ -20,7 +20,7 @@ EditingConfiguration _$EditingConfigurationFromJson(
       showSyntaxHighlight: json['showSyntaxHighlight'] as bool? ?? true,
       backupExtension: json['backupExtension'] as String? ?? "bak",
       wordTokenExpression: json['wordTokenExpression'] as String? ??
-          r'[a-zA-ZöäüÖÄÜß][a-zA-Z0-9_öäüÖÄÜß]*',
+          '[a-zA-ZöäüÖÄÜß][a-zA-Z0-9_öäüÖÄÜß]*',
     );
 
 Map<String, dynamic> _$EditingConfigurationToJson(
