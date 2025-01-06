@@ -16,7 +16,8 @@ dependencies:
   http: ^1.2.2
   url_launcher: ^6.3.1
   package_info_plus: ^8.1.1
-  re_editor: ^0.6.0
+  re_editor:
+    git: https://github.com/TomKrauss/re-editor
   multi_split_view: ^3.6.0
   window_manager: ^0.4.3
   re_highlight: ^0.0.3
