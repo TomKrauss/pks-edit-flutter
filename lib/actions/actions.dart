@@ -38,6 +38,7 @@ import 'package:pks_edit_flutter/generated/l10n.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/input_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/search_replace_dialog.dart';
+import 'package:pks_edit_flutter/ui/dialog/search_replace_dialog_in_files.dart';
 import 'package:pks_edit_flutter/ui/dialog/settings_dialog.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:window_manager/window_manager.dart';
@@ -220,6 +221,10 @@ class PksEditActions {
           execute: _find,
           isEnabled: _hasFile,
           textKey: "actionFind"),
+      PksEditAction(
+          id: "find-in-filelist",
+          execute: _findInFiles,
+          textKey: "actionFindInFiles"),
       PksEditAction(
           id: "find-word-forward",
           execute: _findWordForward,
@@ -622,6 +627,13 @@ class PksEditActions {
       await bloc.matchWord(file);
       file.findController.previousMatch();
       _updateMatchSelection(file);
+    });
+  }
+
+  void _findInFiles() {
+    _withCurrentFile((file) {
+      SearchReplaceInFilesDialog.show(context: getBuildContext(),
+          arguments: SearchReplaceInFilesDialogArguments(initialSearchPattern: "text"));
     });
   }
 

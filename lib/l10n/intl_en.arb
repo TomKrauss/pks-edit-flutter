@@ -55,6 +55,7 @@
   "actionErase": "Delete Selection",
   "actionRedo": "Redo",
   "actionFind": "Find...",
+  "actionFindInFiles": "Find in Files...",
   "actionFindAgainForward": "Find Next...",
   "actionFindBackward": "Find Previous...",
   "actionFindWordForward": "Find current word...",

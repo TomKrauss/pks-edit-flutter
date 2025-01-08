@@ -65,6 +65,7 @@
   "actionErase": "Selection löschen",
   "actionRedo": "Wiederholen",
   "actionFind": "Suchen...",
+  "actionFindInFiles": "In Dateien Suchen...",
   "actionFindAgainForward": "Suche wiederholen...",
   "actionFindBackward": "Suche rückwärts wiederholen...",
   "actionFindWordForward": "Aktuelles Wort suchen...",

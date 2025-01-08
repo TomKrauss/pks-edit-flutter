@@ -82,6 +82,8 @@ class MessageLookup extends MessageLookupByLibrary {
             MessageLookupByLibrary.simpleMessage("Suche wiederholen..."),
         "actionFindBackward": MessageLookupByLibrary.simpleMessage(
             "Suche rückwärts wiederholen..."),
+        "actionFindInFiles":
+            MessageLookupByLibrary.simpleMessage("In Dateien Suchen..."),
         "actionFindWordBackward":
             MessageLookupByLibrary.simpleMessage("Wort rückwärts suchen..."),
         "actionFindWordForward":

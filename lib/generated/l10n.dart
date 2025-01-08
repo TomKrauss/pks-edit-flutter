@@ -600,6 +600,16 @@ class S {
     );
   }
 
+  /// `Find in Files...`
+  String get actionFindInFiles {
+    return Intl.message(
+      'Find in Files...',
+      name: 'actionFindInFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Find Next...`
   String get actionFindAgainForward {
     return Intl.message(
