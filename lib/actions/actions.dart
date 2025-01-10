@@ -633,7 +633,7 @@ class PksEditActions {
   void _findInFiles() {
     _withCurrentFile((file) {
       SearchReplaceInFilesDialog.show(context: getBuildContext(),
-          arguments: SearchReplaceInFilesDialogArguments(initialSearchPattern: "text"));
+          arguments: SearchReplaceInFilesDialogArguments(supportReplace: false));
     });
   }
 

@@ -18,6 +18,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:glob/glob.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
+import 'package:pks_edit_flutter/config/pks_sys.dart';
 import 'package:pks_edit_flutter/util/logger.dart';
 import 'package:rxdart/rxdart.dart';
 import 'package:sprintf/sprintf.dart';
@@ -40,11 +41,28 @@ class SearchInFilesMatch {
 
   SearchInFilesMatch({required this.fileName, required this.lineNumber, required this.column, required this.matchLength, this.matchedLine});
 
+  String get shortenedFileName {
+    var n = fileName;
+    var l = n.length;
+    if (l > 30) {
+      return "...${n.substring(l-30)}";
+    }
+    return n;
+  }
+
+  List<String> get matchedSegments {
+    var line = matchedLine;
+    if (line == null) {
+      return [""];
+    }
+    return [line.substring(0,column), line.substring(column, column+matchLength), line.substring(column+matchLength)];
+  }
+
   String printMatch() {
     String matchComment = "";
-    var line = matchedLine;
-    if (line != null) {
-      matchComment = " - ${line.substring(0,column)}~${line.substring(column, column+matchLength)}~${line.substring(column+matchLength)}";
+    var segments = matchedSegments;
+    if (segments.isNotEmpty) {
+      matchComment = " - ${segments[0]}~${segments[1]}~${segments[2]}";
     }
     return sprintf(_grepFileFormat, [fileName, lineNumber+1, "$column/$matchLength$matchComment"]);
   }
@@ -66,11 +84,7 @@ class SearchAndReplaceInFilesOptions {
   String fileNamePattern = "*.txt";
   String search = "";
   String replace = "";
-  bool regex = true;
-  bool ignoreCase = true;
-  bool preserveUpperLowerCase = true;
-  bool singleMatchInFile = false;
-  bool ignoreBinaryFiles = true;
+  SearchAndReplaceOptions options = SearchAndReplaceOptions();
   SearchInFilesAction action = SearchInFilesAction.search;
   Glob get fileNamePatterns {
     var matchString = fileNamePattern;
@@ -105,14 +119,16 @@ class SearchInFilesController {
           foundMatch(f, options);
         }
       }
+    }, onDone: () {
+      _running.value = false;
     });
-    _running.value = false;
   }
 
   Future<void> run(SearchAndReplaceInFilesOptions options) async {
     if (_running.value) {
       return;
     }
+    _running.value = true;
     var found = <SearchInFilesMatch>[];
     _resultController.add(found);
     final dir = Directory(options.directory);
@@ -120,9 +136,31 @@ class SearchInFilesController {
       logger.w("Directory ${options.directory} does not exist");
       return;
     }
-    _running.value = true;
+    Pattern? searchPattern = options.search.isEmpty ? null :
+        (options.options.regex ? RegExp(options.search, caseSensitive: !options.options.ignoreCase) : options.search);
     unawaited(_traverseDirectories(dir, options.fileNamePatterns, options, (file, option) async {
-      found.add(SearchInFilesMatch(fileName: file.absolute.path, lineNumber: 0, column: 0, matchLength: 0));
+      unawaited(file.readAsLines().then(((lines) {
+        int lineNumber = 0;
+        var singleMatched = false;
+        for (final line in lines) {
+          if (searchPattern == null) {
+            found.add(SearchInFilesMatch(fileName: file.absolute.path, lineNumber: lineNumber, column: 0, matchLength: line.length, matchedLine: line));
+            break;
+          } else {
+            for (final m in searchPattern.allMatches(line)) {
+              found.add(SearchInFilesMatch(fileName: file.absolute.path, lineNumber: lineNumber, column: m.start, matchLength: m.end-m.start, matchedLine: line));
+              if (option.options.singleMatchInFile) {
+                singleMatched = true;
+                break;
+              }
+            }
+          }
+          if (singleMatched) {
+            break;
+          }
+          lineNumber++;
+        }
+      })));
       _resultController.add(found);
     }));
   }

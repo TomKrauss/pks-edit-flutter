@@ -5,7 +5,7 @@ All notable changes to the PKS Edit for Flutter will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [LATEST] - 2024-04-25
+## [LATEST] - 2025-01-09
 
 ### Added
 - Editing Settings will now save the settings right away for the next session. Generally editing settings was
@@ -20,4 +20,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New View Options (show/hide highlight, show/hide line numbers) were added.
 - Added "Word"-wise caret movement and selection
 - Support for renderers depending on document type added.
+- Support for Search (and Replace) in Files is on the run.
 

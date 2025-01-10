@@ -145,6 +145,52 @@ class MainFrameDock {
 }
 
 ///
+/// Small utility for lists.
+///
+extension ListExtension<T> on List<T> {
+  void addOrMoveFirst(T item) {
+    int idx = indexOf(item);
+    if (idx == 0) {
+      return;
+    }
+    if (idx > 0) {
+      remove(item);
+    }
+    insert(0, item);
+  }
+}
+
+///
+/// Options used during search and replace. Are stored internally in compatibility to PKS-Edit for
+/// Windows as a bitmask.
+///
+class SearchAndReplaceOptions {
+  int _flags;
+  bool get regex => (_flags & 0x1) != 0;
+  bool get ignoreCase => (_flags & 0x2) != 0;
+  bool get shellWildCards => (_flags & 0x4) != 0;
+  bool get preserveCase => (_flags & 0x8) != 0;
+  bool get ignoreBinaryFiles => (_flags & 0x10) != 0;
+  bool get appendToSearchList => (_flags & 0x80) != 0;
+  bool get searchInSearchResults => (_flags & 0x100) != 0;
+  bool get singleMatchInFile => (_flags & 0x40) != 0;
+  void _setFlag(int mask, bool value) {
+    if (value) {
+      _flags |= mask;
+    } else {
+      _flags = _flags & ~mask;
+    }
+  }
+  set regex(bool flag) => _setFlag(0x1, flag);
+  set ignoreCase(bool flag) => _setFlag(0x2, flag);
+  set singleMatchInFile(bool flag) => _setFlag(0x40, flag);
+  set preserveCase(bool flag) => _setFlag(0x8, flag);
+  set shellWildCards(bool flag) => _setFlag(0x4, flag);
+  set ignoreBinaryFiles(bool flag) => _setFlag(0x10, flag);
+  SearchAndReplaceOptions([this._flags = 0]);
+}
+
+///
 /// Represents the last store PksEditSession.
 ///
 @JsonSerializable(explicitToJson: true, includeIfNull: false)
@@ -154,7 +200,7 @@ class PksEditSession {
   @JsonKey(name: "screen-height")
   final int screenHeight;
   @JsonKey(name: "search-replace-options")
-  final int searchReplaceOptions;
+  int searchReplaceOptions;
   @JsonKey(name: "open-files")
   final List<String> openFiles;
   @JsonKey(name: "search-patterns")
@@ -194,6 +240,9 @@ class PksEditSession {
       replacePatterns = replacePatterns ?? [],
       filePatterns = filePatterns ?? [];
 
+  SearchAndReplaceOptions get searchAndReplaceOptions => SearchAndReplaceOptions(searchReplaceOptions);
+  set searchAndReplaceOptions(SearchAndReplaceOptions options) => searchReplaceOptions = options._flags;
+
   ///
   /// Prepare the current PKSEdit session for being saved, when we exit PKS EDIT.
   ///
@@ -221,6 +270,8 @@ class PksEditSession {
         dock1: dock1 ?? this.dock1,
         dock2: dock2 ?? this.dock2,
         dock3: dock3 ?? this.dock3,
+        filePatterns: filePatterns,
+        replacePatterns: replacePatterns,
         openFiles: openFiles,
         openEditors: openEditors
             .map((e) => OpenEditorPanel(
