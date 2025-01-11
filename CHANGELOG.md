@@ -20,5 +20,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New View Options (show/hide highlight, show/hide line numbers) were added.
 - Added "Word"-wise caret movement and selection
 - Support for renderers depending on document type added.
-- Support for Search (and Replace) in Files is on the run.
+- Support for Search (and Replace) in Files.
 

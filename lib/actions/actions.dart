@@ -24,6 +24,7 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:file_selector/file_selector.dart';
@@ -33,6 +34,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/controller_extension.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
+import 'package:pks_edit_flutter/bloc/search_in_files_controller.dart';
 import 'package:pks_edit_flutter/config/editing_configuration.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
@@ -225,6 +227,14 @@ class PksEditActions {
           id: "find-in-filelist",
           execute: _findInFiles,
           textKey: "actionFindInFiles"),
+      PksEditAction(
+          id: "errorlist-next",
+          execute: _navigateToNextMatch,
+          textKey: "navigateToNextMatch"),
+      PksEditAction(
+          id: "errorlist-previous",
+          execute: _navigateToPreviousMatch,
+          textKey: "navigateToPreviousMatch"),
       PksEditAction(
           id: "find-word-forward",
           execute: _findWordForward,
@@ -630,11 +640,36 @@ class PksEditActions {
     });
   }
 
+  void _navigateToNextMatch() {
+    if (SearchInFilesController.instance.results.moveSelectionNext()) {
+      _openCurrentResultMatch();
+    }
+  }
+
+  void _navigateToPreviousMatch() {
+    if (SearchInFilesController.instance.results.moveSelectionPrevious()) {
+      _openCurrentResultMatch();
+    }
+  }
+
   void _findInFiles() {
-    _withCurrentFile((file) {
-      SearchReplaceInFilesDialog.show(context: getBuildContext(),
-          arguments: SearchReplaceInFilesDialogArguments(supportReplace: false));
-    });
+    SearchReplaceInFilesDialog.show(context: getBuildContext(),
+      arguments: SearchReplaceInFilesDialogArguments(supportReplace: false, onAction: (context, action) {
+        if (action == SearchInFilesAction.openFile) {
+          Navigator.of(context).pop();
+          _openCurrentResultMatch();
+        }
+      }));
+  }
+
+  Future<void> _openCurrentResultMatch() async {
+    final bloc = EditorBloc.of(getBuildContext());
+    var m = SearchInFilesController.instance.results.selectedMatch.value;
+    if (m == null) {
+      return;
+    }
+    var nl = m.lineNumber;
+    await handleCommandResult(await bloc.openFile(m.fileName, lineNumber: nl, column: m.column, selectionExtent: m.matchLength));
   }
 
   void _find() {

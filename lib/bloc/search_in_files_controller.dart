@@ -72,8 +72,8 @@ class SearchInFilesMatch {
 /// The action to perform.
 ///
 enum SearchInFilesAction {
-  search,
-  replace
+  openFile,
+  replaceInFiles
 }
 
 ///
@@ -85,7 +85,6 @@ class SearchAndReplaceInFilesOptions {
   String search = "";
   String replace = "";
   SearchAndReplaceOptions options = SearchAndReplaceOptions();
-  SearchInFilesAction action = SearchInFilesAction.search;
   Glob get fileNamePatterns {
     var matchString = fileNamePattern;
     if (matchString.indexOf(RegExp("[,;|]")) > 0) {
@@ -98,15 +97,80 @@ class SearchAndReplaceInFilesOptions {
   }
 }
 
+///
+/// Maintains a list of "matches" - i.e. file locations, which might be navigated or jumped to.
+/// A match result list may be created as part of a search in files operation of by parsing the
+/// output of a build tool.
+///
+class MatchResultList {
+  final StreamController<List<SearchInFilesMatch>> _resultController = BehaviorSubject();
+  final List<SearchInFilesMatch> _matches = [];
+  Stream<List<SearchInFilesMatch>> get results => _resultController.stream;
+  ///
+  /// The match currently selected. Can be used for next-match and previous-match operations for instance.
+  ///
+  final ValueNotifier<SearchInFilesMatch?> selectedMatch = ValueNotifier(null);
+
+  ///
+  /// The index of the currently selected element or -1 if non was selected.
+  int get selectedIndex {
+    var v = selectedMatch.value;
+    return v == null ? -1 : _matches.indexOf(v);
+  }
+
+  ///
+  /// Reset this match result list.
+  ///
+  void reset() {
+    _matches.clear();
+    _resultController.add(_matches);
+    selectedMatch.value = null;
+  }
+
+  void add(SearchInFilesMatch match) {
+    _matches.add(match);
+    _resultController.add(_matches);
+  }
+
+  ///
+  /// Move the current selection in the match result list one item down. Return [true] if this was successful.
+  ///
+  bool moveSelectionNext() {
+    var idx = selectedIndex;
+    if (idx+1 < _matches.length) {
+      selectedMatch.value = _matches[idx+1];
+      return true;
+    }
+    return false;
+  }
+
+  ///
+  /// Move the current selection in the match result list one item up. Return [true] if this was successful.
+  ///
+  bool moveSelectionPrevious() {
+    var idx = selectedIndex;
+    if (idx-1 >= 0) {
+      selectedMatch.value = _matches[idx-1];
+      return true;
+    }
+    return false;
+  }
+}
 
 ///
 /// The controller performing the search in files operation.
 ///
 class SearchInFilesController {
   final Logger logger = createLogger("SearchInFilesController");
-  final StreamController<List<SearchInFilesMatch>> _resultController = BehaviorSubject();
-  Stream<List<SearchInFilesMatch>> get results => _resultController.stream;
   final ValueNotifier<bool> _running = ValueNotifier(false);
+  final MatchResultList results = MatchResultList();
+
+  SearchInFilesController._();
+
+  ///
+  /// The search in files controller is accessed as a singleton.
+  ///
+  static final SearchInFilesController instance = SearchInFilesController._();
 
   ValueNotifier<bool> get running => _running;
 
@@ -129,13 +193,12 @@ class SearchInFilesController {
       return;
     }
     _running.value = true;
-    var found = <SearchInFilesMatch>[];
-    _resultController.add(found);
     final dir = Directory(options.directory);
     if (!dir.existsSync()) {
       logger.w("Directory ${options.directory} does not exist");
       return;
     }
+    results.reset();
     Pattern? searchPattern = options.search.isEmpty ? null :
         (options.options.regex ? RegExp(options.search, caseSensitive: !options.options.ignoreCase) : options.search);
     unawaited(_traverseDirectories(dir, options.fileNamePatterns, options, (file, option) async {
@@ -144,11 +207,11 @@ class SearchInFilesController {
         var singleMatched = false;
         for (final line in lines) {
           if (searchPattern == null) {
-            found.add(SearchInFilesMatch(fileName: file.absolute.path, lineNumber: lineNumber, column: 0, matchLength: line.length, matchedLine: line));
+            results.add(SearchInFilesMatch(fileName: file.absolute.path, lineNumber: lineNumber, column: 0, matchLength: line.length, matchedLine: line));
             break;
           } else {
             for (final m in searchPattern.allMatches(line)) {
-              found.add(SearchInFilesMatch(fileName: file.absolute.path, lineNumber: lineNumber, column: m.start, matchLength: m.end-m.start, matchedLine: line));
+              results.add(SearchInFilesMatch(fileName: file.absolute.path, lineNumber: lineNumber, column: m.start, matchLength: m.end-m.start, matchedLine: line));
               if (option.options.singleMatchInFile) {
                 singleMatched = true;
                 break;
@@ -161,7 +224,6 @@ class SearchInFilesController {
           lineNumber++;
         }
       })));
-      _resultController.add(found);
     }));
   }
 

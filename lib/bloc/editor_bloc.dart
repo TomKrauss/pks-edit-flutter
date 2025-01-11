@@ -262,13 +262,20 @@ class OpenFile {
     this.encoding = convert.utf8,
     this.bomType = BomType.none,
     required this.isNew,
-    int? initialLineNumber}) {
+    int? initialLineNumber,
+    int? initialColumn,
+    int? initialSelectionExtent
+  }) {
     language = Languages.singleton.modeForFilename(filename);
     _lastSavedText = text;
     this.modificationTime = modificationTime ?? DateTime.now();
     controller = CodeLineEditingController.fromText(text, CodeLineOptions(indentSize: editingConfiguration.tabSize, lineBreak: lineBreak));
     if (initialLineNumber != null) {
-      controller.selection = CodeLineSelection.fromPosition(position: CodeLinePosition(index: initialLineNumber, offset: 0));
+      WidgetsBinding.instance.addPostFrameCallback((d) {
+          controller.selection = CodeLineSelection(baseIndex: initialLineNumber, baseOffset: initialColumn ?? 0,
+            extentIndex: initialLineNumber, extentOffset: (initialColumn ?? 0) + (initialSelectionExtent ?? 0));
+          controller.makeCursorCenterIfInvisible();
+      });
     }
     findController = CodeFindController(controller, const CodeFindValue(option: CodeFindOption(pattern: "", caseSensitive: true, regex: false),
         searching: true,
@@ -320,16 +327,16 @@ class EditorBloc {
   late final EditingConfigurations editingConfigurations;
   late final ActionBindings actionBindings;
   late final Themes themes;
-  final StreamController<OpenFileState> _openFileSubject = BehaviorSubject.seeded(OpenFileState(files: const [], currentIndex: -1));
+  final StreamController<OpenFileState> _openFileStateSubject = BehaviorSubject.seeded(OpenFileState(files: const [], currentIndex: -1));
   final StreamController<OpenFile> _externalFileChanges = BehaviorSubject();
 
   Stream<CommandResult> get errorResultStream => _errorResults.stream;
-  Stream<OpenFileState> get openFileStream => _openFileSubject.stream;
+  Stream<OpenFileState> get openFileStateStream => _openFileStateSubject.stream;
   Stream<PksIniConfiguration> get pksIniStream => _pksIniStreamController.stream;
   Stream<OpenFile> get externalFileChangeStream => _externalFileChanges.stream;
 
   void _refreshFiles() {
-    _openFileSubject.add(_openFileState);
+    _openFileStateSubject.add(_openFileState);
   }
 
   _NextCaretMatch? _findNextWord(OpenFile file, int line, int start, int direction) {
@@ -630,10 +637,16 @@ class EditorBloc {
   /// Open a file with the given [filename]. If a [dock] is passed, the file is opened
   /// in the corresponding dock on the screen otherwise on the default dock.
   ///
-  Future<CommandResult> openFile(String filename, {String? dock, int? lineNumber}) async {
+  Future<CommandResult> openFile(String filename, {String? dock, int? lineNumber, int? column, int? selectionExtent}) async {
     filename = _makeAbsolute(filename);
     if (_selectFile(filename)) {
-      return CommandResult(success: true, message: "File with the given name was open already.");
+      var controller = _openFileState._currentFile?.controller;
+      if (lineNumber != null && controller != null) {
+        controller.selection = CodeLineSelection(baseIndex: lineNumber, baseOffset: column ?? 0,
+            extentIndex: lineNumber, extentOffset: (column ?? 0) + (selectionExtent ?? 0));
+        controller.makeCursorCenterIfInvisible();
+      }
+      return CommandResult(success: true, message: lineNumber == null ? "File with the given name was open already." : null);
     }
     try {
       final ec = await editingConfigurations.forFile(filename);
@@ -659,6 +672,8 @@ class EditorBloc {
           lineBreak: result.lineBreak,
           encoding: result.encoding,
           initialLineNumber: lineNumber,
+          initialColumn: column,
+          initialSelectionExtent: selectionExtent,
           dock: dock ?? OpenFile.dockNameDefault));
       _logger.i("Opened file $filename");
     } catch(ex) {
@@ -793,7 +808,7 @@ class EditorBloc {
   }
 
   Future<void> dispose() async {
-    await _openFileSubject.close();
+    await _openFileStateSubject.close();
     await _externalFileChanges.close();
     await _errorResults.close();
   }

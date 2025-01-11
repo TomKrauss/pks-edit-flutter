@@ -185,7 +185,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
 
   @override
   Widget build(BuildContext context) => StreamBuilder(
-      stream: bloc.openFileStream,
+      stream: bloc.openFileStateStream,
       builder: (context, snapshot) {
         var files = snapshot.data;
         _actionContext = PksEditActionContext(openFileState: files);

@@ -16,17 +16,21 @@ import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:pks_edit_flutter/bloc/search_in_files_controller.dart';
 import 'package:pks_edit_flutter/config/pks_sys.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
 import 'package:pks_edit_flutter/ui/dialog/dialog.dart';
 
-class _SearchResultListItem extends StatelessWidget {
+///
+/// Represents one match result in our MatchResultListWidget.
+///
+class _MatchResultListWidget extends StatelessWidget {
   final SearchInFilesMatch match;
   final bool selected;
   final TextStyle? textStyle;
   final void Function(bool) onSelect;
-  const _SearchResultListItem(
+  const _MatchResultListWidget(
       {required this.match,
       required this.onSelect,
       this.selected = false,
@@ -36,10 +40,13 @@ class _SearchResultListItem extends StatelessWidget {
       List<String> segments, TextStyle? textStyle, TextStyle? boldStyle) {
     if (segments.length == 3) {
       return RichText(
-          text: TextSpan(text: segments[0].trim(), style: textStyle, children: [
-        TextSpan(text: segments[1], style: boldStyle),
-        TextSpan(text: segments[2], style: textStyle)
-      ]));
+          text: TextSpan(
+              text: segments[0].trimLeft(),
+              style: textStyle,
+              children: [
+            TextSpan(text: segments[1], style: boldStyle),
+            TextSpan(text: segments[2], style: textStyle)
+          ]));
     }
     return null;
   }
@@ -62,8 +69,8 @@ class _SearchResultListItem extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(match.fileName, style: style),
-            Flexible(
+            Text(match.fileName, style: style?.copyWith(color: style.color?.withAlpha(100), fontSize: 14)),
+            Expanded(
                 child: Row(children: [
               SizedBox(
                   width: 40, child: Text("${match.lineNumber}:", style: style)),
@@ -71,8 +78,7 @@ class _SearchResultListItem extends StatelessWidget {
                   child: _createSpan(match.matchedSegments, style, boldStyle) ??
                       SizedBox(width: 0))
             ])),
-            Divider(),
-            const SizedBox(height: 5)
+            Divider(thickness: 0.2)
           ],
         ));
     if (selected) {
@@ -88,26 +94,101 @@ class _SearchResultListItem extends StatelessWidget {
 ///
 class SearchReplaceInFilesDialogArguments {
   final bool supportReplace;
+  final void Function(BuildContext context, SearchInFilesAction action) onAction;
 
-  SearchReplaceInFilesDialogArguments({this.supportReplace = true});
+  SearchReplaceInFilesDialogArguments({this.supportReplace = true, required this.onAction});
 }
 
-class SearchResultList extends StatefulWidget {
-  final SearchInFilesController controller;
+///
+/// A widget displaying a match result list.
+///
+class MatchResultListWidget extends StatefulWidget {
+  ///
+  /// The model of this widget - the match results.
+  final MatchResultList resultList;
+  ///
+  /// Invoked, when an item in the list is double clicked.
+  ///
+  final void Function() onAccept;
   final bool progress;
 
-  const SearchResultList(this.controller, {required this.progress, super.key});
+  const MatchResultListWidget(this.resultList, {required this.progress, required this.onAccept, super.key});
 
   @override
   State<StatefulWidget> createState() => SearchResultState();
 }
 
-class SearchResultState extends State<SearchResultList> {
-  int selection = 0;
+// Action to move to the previous match
+class _NextIntent extends Intent {
+  const _NextIntent();
+}
+
+// Action to move to the previous match
+class _PreviousIntent extends Intent {
+  const _PreviousIntent();
+}
+
+// Action to confirm a match
+class _ConfirmIntent extends Intent {
+  const _ConfirmIntent();
+}
+
+class SearchResultState extends State<MatchResultListWidget> {
+  double get itemHeight => 65;
+  ValueNotifier<SearchInFilesMatch?> get selectedMatch =>
+      widget.resultList.selectedMatch;
+  late final CallbackAction<_PreviousIntent> _previousAction;
+  late final CallbackAction<_NextIntent> _nextAction;
+  late final CallbackAction<_ConfirmIntent> _confirmAction;
+  final FocusNode _focusNode = FocusNode();
+  final ScrollController _scrollController = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _previousAction = CallbackAction<_PreviousIntent>(onInvoke: _handleMovePrevious);
+    _nextAction = CallbackAction<_NextIntent>(onInvoke: _handleMoveNext);
+    _confirmAction = CallbackAction<_ConfirmIntent>(onInvoke: _handleConfirm);
+  }
+
+  @override
+  void dispose() {
+    super.dispose();
+    _focusNode.dispose();
+    _scrollController.dispose();
+  }
+
+  void _ensureListItemVisible() {
+    var idx = widget.resultList.selectedIndex;
+    if (idx >= 0 && _scrollController.hasClients) {
+      var lowY = idx * itemHeight;
+      var highY = lowY + itemHeight;
+      var p = _scrollController.position;
+      if (p.viewportDimension+p.pixels < highY) {
+        _scrollController.jumpTo(highY-p.viewportDimension);
+      } else if (p.pixels > lowY) {
+        _scrollController.jumpTo(lowY);
+      }
+    }
+  }
+
+  void _handleConfirm(_ConfirmIntent intent) {
+    widget.onAccept();
+  }
+
+  void _handleMoveNext(_NextIntent intent) {
+    widget.resultList.moveSelectionNext();
+    _ensureListItemVisible();
+  }
+
+  void _handleMovePrevious(_PreviousIntent intent) {
+    widget.resultList.moveSelectionPrevious();
+    _ensureListItemVisible();
+  }
 
   @override
   Widget build(BuildContext context) => StreamBuilder(
-      stream: widget.controller.results,
+      stream: widget.resultList.results,
       builder: (context, snapshot) {
         final data = snapshot.data;
         if (data == null || data.isEmpty) {
@@ -121,22 +202,41 @@ class SearchResultState extends State<SearchResultList> {
             .bodyMedium
             ?.copyWith(overflow: TextOverflow.fade);
         return SingleChildScrollView(
-            child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: data
-                    .mapIndexed((i, d) => Flexible(
-                            child: _SearchResultListItem(
-                          onSelect: (flag) {
-                            setState(() {
-                              selection = i;
-                            });
-                          },
-                          match: d,
-                          textStyle: fnStyle,
-                          selected: i == selection,
-                        )))
-                    .toList()));
+            controller: _scrollController,
+            child: Shortcuts(
+                shortcuts: <LogicalKeySet, Intent>{
+              LogicalKeySet(LogicalKeyboardKey.arrowDown): const _NextIntent(),
+              LogicalKeySet(LogicalKeyboardKey.arrowUp): const _PreviousIntent(),
+              LogicalKeySet(LogicalKeyboardKey.enter): const _ConfirmIntent(),
+            },
+                child: Actions(
+                    actions: <Type, Action<Intent>>{
+                      _NextIntent: _nextAction,
+                      _ConfirmIntent: _confirmAction,
+                      _PreviousIntent: _previousAction
+                    },
+                    child:  Focus(
+            focusNode: _focusNode,
+            debugLabel: "Focused Result List",
+            child: ValueListenableBuilder(
+                        valueListenable: selectedMatch,
+                        builder: (context, value, child) => Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: data
+                                .map((d) => SizedBox(height: itemHeight, child: _MatchResultListWidget(
+                                      onSelect: (flag) {
+                                        _focusNode.requestFocus();
+                                        selectedMatch.value = d;
+                                        if (flag) {
+                                          widget.onAccept();
+                                        }
+                                      },
+                                      match: d,
+                                      textStyle: fnStyle,
+                                      selected: d == value,
+                                    )))
+                                .toList()))))));
       });
 }
 
@@ -173,7 +273,8 @@ class _SearchReplaceInFilesDialogState
       PksConfiguration.singleton.currentSession;
   final parameter = SearchAndReplaceInFilesOptions();
   final SearchInFilesController searchInFilesController =
-      SearchInFilesController();
+      SearchInFilesController.instance;
+  bool _sessionInitialized = false;
 
   @override
   void initState() {
@@ -295,15 +396,13 @@ class _SearchReplaceInFilesDialogState
 
   void _find() {
     _applyOptions();
-    parameter.action = SearchInFilesAction.search;
     searchInFilesController.run(parameter);
     //Navigator.pop(context, parameter);
   }
 
   void _replace() {
     _applyOptions();
-    parameter.action = SearchInFilesAction.replace;
-    Navigator.pop(context, parameter);
+    Navigator.pop(context, SearchInFilesAction.replaceInFiles);
   }
 
   Widget _optionButton(String label, String tooltip, bool value,
@@ -366,7 +465,8 @@ class _SearchReplaceInFilesDialogState
       future: session,
       builder: (context, snapshot) {
         var sessionValues = snapshot.data;
-        if (sessionValues != null) {
+        if (sessionValues != null && !_sessionInitialized) {
+          _sessionInitialized = true;
           parameter.options = sessionValues.searchAndReplaceOptions;
           _searchController.text =
               sessionValues.searchPatterns.firstOrNull ?? "";
@@ -382,10 +482,16 @@ class _SearchReplaceInFilesDialogState
                   actions: _actions(),
                   children: [
                     _inputFields(),
-                    SizedBox(
+                    Container(
                         height: 500,
-                        child: SearchResultList(
-                          searchInFilesController,
+                        padding: const EdgeInsets.all(10),
+                        margin: const EdgeInsets.only(top: 20),
+                        decoration: BoxDecoration(border: Border.all(color: Theme.of(context).primaryColorLight)),
+                        child: MatchResultListWidget(
+                          searchInFilesController.results,
+                          onAccept: () {
+                            widget.arguments.onAction(context, SearchInFilesAction.openFile);
+                          },
                           progress: searchInFilesController.running.value,
                         ))
                   ],
