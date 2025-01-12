@@ -111,5 +111,13 @@
   "autosaveFilesOnExit": "Auomatisch speichern beim Verlassen",
   "autosaveTimeInSeconds": "Auomatisch speichern nach [sek]",
   "playSoundOnError": "Warnungston abspielen",
-  "showErrorsInToastPopup": "Warnungen in einem Toast anzeigen"
+  "showErrorsInToastPopup": "Warnungen in einem Toast anzeigen",
+  "selectDirectory": "Ordner für Suche auswählen",
+  "findInFolder": "Suchen in Ordner",
+  "singleMatchInFile": "Nur 1 Mal pro Datei suchen",
+  "ignoreBinaryFiles": "Binäre Dateien ignorieren",
+  "fileNamePatterns": "*/? Wildcard Suche",
+  "matchRegularExpressions": "Reguläre Ausdrücke verwenden",
+  "preserveCase": "Groß-/Kleinschreibung beibehalten",
+  "searchAndReplaceInFiles": "Suchen und Ersetzen in Dateien"
 }

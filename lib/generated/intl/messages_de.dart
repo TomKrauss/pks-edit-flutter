@@ -161,11 +161,17 @@ class MessageLookup extends MessageLookupByLibrary {
         "exitWithoutSaving":
             MessageLookupByLibrary.simpleMessage("Beenden ohne Speicherung"),
         "fileName": MessageLookupByLibrary.simpleMessage("Dateinnamen"),
+        "fileNamePatterns":
+            MessageLookupByLibrary.simpleMessage("*/? Wildcard Suche"),
         "filesChangedAndExit": MessageLookupByLibrary.simpleMessage(
             "Einige Daeien wurden geändert und müssten gespeichert werden. Wie soll verfahren werden?"),
         "find": MessageLookupByLibrary.simpleMessage("Suchen"),
+        "findInFolder":
+            MessageLookupByLibrary.simpleMessage("Suchen in Ordner"),
         "gotoLine": MessageLookupByLibrary.simpleMessage("Gehe zu Zeile"),
         "iconSize": MessageLookupByLibrary.simpleMessage("Icongröße"),
+        "ignoreBinaryFiles":
+            MessageLookupByLibrary.simpleMessage("Binäre Dateien ignorieren"),
         "ignoreCase": MessageLookupByLibrary.simpleMessage(
             "Groß-/Klein-Schreibung ignorieren"),
         "initializeWithTemplate":
@@ -174,12 +180,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "layout": MessageLookupByLibrary.simpleMessage("Darstellung"),
         "lineNumber": MessageLookupByLibrary.simpleMessage("Zeilennummer"),
         "lineNumberRangeHint": m1,
+        "matchRegularExpressions": MessageLookupByLibrary.simpleMessage(
+            "Reguläre Ausdrücke verwenden"),
         "maximumNumberOfWindows":
             MessageLookupByLibrary.simpleMessage("Maximale Anzahl Fenster"),
         "newFile": MessageLookupByLibrary.simpleMessage("Neue Datei"),
         "no": MessageLookupByLibrary.simpleMessage("Nein"),
         "playSoundOnError":
             MessageLookupByLibrary.simpleMessage("Warnungston abspielen"),
+        "preserveCase": MessageLookupByLibrary.simpleMessage(
+            "Groß-/Kleinschreibung beibehalten"),
         "reallyDiscardAllChanges": MessageLookupByLibrary.simpleMessage(
             "Willst Du wirklich alle Änderungen verwerfen?"),
         "recentFiles": MessageLookupByLibrary.simpleMessage(
@@ -205,7 +215,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "saveAllAndExit":
             MessageLookupByLibrary.simpleMessage("All speichern und beenden"),
         "saving": MessageLookupByLibrary.simpleMessage("Speichern"),
+        "searchAndReplaceInFiles": MessageLookupByLibrary.simpleMessage(
+            "Suchen und Ersetzen in Dateien"),
         "searchIncrementally": m3,
+        "selectDirectory":
+            MessageLookupByLibrary.simpleMessage("Ordner für Suche auswählen"),
         "showErrorsInToastPopup": MessageLookupByLibrary.simpleMessage(
             "Warnungen in einem Toast anzeigen"),
         "showStatusbar":
@@ -214,6 +228,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "silentlyReloadFilesChangedExternally":
             MessageLookupByLibrary.simpleMessage(
                 "Extern geänderte Dateien ohne Abfrage neu laden"),
+        "singleMatchInFile":
+            MessageLookupByLibrary.simpleMessage("Nur 1 Mal pro Datei suchen"),
         "warnings": MessageLookupByLibrary.simpleMessage("Hinweise"),
         "window": MessageLookupByLibrary.simpleMessage("Fenster"),
         "yes": MessageLookupByLibrary.simpleMessage("Ja")

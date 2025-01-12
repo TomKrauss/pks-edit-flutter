@@ -52,6 +52,12 @@ const Map<CodeShortcutType, List<ShortcutActivator>> _kDefaultCommonCodeShortcut
   CodeShortcutType.cursorMoveDown: [
     SingleActivator(LogicalKeyboardKey.arrowDown)
   ],
+  CodeShortcutType.cursorMovePageDown: [
+    SingleActivator(LogicalKeyboardKey.pageDown)
+  ],
+  CodeShortcutType.cursorMovePageUp: [
+    SingleActivator(LogicalKeyboardKey.pageUp)
+  ],
   CodeShortcutType.cursorMoveForward: [
     SingleActivator(LogicalKeyboardKey.arrowRight)
   ],

@@ -381,7 +381,7 @@ class _SearchReplaceInFilesDialogState
                               )))),
             const SizedBox(width: 10),
             Tooltip(
-                message: 'Select Directory',
+                message: S.of(context).selectDirectory,
                 child: IconButton(
                     onPressed: _selectFolder,
                     icon: Icon(Icons.folder_copy_outlined)))
@@ -403,30 +403,30 @@ class _SearchReplaceInFilesDialogState
           Expanded(
               flex: 3,
               child: _folderSelector(
-                  "Find in Folder", Icons.folder, _directoryController,
+                  S.of(context).findInFolder, Icons.folder, _directoryController,
                   options: [
-                    _optionButton("1", "Single Match in File",
+                    _optionButton("1", S.of(context).singleMatchInFile,
                         parameter.options.singleMatchInFile, (newValue) {
                       parameter.options.singleMatchInFile = newValue;
                     }),
-                    _optionButton("0x", "Ignore Binary Files",
+                    _optionButton("0x", S.of(context).ignoreBinaryFiles,
                         parameter.options.ignoreBinaryFiles, (newValue) {
                       parameter.options.ignoreBinaryFiles = newValue;
                     }),
                   ])),
           Flexible(
-              child: _editor("File Name Patterns", Icons.filter, false,
+              child: _editor(S.of(context).fileNamePatterns, Icons.filter, false,
                   _fileNamePatternController))
         ]),
         _editor(S.of(context).enterTextToFind, Icons.search, true,
             _searchController,
             options: [
               _optionButton(
-                  ".*", "Match regular Expressions", parameter.options.regex,
+                  ".*", S.of(context).matchRegularExpressions, parameter.options.regex,
                   (newValue) {
                 parameter.options.regex = newValue;
               }),
-              _optionButton("Cc", "Ignore Case", parameter.options.ignoreCase,
+              _optionButton("Cc", S.of(context).ignoreCase, parameter.options.ignoreCase,
                   (newValue) {
                 parameter.options.ignoreCase = newValue;
               }),
@@ -436,7 +436,7 @@ class _SearchReplaceInFilesDialogState
               _replaceController,
               options: [
                 _optionButton(
-                    "AA", "Preserve Case", parameter.options.preserveCase,
+                    "AA", S.of(context).preserveCase, parameter.options.preserveCase,
                     (newValue) {
                   parameter.options.preserveCase = newValue;
                 }),
@@ -530,7 +530,7 @@ class _SearchReplaceInFilesDialogState
         return ValueListenableBuilder(
             valueListenable: searchInFilesController.running,
             builder: (_, value, __) => PksDialog(
-                  title: Text("Search and Replace in Files"),
+                  title: Text(S.of(context).searchAndReplaceInFiles),
                   actions: _actions(),
                   children: [
                     _inputFields(),

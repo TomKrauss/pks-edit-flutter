@@ -1169,6 +1169,86 @@ class S {
       args: [],
     );
   }
+
+  /// `Select Directory`
+  String get selectDirectory {
+    return Intl.message(
+      'Select Directory',
+      name: 'selectDirectory',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Find in Folder`
+  String get findInFolder {
+    return Intl.message(
+      'Find in Folder',
+      name: 'findInFolder',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Single Match in File`
+  String get singleMatchInFile {
+    return Intl.message(
+      'Single Match in File',
+      name: 'singleMatchInFile',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Ignore Binary Files`
+  String get ignoreBinaryFiles {
+    return Intl.message(
+      'Ignore Binary Files',
+      name: 'ignoreBinaryFiles',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `File Name Patterns`
+  String get fileNamePatterns {
+    return Intl.message(
+      'File Name Patterns',
+      name: 'fileNamePatterns',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Match regular Expressions`
+  String get matchRegularExpressions {
+    return Intl.message(
+      'Match regular Expressions',
+      name: 'matchRegularExpressions',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Preserve Case`
+  String get preserveCase {
+    return Intl.message(
+      'Preserve Case',
+      name: 'preserveCase',
+      desc: '',
+      args: [],
+    );
+  }
+
+  /// `Search and Replace in Files`
+  String get searchAndReplaceInFiles {
+    return Intl.message(
+      'Search and Replace in Files',
+      name: 'searchAndReplaceInFiles',
+      desc: '',
+      args: [],
+    );
+  }
 }
 
 class AppLocalizationDelegate extends LocalizationsDelegate<S> {

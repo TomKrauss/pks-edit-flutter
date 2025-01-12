@@ -152,11 +152,16 @@ class MessageLookup extends MessageLookupByLibrary {
         "exitWithoutSaving":
             MessageLookupByLibrary.simpleMessage("Exit without Saving"),
         "fileName": MessageLookupByLibrary.simpleMessage("File name"),
+        "fileNamePatterns":
+            MessageLookupByLibrary.simpleMessage("File Name Patterns"),
         "filesChangedAndExit": MessageLookupByLibrary.simpleMessage(
             "Some files are changed and not yet saved. How should we proceed?"),
         "find": MessageLookupByLibrary.simpleMessage("Find"),
+        "findInFolder": MessageLookupByLibrary.simpleMessage("Find in Folder"),
         "gotoLine": MessageLookupByLibrary.simpleMessage("Goto Line"),
         "iconSize": MessageLookupByLibrary.simpleMessage("Icon Size"),
+        "ignoreBinaryFiles":
+            MessageLookupByLibrary.simpleMessage("Ignore Binary Files"),
         "ignoreCase": MessageLookupByLibrary.simpleMessage("Ignore Case"),
         "initializeWithTemplate":
             MessageLookupByLibrary.simpleMessage("Initialize with Template"),
@@ -164,12 +169,15 @@ class MessageLookup extends MessageLookupByLibrary {
         "layout": MessageLookupByLibrary.simpleMessage("Layout"),
         "lineNumber": MessageLookupByLibrary.simpleMessage("Line number"),
         "lineNumberRangeHint": m1,
+        "matchRegularExpressions":
+            MessageLookupByLibrary.simpleMessage("Match regular Expressions"),
         "maximumNumberOfWindows":
             MessageLookupByLibrary.simpleMessage("Maximum Number of Windows"),
         "newFile": MessageLookupByLibrary.simpleMessage("New File"),
         "no": MessageLookupByLibrary.simpleMessage("No"),
         "playSoundOnError":
             MessageLookupByLibrary.simpleMessage("Play sound on error"),
+        "preserveCase": MessageLookupByLibrary.simpleMessage("Preserve Case"),
         "reallyDiscardAllChanges": MessageLookupByLibrary.simpleMessage(
             "Do you really want to discard all changes?"),
         "recentFiles": MessageLookupByLibrary.simpleMessage("Recent Files"),
@@ -194,7 +202,11 @@ class MessageLookup extends MessageLookupByLibrary {
         "saveAllAndExit":
             MessageLookupByLibrary.simpleMessage("Save All and Exit"),
         "saving": MessageLookupByLibrary.simpleMessage("Saving"),
+        "searchAndReplaceInFiles":
+            MessageLookupByLibrary.simpleMessage("Search and Replace in Files"),
         "searchIncrementally": m3,
+        "selectDirectory":
+            MessageLookupByLibrary.simpleMessage("Select Directory"),
         "showErrorsInToastPopup":
             MessageLookupByLibrary.simpleMessage("Show errors in toast popup"),
         "showStatusbar": MessageLookupByLibrary.simpleMessage("Show Statusbar"),
@@ -202,6 +214,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "silentlyReloadFilesChangedExternally":
             MessageLookupByLibrary.simpleMessage(
                 "Silently reload files changed externally"),
+        "singleMatchInFile":
+            MessageLookupByLibrary.simpleMessage("Single Match in File"),
         "warnings": MessageLookupByLibrary.simpleMessage("Hints"),
         "window": MessageLookupByLibrary.simpleMessage("Window"),
         "yes": MessageLookupByLibrary.simpleMessage("Yes")

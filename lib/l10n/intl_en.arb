@@ -111,5 +111,13 @@
   "autosaveFilesOnExit": "Autosave files on exit",
   "autosaveTimeInSeconds": "Autosave time in seconds",
   "playSoundOnError": "Play sound on error",
-  "showErrorsInToastPopup": "Show errors in toast popup"
+  "showErrorsInToastPopup": "Show errors in toast popup",
+  "selectDirectory": "Select Directory",
+  "findInFolder": "Find in Folder",
+  "singleMatchInFile": "Single Match in File",
+  "ignoreBinaryFiles": "Ignore Binary Files",
+  "fileNamePatterns": "File Name Patterns",
+  "matchRegularExpressions": "Match regular Expressions",
+  "preserveCase": "Preserve Case",
+  "searchAndReplaceInFiles": "Search and Replace in Files"
 }
