@@ -70,6 +70,8 @@ PksEditSession _$PksEditSessionFromJson(Map<String, dynamic> json) =>
       replacePatterns: (json['replace-patterns'] as List<dynamic>?)
           ?.map((e) => e as String)
           .toList(),
+      folders:
+          (json['folders'] as List<dynamic>?)?.map((e) => e as String).toList(),
       openEditors: json['open-editors'] == null
           ? const []
           : PksEditSession._panelsFromString(json['open-editors'] as List),
@@ -81,6 +83,7 @@ Map<String, dynamic> _$PksEditSessionToJson(PksEditSession instance) =>
       'screen-height': instance.screenHeight,
       'search-replace-options': instance.searchReplaceOptions,
       'open-files': instance.openFiles,
+      'folders': instance.folders,
       'search-patterns': instance.searchPatterns,
       'replace-patterns': instance.replacePatterns,
       'file-patterns': instance.filePatterns,

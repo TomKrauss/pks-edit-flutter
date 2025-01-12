@@ -18,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:pks_edit_flutter/actions/action_bindings.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/editing_configuration.dart';
@@ -203,6 +204,11 @@ class PksEditSession {
   int searchReplaceOptions;
   @JsonKey(name: "open-files")
   final List<String> openFiles;
+  ///
+  /// Folders used in e.g. search in files or when opening files.
+  ///
+  @JsonKey(name: "folders")
+  final List<String> folders;
   @JsonKey(name: "search-patterns")
   final List<String> searchPatterns;
   @JsonKey(name: "replace-patterns")
@@ -234,12 +240,15 @@ class PksEditSession {
         List<String>? filePatterns,
         List<String>? searchPatterns,
         List<String>? replacePatterns,
+        List<String>? folders,
       this.openEditors = const []}) :
       openFiles = openFiles ?? [],
+      folders = folders ?? [],
       searchPatterns = searchPatterns ?? [],
       replacePatterns = replacePatterns ?? [],
       filePatterns = filePatterns ?? [];
 
+  @JsonKey(includeToJson: false, includeFromJson: false)
   SearchAndReplaceOptions get searchAndReplaceOptions => SearchAndReplaceOptions(searchReplaceOptions);
   set searchAndReplaceOptions(SearchAndReplaceOptions options) => searchReplaceOptions = options._flags;
 
@@ -273,6 +282,7 @@ class PksEditSession {
         filePatterns: filePatterns,
         replacePatterns: replacePatterns,
         openFiles: openFiles,
+        folders: folders,
         openEditors: openEditors
             .map((e) => OpenEditorPanel(
                 path: e.filename,
@@ -297,6 +307,9 @@ class PksEditSession {
   Map<String, dynamic> toJson() => _$PksEditSessionToJson(this);
 }
 
+///
+/// Represents all configuration related files.
+///
 class PksConfiguration {
   PksConfiguration._();
   static const sessionFilename = "pkssession.json";
@@ -304,6 +317,7 @@ class PksConfiguration {
   static const themeFilename = "themeconfig.json";
   static const editingConfigurationFilename = "pkseditconfig.json";
   static const actionBindingsFilename = "pksactionbindings.json";
+  static const searchResultsFilename = "pksedit.grep";
   static const pksSysVariable = "PKS_SYS";
   static PksConfiguration singleton = PksConfiguration._();
   final Logger _logger = createLogger("PksConfiguration");
@@ -337,6 +351,26 @@ class PksConfiguration {
       }
     }
     return null;
+  }
+
+  ///
+  /// Returns the temporary path of PKS Edit, where temporary files like backup files
+  /// or search results are saved.
+  ///
+  Future<String> get pksEditTempPath async {
+    var p = Platform.environment["PKS_TMP"];
+    if (p != null) {
+      return p;
+    }
+    var d = await getTemporaryDirectory();
+    if (!d.existsSync()) {
+      d = Directory("temp");
+    }
+    d = Directory(join(d.absolute.path, "pksedit"));
+    if (!d.existsSync()) {
+      d.createSync(recursive: true);
+    }
+    return d.absolute.path;
   }
 
   ///

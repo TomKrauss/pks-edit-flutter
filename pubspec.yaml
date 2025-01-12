@@ -23,6 +23,7 @@ dependencies:
   re_highlight: ^0.0.3
   collection: ^1.18.0
   path: ^1.9.0
+  path_provider: ^2.1.5
   sprintf: ^7.0.0
   glob: ^2.1.2
   jovial_svg: ^1.1.24

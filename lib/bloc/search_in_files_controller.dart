@@ -18,55 +18,12 @@ import 'package:flutter/cupertino.dart';
 import 'package:glob/glob.dart';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart';
+import 'package:pks_edit_flutter/bloc/file_io.dart';
+import 'package:pks_edit_flutter/bloc/match_location_parser.dart';
+import 'package:pks_edit_flutter/bloc/match_result_list.dart';
 import 'package:pks_edit_flutter/config/pks_sys.dart';
 import 'package:pks_edit_flutter/util/logger.dart';
-import 'package:rxdart/rxdart.dart';
 import 'package:sprintf/sprintf.dart';
-
-///
-/// Captures the result of a match of a find operation.
-///
-class SearchInFilesMatch {
-  static const String _grepFileFormat = '"%s", line %d: %s';
-
-  final String fileName;
-  /// 0 based line number, where the match was found
-  final int lineNumber;
-  /// Column where the match was found
-  final int column;
-  /// The length of the match
-  final int matchLength;
-  /// The text of the matched line
-  final String? matchedLine;
-
-  SearchInFilesMatch({required this.fileName, required this.lineNumber, required this.column, required this.matchLength, this.matchedLine});
-
-  String get shortenedFileName {
-    var n = fileName;
-    var l = n.length;
-    if (l > 30) {
-      return "...${n.substring(l-30)}";
-    }
-    return n;
-  }
-
-  List<String> get matchedSegments {
-    var line = matchedLine;
-    if (line == null) {
-      return [""];
-    }
-    return [line.substring(0,column), line.substring(column, column+matchLength), line.substring(column+matchLength)];
-  }
-
-  String printMatch() {
-    String matchComment = "";
-    var segments = matchedSegments;
-    if (segments.isNotEmpty) {
-      matchComment = " - ${segments[0]}~${segments[1]}~${segments[2]}";
-    }
-    return sprintf(_grepFileFormat, [fileName, lineNumber+1, "$column/$matchLength$matchComment"]);
-  }
-}
 
 ///
 /// The action to perform.
@@ -98,72 +55,13 @@ class SearchAndReplaceInFilesOptions {
 }
 
 ///
-/// Maintains a list of "matches" - i.e. file locations, which might be navigated or jumped to.
-/// A match result list may be created as part of a search in files operation of by parsing the
-/// output of a build tool.
-///
-class MatchResultList {
-  final StreamController<List<SearchInFilesMatch>> _resultController = BehaviorSubject();
-  final List<SearchInFilesMatch> _matches = [];
-  Stream<List<SearchInFilesMatch>> get results => _resultController.stream;
-  ///
-  /// The match currently selected. Can be used for next-match and previous-match operations for instance.
-  ///
-  final ValueNotifier<SearchInFilesMatch?> selectedMatch = ValueNotifier(null);
-
-  ///
-  /// The index of the currently selected element or -1 if non was selected.
-  int get selectedIndex {
-    var v = selectedMatch.value;
-    return v == null ? -1 : _matches.indexOf(v);
-  }
-
-  ///
-  /// Reset this match result list.
-  ///
-  void reset() {
-    _matches.clear();
-    _resultController.add(_matches);
-    selectedMatch.value = null;
-  }
-
-  void add(SearchInFilesMatch match) {
-    _matches.add(match);
-    _resultController.add(_matches);
-  }
-
-  ///
-  /// Move the current selection in the match result list one item down. Return [true] if this was successful.
-  ///
-  bool moveSelectionNext() {
-    var idx = selectedIndex;
-    if (idx+1 < _matches.length) {
-      selectedMatch.value = _matches[idx+1];
-      return true;
-    }
-    return false;
-  }
-
-  ///
-  /// Move the current selection in the match result list one item up. Return [true] if this was successful.
-  ///
-  bool moveSelectionPrevious() {
-    var idx = selectedIndex;
-    if (idx-1 >= 0) {
-      selectedMatch.value = _matches[idx-1];
-      return true;
-    }
-    return false;
-  }
-}
-
-///
 /// The controller performing the search in files operation.
 ///
 class SearchInFilesController {
   final Logger logger = createLogger("SearchInFilesController");
   final ValueNotifier<bool> _running = ValueNotifier(false);
-  final MatchResultList results = MatchResultList();
+  final MatchResultList _results = MatchResultList.current;
+  bool _initialized = false;
 
   SearchInFilesController._();
 
@@ -185,7 +83,52 @@ class SearchInFilesController {
       }
     }, onDone: () {
       _running.value = false;
+      saveSearchResults(options);
     });
+  }
+
+  Future<File> get _grepFile async {
+    var p = await PksConfiguration.singleton.pksEditTempPath;
+    return File(join(p, PksConfiguration.searchResultsFilename));
+  }
+
+  ///
+  /// Save the search results.
+  ///
+  Future<void> saveSearchResults(SearchAndReplaceInFilesOptions options) async {
+    var f = await _grepFile;
+    f.createSync();
+    logger.i("Saving search results in file ${f.path}");
+    var title = _results.title;
+    if (title != null) {
+      f.writeAsStringSync(title, mode: FileMode.write);
+    }
+    for (final r in await _results.results.first) {
+      f.writeAsStringSync("${r.printMatch()}\n", mode: FileMode.append);
+    }
+  }
+
+  Future<void> initialize() async {
+    if (_initialized) {
+      return;
+    }
+    _initialized = true;
+    var f = await _grepFile;
+    if (!f.existsSync()) {
+      return;
+    }
+    logger.i("Restoring search results from file ${f.path}");
+    var parser = searchInFilesResultParser;
+    bool titleFound = false;
+    for (final s in f.readAsLinesSync()) {
+      var match = parser.parse(s);
+      if (match != null) {
+        _results.add(match);
+      } else if (!titleFound && s.isNotEmpty) {
+        _results.title = s;
+        titleFound = true;
+      }
+    }
   }
 
   Future<void> run(SearchAndReplaceInFilesOptions options) async {
@@ -198,20 +141,23 @@ class SearchInFilesController {
       logger.w("Directory ${options.directory} does not exist");
       return;
     }
-    results.reset();
+    _results.reset();
+    _results.title = sprintf("Matches of '%s' in '%s'\n", [options.search, options.directory]);
+    var fileHelper = FileIO();
     Pattern? searchPattern = options.search.isEmpty ? null :
         (options.options.regex ? RegExp(options.search, caseSensitive: !options.options.ignoreCase) : options.search);
     unawaited(_traverseDirectories(dir, options.fileNamePatterns, options, (file, option) async {
-      unawaited(file.readAsLines().then(((lines) {
+      var encoding = await fileHelper.detectEncoding(file);
+      unawaited(file.readAsLines(encoding: encoding.encoding).then(((lines) {
         int lineNumber = 0;
         var singleMatched = false;
         for (final line in lines) {
           if (searchPattern == null) {
-            results.add(SearchInFilesMatch(fileName: file.absolute.path, lineNumber: lineNumber, column: 0, matchLength: line.length, matchedLine: line));
+            _results.add(MatchedFileLocation(fileName: file.absolute.path, lineNumber: lineNumber, column: 0, matchLength: line.length, matchedLine: line));
             break;
           } else {
             for (final m in searchPattern.allMatches(line)) {
-              results.add(SearchInFilesMatch(fileName: file.absolute.path, lineNumber: lineNumber, column: m.start, matchLength: m.end-m.start, matchedLine: line));
+              _results.add(MatchedFileLocation(fileName: file.absolute.path, lineNumber: lineNumber, column: m.start, matchLength: m.end-m.start, matchedLine: line));
               if (option.options.singleMatchInFile) {
                 singleMatched = true;
                 break;
@@ -223,7 +169,9 @@ class SearchInFilesController {
           }
           lineNumber++;
         }
-      })));
+      })).onError((ex, stack) {
+        logger.e("Cannot search in file $file. Exception: $ex");
+      }));
     }));
   }
 

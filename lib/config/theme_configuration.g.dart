@@ -8,13 +8,13 @@ part of 'theme_configuration.dart';
 
 ThemeConfiguration _$ThemeConfigurationFromJson(Map<String, dynamic> json) =>
     ThemeConfiguration(
-      name: json['name'] as String? ?? "default",
+      name: json['name'] as String? ?? "system default",
       backgroundColor: json['backgroundColor'] == null
-          ? Colors.black
+          ? Colors.white
           : ThemeConfiguration._parseColor(json['backgroundColor'] as String),
       darkMode: (json['darkMode'] as num?)?.toInt(),
       dialogLightBackground: json['dialogLightBackground'] == null
-          ? Colors.black26
+          ? Colors.black12
           : ThemeConfiguration._parseColor(
               json['dialogLightBackground'] as String),
       optDialogBackground: ThemeConfiguration._parseOptColor(

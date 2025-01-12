@@ -34,6 +34,7 @@ import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/bloc/controller_extension.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
+import 'package:pks_edit_flutter/bloc/match_result_list.dart';
 import 'package:pks_edit_flutter/bloc/search_in_files_controller.dart';
 import 'package:pks_edit_flutter/config/editing_configuration.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
@@ -641,13 +642,13 @@ class PksEditActions {
   }
 
   void _navigateToNextMatch() {
-    if (SearchInFilesController.instance.results.moveSelectionNext()) {
+    if (MatchResultList.current.moveSelectionNext()) {
       _openCurrentResultMatch();
     }
   }
 
   void _navigateToPreviousMatch() {
-    if (SearchInFilesController.instance.results.moveSelectionPrevious()) {
+    if (MatchResultList.current.moveSelectionPrevious()) {
       _openCurrentResultMatch();
     }
   }
@@ -664,7 +665,7 @@ class PksEditActions {
 
   Future<void> _openCurrentResultMatch() async {
     final bloc = EditorBloc.of(getBuildContext());
-    var m = SearchInFilesController.instance.results.selectedMatch.value;
+    var m = MatchResultList.current.selectedMatch.value;
     if (m == null) {
       return;
     }
