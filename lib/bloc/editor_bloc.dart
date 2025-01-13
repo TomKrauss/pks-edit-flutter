@@ -725,8 +725,7 @@ class EditorBloc {
     WindowOptions windowOptions = WindowOptions(
         size: p.show == MainWindowPlacement.swShowMaximized ? null : size,
         minimumSize: p.show == MainWindowPlacement.swShowMaximized ? null : size,
-        skipTaskbar: false,
-        fullScreen: null);
+        skipTaskbar: false);
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.focus();
       await windowManager.show();

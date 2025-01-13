@@ -108,9 +108,9 @@ class _MatchResultListWidgetState extends State<_MatchResultListWidget> {
                               },
                               child: _createSpan(
                                   match.matchedSegments, style, boldStyle) ??
-                              SizedBox(width: 0)))
+                              const SizedBox(width: 0)))
                     ])),
-            Divider(thickness: 0.2)
+            const Divider(thickness: 0.2)
           ],
         ));
     if (selected) {
@@ -236,7 +236,7 @@ class SearchResultState extends State<MatchResultListWidget> {
           return Center(
               child: widget.progress
                   ? const CircularProgressIndicator()
-                  : Text("No results"));
+                  : const Text("No results"));
         }
         WidgetsBinding.instance.addPostFrameCallback((d) {
           _ensureListItemVisible();
@@ -346,7 +346,7 @@ class _SearchReplaceInFilesDialogState
                 message: S.of(context).selectDirectory,
                 child: IconButton(
                     onPressed: _selectFolder,
-                    icon: Icon(Icons.folder_copy_outlined)))
+                    icon: const Icon(Icons.folder_copy_outlined)))
           ]));
 
   Future<void> _selectFolder() async {
@@ -453,7 +453,7 @@ class _SearchReplaceInFilesDialogState
                           progress: searchInFilesController.running.value,
                         )),
                     SizedBox(width: 800, child: ValueListenableBuilder(valueListenable: searchInFilesController.progressInfo,
-                        builder: (context, value, child) => Text(value, style: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 12),))),
+                        builder: (context, value, child) => Text(value, style: const TextStyle(overflow: TextOverflow.ellipsis, fontSize: 12),))),
                   ],
                 ));
       });

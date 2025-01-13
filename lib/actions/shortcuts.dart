@@ -137,7 +137,7 @@ class PksEditCodeShortcutsActivatorsBuilder extends CodeShortcutsActivatorsBuild
         for (final entry in _kDefaultCommonCodeShortcutsActivators.entries) {
           _kDefaultCommonCodeShortcutsActivators[entry.key] = entry.value.map((e) {
             if ((e as SingleActivator).control) {
-              return SingleActivator(e.trigger, shift: e.shift, meta: true, control: false, alt: e.alt);
+              return SingleActivator(e.trigger, shift: e.shift, meta: true, alt: e.alt);
             }
             return e;
           }).toList();

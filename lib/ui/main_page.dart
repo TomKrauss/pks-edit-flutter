@@ -199,7 +199,6 @@ class _PksEditMainPageState extends State<PksEditMainPage>
                           Formats.plainTextFile,
                         ], onDropOver: _onDropOver,
                             onPerformDrop: _onPerformDrop, child: Column(
-                      mainAxisAlignment: MainAxisAlignment.start,
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         if (!configuration.fullscreen)

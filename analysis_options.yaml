@@ -10,7 +10,14 @@ analyzer:
 linter:
   rules:
     - camel_case_types
+    - prefer_const_constructors
+    - avoid_field_initializers_in_const_classes
+    - avoid_null_checks_in_equality_operators
+    - avoid_returning_null_for_void
+    - avoid_returning_null
+    - avoid_return_types_on_setters
     - implicit_call_tearoffs
+    - avoid_redundant_argument_values
     - prefer_expression_function_bodies
     - unnecessary_late
     - unnecessary_lambdas

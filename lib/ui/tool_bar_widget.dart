@@ -167,8 +167,6 @@ class ToolBarWidgetState extends State<ToolBarWidget> {
           decoration: BoxDecoration(color: Theme.of(context).appBarTheme.backgroundColor),
           padding: const EdgeInsets.all(4),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.center,
             children: _buildToolbarItems(),
           )));
 }

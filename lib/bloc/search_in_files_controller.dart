@@ -156,7 +156,7 @@ class SearchInFilesController {
     logger.i("Saving search results in file ${f.path}");
     var title = _results.title;
     if (title.value.trim().isNotEmpty) {
-      f.writeAsStringSync(title.value, mode: FileMode.write);
+      f.writeAsStringSync(title.value);
     }
     for (final r in await _results.results.first) {
       f.writeAsStringSync("${r.printMatch()}\n", mode: FileMode.append);
@@ -198,7 +198,7 @@ class SearchInFilesController {
     }
     _results.reset();
     _results.title.value = sprintf("Matches of '%s' in '%s'\n", [options.search, options.directory]);
-    var fileHelper = FileIO();
+    var fileHelper = const FileIO();
     Pattern? searchPattern = options.search.isEmpty ? null :
         (options.options.regex ? RegExp(options.search, caseSensitive: !options.options.ignoreCase) : options.search);
     unawaited(_traverseDirectories(baseDirectory: dir, pattern: options.fileNamePatterns, options: options,

@@ -91,7 +91,7 @@ class EditingConfiguration {
       wordTokenExpression: wordTokenExpression ?? this.wordTokenExpression
   );
 
-  static const EditingConfiguration defaultConfiguration = EditingConfiguration(name: "default");
+  static const EditingConfiguration defaultConfiguration = EditingConfiguration();
 
   static EditingConfiguration fromJson(Map<String, dynamic> map) =>
       _$EditingConfigurationFromJson(map);

@@ -59,10 +59,10 @@ abstract class SearchWidgetState<T extends SearchWidget> extends State<T> {
     var style = ElevatedButton.styleFrom(
         padding: EdgeInsets.zero,
         visualDensity: VisualDensity.compact,
-        fixedSize: Size(25, 25),
+        fixedSize: const Size(25, 25),
         minimumSize: Size.zero,
         backgroundColor: theme.colorScheme.primary.withAlpha(30),
-        shape: ContinuousRectangleBorder(
+        shape: const ContinuousRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(5))));
     if (value) {
       style = style.copyWith(
@@ -70,7 +70,7 @@ abstract class SearchWidgetState<T extends SearchWidget> extends State<T> {
           backgroundColor: WidgetStatePropertyAll(theme.colorScheme.primary));
     }
     return Padding(
-        padding: EdgeInsets.only(left: 10),
+        padding: const EdgeInsets.only(left: 10),
         child: Tooltip(
             message: tooltip,
             child: ElevatedButton(
@@ -122,7 +122,7 @@ abstract class SearchWidgetState<T extends SearchWidget> extends State<T> {
                   child: PopupMenuButton(itemBuilder: (context) => suggestions.map((String s) => PopupMenuItem<String>(child: Text(s), onTap: () {
                     _controller.text = s;
                   },)).toList(),
-                      icon: Icon(Icons.arrow_drop_down_outlined, size: 24,))),
+                      icon: const Icon(Icons.arrow_drop_down_outlined, size: 24,))),
           ]));
 }
 

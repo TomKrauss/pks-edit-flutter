@@ -34,7 +34,7 @@ class FileWatcher {
     if (_watchedEntities.containsKey(f.path)) {
       return;
     }
-    final stream = f.watch(recursive: false);
+    final stream = f.watch();
     _watchedEntities[f.path] = stream;
     stream.listen(_controller.add);
   }
