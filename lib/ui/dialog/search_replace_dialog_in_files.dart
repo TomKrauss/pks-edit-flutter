@@ -23,6 +23,9 @@ import 'package:pks_edit_flutter/config/pks_sys.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
 import 'package:pks_edit_flutter/ui/dialog/dialog.dart';
 
+///
+/// A widget displaying one match result.
+///
 class _MatchResultListWidget extends StatefulWidget {
   final MatchedFileLocation match;
   final bool selected;
@@ -494,21 +497,27 @@ class _SearchReplaceInFilesDialogState
     parameter.search = _searchController.text;
     parameter.replace = _replaceController.text;
     PksConfiguration.singleton.currentSession.then((session) {
-      session.searchPatterns.addOrMoveFirst(_searchController.text);
-      session.replacePatterns.addOrMoveFirst(_replaceController.text);
-      session.filePatterns.addOrMoveFirst(_fileNamePatternController.text);
-      session.folders.addOrMoveFirst(_directoryController.text);
+      session.searchPatterns.addOrMoveFirst(_searchController.text, maxLength: PksEditSession.maxHistoryListSize);
+      session.replacePatterns.addOrMoveFirst(_replaceController.text, maxLength: PksEditSession.maxHistoryListSize);
+      session.filePatterns.addOrMoveFirst(_fileNamePatternController.text, maxLength: PksEditSession.maxHistoryListSize);
+      session.folders.addOrMoveFirst(_directoryController.text, maxLength: PksEditSession.maxHistoryListSize);
       session.searchAndReplaceOptions = parameter.options;
     });
   }
 
   List<DialogAction> _actions() => [
-        _button(S.of(context).find,
-            searchInFilesController.running.value ? null : _find),
-        _button(S.of(context).replace,
-            searchInFilesController.running.value ? null : _replace),
+        if (!searchInFilesController.running.value)
+        _button(S.of(context).find, _find),
+        if (widget.arguments.supportReplace && !searchInFilesController.running.value)
+        _button(S.of(context).replace, _replace),
+        if (searchInFilesController.running.value)
+        _button("Abort", _abortSearch),
         DialogAction.createCancelAction(context)
       ];
+
+  void _abortSearch() {
+    searchInFilesController.abortSearch();
+  }
 
   @override
   Widget build(BuildContext context) => FutureBuilder(
@@ -535,7 +544,7 @@ class _SearchReplaceInFilesDialogState
                   children: [
                     _inputFields(),
                     const SizedBox(height: 20),
-                    if (title != null) Text(title),
+                    ValueListenableBuilder(valueListenable: title, builder: (context, value, child) => Text(value)),
                     Container(
                         height: 500,
                         padding: const EdgeInsets.all(10),
@@ -549,7 +558,9 @@ class _SearchReplaceInFilesDialogState
                                 context, SearchInFilesAction.openFile);
                           },
                           progress: searchInFilesController.running.value,
-                        ))
+                        )),
+                    SizedBox(width: 800, child: ValueListenableBuilder(valueListenable: searchInFilesController.progressInfo,
+                        builder: (context, value, child) => Text(value, style: TextStyle(overflow: TextOverflow.ellipsis, fontSize: 12),))),
                   ],
                 ));
       });

@@ -53,7 +53,14 @@ class MatchedFileLocation {
     if (line == null || col == null || length == null) {
       return [""];
     }
-    return [line.substring(0,column), line.substring(col, col+length), line.substring(col+length)];
+    var maxLength = line.length;
+    if (col > maxLength) {
+      col = maxLength;
+      length = 0;
+    } else if (col+length > maxLength) {
+      length = maxLength-col;
+    }
+    return [line.substring(0,col), line.substring(col, col+length), line.substring(col+length)];
   }
 
   String printMatch() {
@@ -76,7 +83,7 @@ class MatchResultList {
   final List<MatchedFileLocation> _matches = [];
   Stream<List<MatchedFileLocation>> get results => _resultController.stream;
   /// The title describing the contents of the result list.
-  String? title;
+  ValueNotifier<String> title = ValueNotifier("");
 
   ///
   /// The match currently selected. Can be used for next-match and previous-match operations for instance.
@@ -97,6 +104,11 @@ class MatchResultList {
     var v = selectedMatch.value;
     return v == null ? -1 : _matches.indexOf(v);
   }
+
+  ///
+  /// The number of matches found.
+  ///
+  int get length => _matches.length;
 
   ///
   /// Reset this match result list.

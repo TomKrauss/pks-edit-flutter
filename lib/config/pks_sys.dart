@@ -149,13 +149,20 @@ class MainFrameDock {
 /// Small utility for lists.
 ///
 extension ListExtension<T> on List<T> {
-  void addOrMoveFirst(T item) {
+  ///
+  /// Add [item] to the list. If it is in the list move it to the front of
+  /// the list. If [maxLength] was specified, ensure, that the list does not
+  /// grow beyond the given length.
+  ///
+  void addOrMoveFirst(T item, {int? maxLength}) {
     int idx = indexOf(item);
     if (idx == 0) {
       return;
     }
     if (idx > 0) {
       remove(item);
+    } else if (maxLength != null && length >= maxLength) {
+      removeLast();
     }
     insert(0, item);
   }
@@ -247,6 +254,11 @@ class PksEditSession {
       searchPatterns = searchPatterns ?? [],
       replacePatterns = replacePatterns ?? [],
       filePatterns = filePatterns ?? [];
+
+  ///
+  /// Maximum number of entries in a "history" entry of type list of strings.
+  ///
+  static const int maxHistoryListSize = 32;
 
   @JsonKey(includeToJson: false, includeFromJson: false)
   SearchAndReplaceOptions get searchAndReplaceOptions => SearchAndReplaceOptions(searchReplaceOptions);

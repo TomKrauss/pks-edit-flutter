@@ -137,9 +137,15 @@ class FileIO {
   /// Utility which can be used to detect the details about how a file is encoded.
   ///
   Future<FileEncoding> detectEncoding(File file) async {
-    final size = min(4096, await file.length());
+    final size = min(4096, file.lengthSync());
     final tester = file.openRead(0, size);
-    var result = _parseBytesToDetectEncoding(await tester.first);
+    List<int> bytes;
+    try {
+      bytes = await tester.first;
+    } catch(_) {
+      bytes = [];
+    }
+    var result = _parseBytesToDetectEncoding(bytes);
     return FileEncoding(encoding: result.encoding, lineBreak: result.lineBreak, bomType: result.bomType);
   }
 

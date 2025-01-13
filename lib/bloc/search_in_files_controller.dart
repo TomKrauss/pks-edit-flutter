@@ -54,14 +54,45 @@ class SearchAndReplaceInFilesOptions {
   }
 }
 
+// TODO(alphacentauri4711): need an efficient way to exclude hidden directories like ".git" to speed up.
+class DirectoryWalker {
+  //final StreamController<FileSystemEntity> _controller = BehaviorSubject();
+  final Directory root;
+  int directoryCount = 0;
+  DirectoryWalker(this.root);
+
+  // void _walk(Directory baseDir, void Function() onDone) {
+  //   directoryCount++;
+  //   root.list().listen((file) {
+  //     _controller.add(file);
+  //     if (file is Directory && basename(file.path) != ".git") {
+  //       _walk(file, onDone);
+  //     }
+  //   }).onDone(onDone);
+  // }
+  //
+  // Stream<FileSystemEntity> walk() {
+  //   _walk(root, () {
+  //     if (--directoryCount <= 0) {
+  //       _controller.close();
+  //     }
+  //   });
+  //   return _controller.stream;
+  // }
+  Stream<FileSystemEntity> walk() => root.list(recursive: true);
+
+}
+
 ///
 /// The controller performing the search in files operation.
 ///
 class SearchInFilesController {
   final Logger logger = createLogger("SearchInFilesController");
   final ValueNotifier<bool> _running = ValueNotifier(false);
+  final ValueNotifier<String> progressInfo = ValueNotifier("");
   final MatchResultList _results = MatchResultList.current;
   bool _initialized = false;
+  StreamSubscription<FileSystemEntity>? _directoryWalk;
 
   SearchInFilesController._();
 
@@ -72,19 +103,43 @@ class SearchInFilesController {
 
   ValueNotifier<bool> get running => _running;
 
-  Future<void> _traverseDirectories(Directory baseDirectory, Glob pattern, SearchAndReplaceInFilesOptions options,
-      Future<void> Function(File file, SearchAndReplaceInFilesOptions options) foundMatch) async {
-    baseDirectory.list(recursive: true).listen((f) {
+  void _updateProgressInfo(int nDirectoriesProcessed) {
+    progressInfo.value = sprintf("%d matches, %d directories processed", [_results.length, nDirectoriesProcessed]);
+  }
+
+  Future<void> _traverseDirectories({required Directory baseDirectory, required Glob pattern, required SearchAndReplaceInFilesOptions options,
+    required Future<void> Function(File file, SearchAndReplaceInFilesOptions options) foundMatch}) async {
+    int nDir = 0;
+    final walker = DirectoryWalker(baseDirectory);
+    _directoryWalk = walker.walk().listen((f) {
+      if (!running.value) {
+        return;
+      }
       if (f is File) {
         String baseName = basename(f.path);
         if (pattern.matches(baseName)) {
           foundMatch(f, options);
+          _updateProgressInfo(nDir);
         }
+      } else {
+        if (nDir % 500 == 499) {
+          _updateProgressInfo(nDir);
+        }
+        nDir++;
       }
     }, onDone: () {
+      progressInfo.value = "";
       _running.value = false;
       saveSearchResults(options);
+      _directoryWalk = null;
+    }, onError: (Object? e, s) {
+      logger.w("Error when listing files in directory $baseDirectory: $e");
     });
+  }
+
+  void abortSearch() {
+    _directoryWalk?.cancel();
+    running.value = false;
   }
 
   Future<File> get _grepFile async {
@@ -100,8 +155,8 @@ class SearchInFilesController {
     f.createSync();
     logger.i("Saving search results in file ${f.path}");
     var title = _results.title;
-    if (title != null) {
-      f.writeAsStringSync(title, mode: FileMode.write);
+    if (title.value.trim().isNotEmpty) {
+      f.writeAsStringSync(title.value, mode: FileMode.write);
     }
     for (final r in await _results.results.first) {
       f.writeAsStringSync("${r.printMatch()}\n", mode: FileMode.append);
@@ -125,7 +180,7 @@ class SearchInFilesController {
       if (match != null) {
         _results.add(match);
       } else if (!titleFound && s.isNotEmpty) {
-        _results.title = s;
+        _results.title.value = s;
         titleFound = true;
       }
     }
@@ -142,11 +197,12 @@ class SearchInFilesController {
       return;
     }
     _results.reset();
-    _results.title = sprintf("Matches of '%s' in '%s'\n", [options.search, options.directory]);
+    _results.title.value = sprintf("Matches of '%s' in '%s'\n", [options.search, options.directory]);
     var fileHelper = FileIO();
     Pattern? searchPattern = options.search.isEmpty ? null :
         (options.options.regex ? RegExp(options.search, caseSensitive: !options.options.ignoreCase) : options.search);
-    unawaited(_traverseDirectories(dir, options.fileNamePatterns, options, (file, option) async {
+    unawaited(_traverseDirectories(baseDirectory: dir, pattern: options.fileNamePatterns, options: options,
+        foundMatch: (file, option) async {
       var encoding = await fileHelper.detectEncoding(file);
       unawaited(file.readAsLines(encoding: encoding.encoding).then(((lines) {
         int lineNumber = 0;
@@ -170,7 +226,7 @@ class SearchInFilesController {
           lineNumber++;
         }
       })).onError((ex, stack) {
-        logger.e("Cannot search in file $file. Exception: $ex");
+        logger.e("Cannot search in file $file. Exception: $ex", stackTrace: stack);
       }));
     }));
   }
