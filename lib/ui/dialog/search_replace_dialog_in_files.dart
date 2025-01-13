@@ -11,9 +11,6 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 
-import 'dart:io';
-
-import 'package:collection/collection.dart';
 import 'package:file_selector/file_selector.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -22,6 +19,7 @@ import 'package:pks_edit_flutter/bloc/search_in_files_controller.dart';
 import 'package:pks_edit_flutter/config/pks_sys.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
 import 'package:pks_edit_flutter/ui/dialog/dialog.dart';
+import 'package:pks_edit_flutter/ui/dialog/search_widgets.dart';
 
 ///
 /// A widget displaying one match result.
@@ -315,11 +313,11 @@ class SearchReplaceInFilesDialog extends StatefulWidget {
 
 class _SearchReplaceInFilesDialogState
     extends State<SearchReplaceInFilesDialog> {
+  final GlobalKey<FindWidgetState> searchKey = GlobalKey(debugLabel: "searchField");
+  final GlobalKey<ReplaceWidgetState> replaceKey = GlobalKey(debugLabel: "replaceField");
+  final GlobalKey<FileNamePatternWidgetState> patternKey = GlobalKey(debugLabel: "patternField");
+  final GlobalKey<FolderWidgetState> folderKey = GlobalKey(debugLabel: "folderField");
   static const _padding = EdgeInsets.all(10);
-  late final TextEditingController _fileNamePatternController;
-  late final TextEditingController _directoryController;
-  late final TextEditingController _searchController;
-  late final TextEditingController _replaceController;
   final Future<PksEditSession> session =
       PksConfiguration.singleton.currentSession;
   final parameter = SearchAndReplaceInFilesOptions();
@@ -330,58 +328,19 @@ class _SearchReplaceInFilesDialogState
   @override
   void initState() {
     super.initState();
-    _fileNamePatternController = TextEditingController();
-    _directoryController = TextEditingController();
-    _searchController = TextEditingController();
-    _replaceController = TextEditingController();
     searchInFilesController.initialize();
   }
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    _replaceController.dispose();
-    _fileNamePatternController.dispose();
-    _directoryController.dispose();
-    super.dispose();
-  }
-
-  Widget _editor(String label, IconData icon, bool autoFocus,
-          TextEditingController controller,
-          {List<Widget>? options}) =>
-      Padding(
-          padding: _padding,
-          child: TextField(
-              controller: controller,
-              autofocus: autoFocus,
-              decoration: InputDecoration(
-                  icon: Icon(icon),
-                  hintText: label,
-                  suffix: options == null
-                      ? null
-                      : Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: options,
-                        ))));
-
   Widget _folderSelector(
-          String label, IconData icon, TextEditingController controller,
-          {List<Widget>? options}) =>
+          String label) =>
       Padding(
           padding: _padding,
           child: Row(children: [
             Flexible(
-                child: TextField(
-                    controller: controller,
-                    decoration: InputDecoration(
-                        icon: Icon(icon),
-                        hintText: label,
-                        suffix: options == null
-                            ? null
-                            : Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: options,
-                              )))),
+                child: FolderWidget(
+                  key: folderKey,
+                    label: label,
+                    parameter: parameter)),
             const SizedBox(width: 10),
             Tooltip(
                 message: S.of(context).selectDirectory,
@@ -395,7 +354,7 @@ class _SearchReplaceInFilesDialogState
         initialDirectory: parameter.directory,
         confirmButtonText: "Select Folder");
     if (result != null) {
-      _directoryController.text = result;
+      folderKey.currentState?.value = result;
     }
   }
 
@@ -405,45 +364,13 @@ class _SearchReplaceInFilesDialogState
         Row(children: [
           Expanded(
               flex: 3,
-              child: _folderSelector(
-                  S.of(context).findInFolder, Icons.folder, _directoryController,
-                  options: [
-                    _optionButton("1", S.of(context).singleMatchInFile,
-                        parameter.options.singleMatchInFile, (newValue) {
-                      parameter.options.singleMatchInFile = newValue;
-                    }),
-                    _optionButton("0x", S.of(context).ignoreBinaryFiles,
-                        parameter.options.ignoreBinaryFiles, (newValue) {
-                      parameter.options.ignoreBinaryFiles = newValue;
-                    }),
-                  ])),
+              child: _folderSelector(S.of(context).findInFolder)),
           Flexible(
-              child: _editor(S.of(context).fileNamePatterns, Icons.filter, false,
-                  _fileNamePatternController))
+              child: FileNamePatternWidget(key: patternKey, label: S.of(context).fileNamePatterns, icon: Icons.filter, parameter: parameter,))
         ]),
-        _editor(S.of(context).enterTextToFind, Icons.search, true,
-            _searchController,
-            options: [
-              _optionButton(
-                  ".*", S.of(context).matchRegularExpressions, parameter.options.regex,
-                  (newValue) {
-                parameter.options.regex = newValue;
-              }),
-              _optionButton("Cc", S.of(context).ignoreCase, parameter.options.ignoreCase,
-                  (newValue) {
-                parameter.options.ignoreCase = newValue;
-              }),
-            ]),
+        FindWidget(key: searchKey, label: S.of(context).enterTextToFind, parameter: parameter),
         if (widget.arguments.supportReplace)
-          _editor(S.of(context).enterTextToReplace, Icons.find_replace, false,
-              _replaceController,
-              options: [
-                _optionButton(
-                    "AA", S.of(context).preserveCase, parameter.options.preserveCase,
-                    (newValue) {
-                  parameter.options.preserveCase = newValue;
-                }),
-              ])
+          ReplaceWidget(key: replaceKey, label: S.of(context).enterTextToReplace, parameter: parameter,)
       ]));
 
   void _find() {
@@ -457,50 +384,19 @@ class _SearchReplaceInFilesDialogState
     Navigator.pop(context, SearchInFilesAction.replaceInFiles);
   }
 
-  Widget _optionButton(String label, String tooltip, bool value,
-      void Function(bool newValue) onChanged) {
-    var theme = Theme.of(context);
-    var style = ElevatedButton.styleFrom(
-        padding: EdgeInsets.zero,
-        visualDensity: VisualDensity.compact,
-        fixedSize: Size(25, 25),
-        minimumSize: Size.zero,
-        backgroundColor: theme.colorScheme.primary.withAlpha(30),
-        shape: ContinuousRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(5))));
-    if (value) {
-      style = style.copyWith(
-          foregroundColor: WidgetStatePropertyAll(theme.colorScheme.onPrimary),
-          backgroundColor: WidgetStatePropertyAll(theme.colorScheme.primary));
-    }
-    return Padding(
-        padding: EdgeInsets.only(left: 10),
-        child: Tooltip(
-            message: tooltip,
-            child: ElevatedButton(
-              onPressed: () {
-                setState(() {
-                  onChanged(!value);
-                });
-              },
-              style: style,
-              child: Text(label),
-            )));
-  }
-
   DialogAction _button(String text, VoidCallback? callback) =>
       DialogAction(text: text, onPressed: callback);
 
   void _applyOptions() {
-    parameter.fileNamePattern = _fileNamePatternController.text;
-    parameter.directory = _directoryController.text;
-    parameter.search = _searchController.text;
-    parameter.replace = _replaceController.text;
+    parameter.fileNamePattern = patternKey.currentState?.value ?? "";
+    parameter.directory = folderKey.currentState?.value ?? "";
+    parameter.replace = replaceKey.currentState?.value ?? "";
+    parameter.search = searchKey.currentState?.value ?? "";
     PksConfiguration.singleton.currentSession.then((session) {
-      session.searchPatterns.addOrMoveFirst(_searchController.text, maxLength: PksEditSession.maxHistoryListSize);
-      session.replacePatterns.addOrMoveFirst(_replaceController.text, maxLength: PksEditSession.maxHistoryListSize);
-      session.filePatterns.addOrMoveFirst(_fileNamePatternController.text, maxLength: PksEditSession.maxHistoryListSize);
-      session.folders.addOrMoveFirst(_directoryController.text, maxLength: PksEditSession.maxHistoryListSize);
+      searchKey.currentState?.saveSession(session);
+      replaceKey.currentState?.saveSession(session);
+      folderKey.currentState?.saveSession(session);
+      patternKey.currentState?.saveSession(session);
       session.searchAndReplaceOptions = parameter.options;
     });
   }
@@ -527,13 +423,10 @@ class _SearchReplaceInFilesDialogState
         if (sessionValues != null && !_sessionInitialized) {
           _sessionInitialized = true;
           parameter.options = sessionValues.searchAndReplaceOptions;
-          _searchController.text =
-              sessionValues.searchPatterns.firstOrNull ?? "";
-          _replaceController.text =
-              sessionValues.replacePatterns.firstOrNull ?? "";
-          _fileNamePatternController.text =
-              sessionValues.filePatterns.firstOrNull ?? "";
-          _directoryController.text = sessionValues.folders.firstOrNull ?? File(".").absolute.path;
+          searchKey.currentState?.initializeValues(sessionValues.searchPatterns);
+          replaceKey.currentState?.initializeValues(sessionValues.searchPatterns);
+          folderKey.currentState?.initializeValues(sessionValues.folders);
+          patternKey.currentState?.initializeValues(sessionValues.filePatterns);
         }
         var title = MatchResultList.current.title;
         return ValueListenableBuilder(
