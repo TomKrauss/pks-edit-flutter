@@ -82,8 +82,8 @@ class _MatchResultListWidgetState extends State<_MatchResultListWidget> {
         onTap: () {
           onSelect(_hovered);
         },
+        behavior: HitTestBehavior.translucent,
         child: Column(
-          mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(match.fileName,
@@ -154,7 +154,7 @@ class MatchResultListWidget extends StatefulWidget {
   State<StatefulWidget> createState() => SearchResultState();
 }
 
-// Action to move to the previous match
+// Action to move to the next match
 class _NextIntent extends Intent {
   const _NextIntent();
 }
@@ -162,6 +162,16 @@ class _NextIntent extends Intent {
 // Action to move to the previous match
 class _PreviousIntent extends Intent {
   const _PreviousIntent();
+}
+
+// Action to move to the next page match
+class _NextPageIntent extends Intent {
+  const _NextPageIntent();
+}
+
+// Action to move to the previous page match
+class _PreviousPageIntent extends Intent {
+  const _PreviousPageIntent();
 }
 
 // Action to confirm a match
@@ -175,6 +185,8 @@ class SearchResultState extends State<MatchResultListWidget> {
       widget.resultList.selectedMatch;
   late final CallbackAction<_PreviousIntent> _previousAction;
   late final CallbackAction<_NextIntent> _nextAction;
+  late final CallbackAction<_PreviousPageIntent> _previousPageAction;
+  late final CallbackAction<_NextPageIntent> _nextPageAction;
   late final CallbackAction<_ConfirmIntent> _confirmAction;
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
@@ -182,9 +194,10 @@ class SearchResultState extends State<MatchResultListWidget> {
   @override
   void initState() {
     super.initState();
-    _previousAction =
-        CallbackAction<_PreviousIntent>(onInvoke: _handleMovePrevious);
+    _previousAction = CallbackAction<_PreviousIntent>(onInvoke: _handleMovePrevious);
     _nextAction = CallbackAction<_NextIntent>(onInvoke: _handleMoveNext);
+    _previousPageAction = CallbackAction<_PreviousPageIntent>(onInvoke: _handleMovePreviousPage);
+    _nextPageAction = CallbackAction<_NextPageIntent>(onInvoke: _handleMoveNextPage);
     _confirmAction = CallbackAction<_ConfirmIntent>(onInvoke: _handleConfirm);
   }
 
@@ -227,6 +240,21 @@ class SearchResultState extends State<MatchResultListWidget> {
     _ensureListItemVisible();
   }
 
+  int get itemsPerPage {
+    var p = _scrollController.position;
+    return p.viewportDimension ~/ itemHeight;
+  }
+
+  void _handleMoveNextPage(_NextPageIntent intent) {
+    widget.resultList.moveSelectionNext(delta: itemsPerPage);
+    _ensureListItemVisible();
+  }
+
+  void _handleMovePreviousPage(_PreviousPageIntent intent) {
+    widget.resultList.moveSelectionPrevious(delta: itemsPerPage);
+    _ensureListItemVisible();
+  }
+
   @override
   Widget build(BuildContext context) => StreamBuilder(
       stream: widget.resultList.results,
@@ -253,14 +281,20 @@ class SearchResultState extends State<MatchResultListWidget> {
                       const _NextIntent(),
                   LogicalKeySet(LogicalKeyboardKey.arrowUp):
                       const _PreviousIntent(),
+                  LogicalKeySet(LogicalKeyboardKey.pageDown):
+                    const _NextPageIntent(),
+                  LogicalKeySet(LogicalKeyboardKey.pageUp):
+                    const _PreviousPageIntent(),
                   LogicalKeySet(LogicalKeyboardKey.enter):
                       const _ConfirmIntent(),
                 },
                 child: Actions(
                     actions: <Type, Action<Intent>>{
-                      _NextIntent: _nextAction,
                       _ConfirmIntent: _confirmAction,
-                      _PreviousIntent: _previousAction
+                      _NextIntent: _nextAction,
+                      _PreviousIntent: _previousAction,
+                      _NextPageIntent: _nextPageAction,
+                      _PreviousPageIntent: _previousPageAction
                     },
                     child: Focus(
                         focusNode: _focusNode,

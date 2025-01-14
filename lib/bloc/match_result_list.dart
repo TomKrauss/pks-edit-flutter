@@ -12,6 +12,7 @@
 //
 
 import 'dart:async';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:rxdart/rxdart.dart';
@@ -137,25 +138,33 @@ class MatchResultList {
   ///
   /// Move the current selection in the match result list one item down. Return [true] if this was successful.
   ///
-  bool moveSelectionNext() {
+  bool moveSelectionNext({int delta = 1}) {
     var idx = selectedIndex;
-    if (idx+1 < _matches.length) {
-      selectedMatch.value = _matches[idx+1];
-      return true;
+    var oldIdx = idx;
+    idx += delta;
+    if (idx >= _matches.length) {
+      idx = _matches.length;
     }
-    return false;
+    if (idx == oldIdx) {
+      return false;
+    }
+    selectedMatch.value = _matches[idx];
+    return true;
   }
 
   ///
   /// Move the current selection in the match result list one item up. Return [true] if this was successful.
   ///
-  bool moveSelectionPrevious() {
+  bool moveSelectionPrevious({int delta = 1}) {
     var idx = selectedIndex;
-    if (idx-1 >= 0) {
-      selectedMatch.value = _matches[idx-1];
-      return true;
+    var oldIdx = idx;
+    idx -= delta;
+    idx = max(0, idx);
+    if (idx == oldIdx) {
+      return false;
     }
-    return false;
+    selectedMatch.value = _matches[idx];
+    return true;
   }
 }
 
