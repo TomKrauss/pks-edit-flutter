@@ -195,6 +195,8 @@ class SearchAndReplaceOptions {
   set preserveCase(bool flag) => _setFlag(0x8, flag);
   set shellWildCards(bool flag) => _setFlag(0x4, flag);
   set ignoreBinaryFiles(bool flag) => _setFlag(0x10, flag);
+  set searchInSearchResults(bool flag) => _setFlag(0x100, flag);
+  set appendToSearchList(bool flag) => _setFlag(0x80, flag);
   SearchAndReplaceOptions([this._flags = 0]);
 }
 

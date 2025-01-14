@@ -103,15 +103,25 @@ class SearchInFilesController {
 
   ValueNotifier<bool> get running => _running;
 
-  void _updateProgressInfo(int nDirectoriesProcessed) {
-    progressInfo.value = sprintf("%d matches, %d directories processed", [_results.length, nDirectoriesProcessed]);
+  void _updateProgressInfo(Stopwatch clock, int nDirectoriesProcessed) {
+    if (clock.elapsedMilliseconds > 250) {
+      clock.reset();
+      progressInfo.value = sprintf("%d matches, %d directories processed", [_results.length, nDirectoriesProcessed]);
+    }
   }
 
-  Future<void> _traverseDirectories({required Directory baseDirectory, required Glob pattern, required SearchAndReplaceInFilesOptions options,
+  Stream<FileSystemEntity> createFileListFromResults() {
+    final files = _results.resultList.map((r) => r.fileName).toSet().map(File.new);
+    return Stream.fromIterable(files);
+  }
+
+  Future<void> _traverseDirectories({required Stream<FileSystemEntity> walker, required String inputDescription,
+    required Glob pattern, required SearchAndReplaceInFilesOptions options,
     required Future<void> Function(File file, SearchAndReplaceInFilesOptions options) foundMatch}) async {
     int nDir = 0;
-    final walker = DirectoryWalker(baseDirectory);
-    _directoryWalk = walker.walk().listen((f) {
+    var clock = Stopwatch();
+    clock.start();
+    _directoryWalk = walker.listen((f) {
       if (!running.value) {
         return;
       }
@@ -119,12 +129,10 @@ class SearchInFilesController {
         String baseName = basename(f.path);
         if (pattern.matches(baseName)) {
           foundMatch(f, options);
-          _updateProgressInfo(nDir);
+          _updateProgressInfo(clock, nDir);
         }
       } else {
-        if (nDir % 500 == 499) {
-          _updateProgressInfo(nDir);
-        }
+        _updateProgressInfo(clock, nDir);
         nDir++;
       }
     }, onDone: () {
@@ -133,13 +141,16 @@ class SearchInFilesController {
       saveSearchResults(options);
       _directoryWalk = null;
     }, onError: (Object? e, s) {
-      logger.w("Error when listing files in directory $baseDirectory: $e");
+      logger.w("Error when listing files in directory $inputDescription: $e");
     });
   }
 
   void abortSearch() {
-    _directoryWalk?.cancel();
-    running.value = false;
+    if (running.value) {
+      _directoryWalk?.cancel();
+      _directoryWalk = null;
+      running.value = false;
+    }
   }
 
   Future<File> get _grepFile async {
@@ -175,15 +186,17 @@ class SearchInFilesController {
     logger.i("Restoring search results from file ${f.path}");
     var parser = searchInFilesResultParser;
     bool titleFound = false;
+    var matches = <MatchedFileLocation>[];
     for (final s in f.readAsLinesSync()) {
       var match = parser.parse(s);
       if (match != null) {
-        _results.add(match);
+        matches.add(match);
       } else if (!titleFound && s.isNotEmpty) {
         _results.title.value = s;
         titleFound = true;
       }
     }
+    _results.addAll(matches);
   }
 
   Future<void> run(SearchAndReplaceInFilesOptions options) async {
@@ -196,12 +209,16 @@ class SearchInFilesController {
       logger.w("Directory ${options.directory} does not exist");
       return;
     }
-    _results.reset();
+    final walker = options.options.searchInSearchResults ? createFileListFromResults() : DirectoryWalker(dir).walk();
+    final inputDescription = options.options.searchInSearchResults ? 'File List' : dir.path;
+    if (!options.options.appendToSearchList) {
+      _results.reset();
+    }
     _results.title.value = sprintf("Matches of '%s' in '%s'\n", [options.search, options.directory]);
     var fileHelper = const FileIO();
     Pattern? searchPattern = options.search.isEmpty ? null :
         (options.options.regex ? RegExp(options.search, caseSensitive: !options.options.ignoreCase) : options.search);
-    unawaited(_traverseDirectories(baseDirectory: dir, pattern: options.fileNamePatterns, options: options,
+    unawaited(_traverseDirectories(walker: walker, inputDescription: inputDescription, pattern: options.fileNamePatterns, options: options,
         foundMatch: (file, option) async {
       var encoding = await fileHelper.detectEncoding(file);
       unawaited(file.readAsLines(encoding: encoding.encoding).then(((lines) {

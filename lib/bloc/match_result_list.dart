@@ -111,12 +111,22 @@ class MatchResultList {
   int get length => _matches.length;
 
   ///
+  /// The matches as a fixed list not intended for dynamic update.
+  ///
+  List<MatchedFileLocation> get resultList => _matches;
+
+  ///
   /// Reset this match result list.
   ///
   void reset() {
     _matches.clear();
     _resultController.add(_matches);
     selectedMatch.value = null;
+  }
+
+  void addAll(List<MatchedFileLocation> matches) {
+    _matches.addAll(matches);
+    _resultController.add(_matches);
   }
 
   void add(MatchedFileLocation match) {

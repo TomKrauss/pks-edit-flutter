@@ -230,6 +230,14 @@ class FolderWidgetState extends SearchWidgetState<FolderWidget> {
             parameter.options.singleMatchInFile, (newValue) {
           parameter.options.singleMatchInFile = newValue;
         }),
+        optionButton("<<", "Search in current result set",
+          parameter.options.searchInSearchResults, (newValue) {
+            parameter.options.searchInSearchResults = newValue;
+          }),
+       optionButton(">>", "Append to result set",
+          parameter.options.appendToSearchList, (newValue) {
+            parameter.options.appendToSearchList = newValue;
+          }),
         optionButton("0x", S.of(context).ignoreBinaryFiles,
             parameter.options.ignoreBinaryFiles, (newValue) {
           parameter.options.ignoreBinaryFiles = newValue;

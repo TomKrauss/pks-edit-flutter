@@ -358,25 +358,22 @@ class _SearchReplaceInFilesDialogState
     }
   }
 
-  Widget _inputFields() => SizedBox(
-      width: 900,
-      child: Column(children: [
+  Widget _inputFields() => Column(children: [
         Row(children: [
           Expanded(
               flex: 3,
               child: _folderSelector(S.of(context).findInFolder)),
           Flexible(
-              child: FileNamePatternWidget(key: patternKey, label: S.of(context).fileNamePatterns, icon: Icons.filter, parameter: parameter,))
+              child: FileNamePatternWidget(key: patternKey, label: S.of(context).fileNamePatterns, icon: Icons.question_mark, parameter: parameter,))
         ]),
         FindWidget(key: searchKey, label: S.of(context).enterTextToFind, parameter: parameter),
         if (widget.arguments.supportReplace)
           ReplaceWidget(key: replaceKey, label: S.of(context).enterTextToReplace, parameter: parameter,)
-      ]));
+      ]);
 
   void _find() {
     _applyOptions();
     searchInFilesController.run(parameter);
-    //Navigator.pop(context, parameter);
   }
 
   void _replace() {
@@ -411,6 +408,12 @@ class _SearchReplaceInFilesDialogState
         DialogAction.createCancelAction(context)
       ];
 
+  @override
+  void dispose() {
+    super.dispose();
+    _abortSearch();
+  }
+
   void _abortSearch() {
     searchInFilesController.abortSearch();
   }
@@ -440,6 +443,7 @@ class _SearchReplaceInFilesDialogState
                     ValueListenableBuilder(valueListenable: title, builder: (context, value, child) => Text(value)),
                     Container(
                         height: 500,
+                        width: MediaQuery.of(context).size.width*0.6,
                         padding: const EdgeInsets.all(10),
                         decoration: BoxDecoration(
                             border: Border.all(
@@ -452,8 +456,8 @@ class _SearchReplaceInFilesDialogState
                           },
                           progress: searchInFilesController.running.value,
                         )),
-                    SizedBox(width: 800, child: ValueListenableBuilder(valueListenable: searchInFilesController.progressInfo,
-                        builder: (context, value, child) => Text(value, style: const TextStyle(overflow: TextOverflow.ellipsis, fontSize: 12),))),
+                    ValueListenableBuilder(valueListenable: searchInFilesController.progressInfo,
+                        builder: (context, value, child) => Text(value, style: const TextStyle(overflow: TextOverflow.ellipsis, fontSize: 12),)),
                   ],
                 ));
       });
