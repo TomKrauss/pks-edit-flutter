@@ -169,6 +169,16 @@ class _NextPageIntent extends Intent {
   const _NextPageIntent();
 }
 
+// Action to move to the first match
+class _FirstIntent extends Intent {
+  const _FirstIntent();
+}
+
+// Action to move to the last match
+class _LastIntent extends Intent {
+  const _LastIntent();
+}
+
 // Action to move to the previous page match
 class _PreviousPageIntent extends Intent {
   const _PreviousPageIntent();
@@ -187,6 +197,8 @@ class SearchResultState extends State<MatchResultListWidget> {
   late final CallbackAction<_NextIntent> _nextAction;
   late final CallbackAction<_PreviousPageIntent> _previousPageAction;
   late final CallbackAction<_NextPageIntent> _nextPageAction;
+  late final CallbackAction<_FirstIntent> _firstAction;
+  late final CallbackAction<_LastIntent> _lastAction;
   late final CallbackAction<_ConfirmIntent> _confirmAction;
   final FocusNode _focusNode = FocusNode();
   final ScrollController _scrollController = ScrollController();
@@ -198,6 +210,8 @@ class SearchResultState extends State<MatchResultListWidget> {
     _nextAction = CallbackAction<_NextIntent>(onInvoke: _handleMoveNext);
     _previousPageAction = CallbackAction<_PreviousPageIntent>(onInvoke: _handleMovePreviousPage);
     _nextPageAction = CallbackAction<_NextPageIntent>(onInvoke: _handleMoveNextPage);
+    _firstAction = CallbackAction<_FirstIntent>(onInvoke: _handleMoveFirst);
+    _lastAction = CallbackAction<_LastIntent>(onInvoke: _handleMoveLast);
     _confirmAction = CallbackAction<_ConfirmIntent>(onInvoke: _handleConfirm);
   }
 
@@ -255,6 +269,16 @@ class SearchResultState extends State<MatchResultListWidget> {
     _ensureListItemVisible();
   }
 
+  void _handleMoveFirst(_FirstIntent intent) {
+    widget.resultList.moveSelectionPrevious(delta: widget.resultList.length);
+    _ensureListItemVisible();
+  }
+
+  void _handleMoveLast(_LastIntent intent) {
+    widget.resultList.moveSelectionNext(delta: widget.resultList.length);
+    _ensureListItemVisible();
+  }
+
   @override
   Widget build(BuildContext context) => StreamBuilder(
       stream: widget.resultList.results,
@@ -267,6 +291,10 @@ class SearchResultState extends State<MatchResultListWidget> {
                   : const Text("No results"));
         }
         WidgetsBinding.instance.addPostFrameCallback((d) {
+          if (data.isNotEmpty && widget.resultList.selectedMatch.value == null) {
+            widget.resultList.selectedMatch.value = data.first;
+            _focusNode.requestFocus();
+          }
           _ensureListItemVisible();
         });
         var fnStyle = Theme.of(context)
@@ -285,6 +313,10 @@ class SearchResultState extends State<MatchResultListWidget> {
                     const _NextPageIntent(),
                   LogicalKeySet(LogicalKeyboardKey.pageUp):
                     const _PreviousPageIntent(),
+                  LogicalKeySet(LogicalKeyboardKey.end, LogicalKeyboardKey.control):
+                    const _LastIntent(),
+                  LogicalKeySet(LogicalKeyboardKey.home, LogicalKeyboardKey.control):
+                    const _FirstIntent(),
                   LogicalKeySet(LogicalKeyboardKey.enter):
                       const _ConfirmIntent(),
                 },
@@ -294,6 +326,8 @@ class SearchResultState extends State<MatchResultListWidget> {
                       _NextIntent: _nextAction,
                       _PreviousIntent: _previousAction,
                       _NextPageIntent: _nextPageAction,
+                      _FirstIntent: _firstAction,
+                      _LastIntent: _lastAction,
                       _PreviousPageIntent: _previousPageAction
                     },
                     child: Focus(
@@ -400,7 +434,9 @@ class _SearchReplaceInFilesDialogState
           Flexible(
               child: FileNamePatternWidget(key: patternKey, label: S.of(context).fileNamePatterns, icon: Icons.question_mark, parameter: parameter,))
         ]),
-        FindWidget(key: searchKey, label: S.of(context).enterTextToFind, parameter: parameter),
+        FindWidget(key: searchKey, label: S.of(context).enterTextToFind, parameter: parameter, onAccept: (s) {
+          _find();
+        },),
         if (widget.arguments.supportReplace)
           ReplaceWidget(key: replaceKey, label: S.of(context).enterTextToReplace, parameter: parameter,)
       ]);

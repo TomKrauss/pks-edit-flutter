@@ -237,6 +237,14 @@ class PksEditActions {
           execute: _navigateToPreviousMatch,
           textKey: "navigateToPreviousMatch"),
       PksEditAction(
+          id: "errorlist-end",
+          execute: _navigateToLastMatch,
+          textKey: "navigateToLastMatch"),
+      PksEditAction(
+          id: "errorlist-start",
+          execute: _navigateToFirstMatch,
+          textKey: "navigateToFirstMatch"),
+      PksEditAction(
           id: "find-word-forward",
           execute: _findWordForward,
           isEnabled: _hasFile,
@@ -649,6 +657,18 @@ class PksEditActions {
 
   void _navigateToPreviousMatch() {
     if (MatchResultList.current.moveSelectionPrevious()) {
+      _openCurrentResultMatch();
+    }
+  }
+
+  void _navigateToLastMatch() {
+    if (MatchResultList.current.moveSelectionNext(delta: MatchResultList.current.length)) {
+      _openCurrentResultMatch();
+    }
+  }
+
+  void _navigateToFirstMatch() {
+    if (MatchResultList.current.moveSelectionPrevious(delta: MatchResultList.current.length)) {
       _openCurrentResultMatch();
     }
   }

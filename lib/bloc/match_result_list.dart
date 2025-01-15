@@ -143,9 +143,9 @@ class MatchResultList {
     var oldIdx = idx;
     idx += delta;
     if (idx >= _matches.length) {
-      idx = _matches.length;
+      idx = _matches.length-1;
     }
-    if (idx == oldIdx) {
+    if (idx < 0 || idx == oldIdx) {
       return false;
     }
     selectedMatch.value = _matches[idx];

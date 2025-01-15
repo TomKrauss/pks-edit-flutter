@@ -11,6 +11,9 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 
+import 'package:pks_edit_flutter/bloc/grammar.dart';
+import 'package:pks_edit_flutter/config/copyright.dart';
+
 class Template {
   final bool useCopyright;
   final String text;
@@ -28,12 +31,20 @@ class Templates {
     RegExp(r".*\.py"): Template(useCopyright: false, text:""),
   };
 
-  String _evaluate(Template template) => template.text;
+  String _evaluate(Template template, String filename) {
+   var result = StringBuffer();
+   if (template.useCopyright) {
+     result.write(CopyrightManager.current.getCopyrightFormatted(Grammar(scopeName: "default",
+         commentDescriptor: CommentDescriptor(commentStart: "/*", commentEnd: "*/", commentSingle: "//"))));
+   }
+   result.write(template.text);
+   return result.toString();
+  }
 
   String generateInitialContent(String fileName) {
     for (final e in _templates.entries) {
       if (e.key.hasMatch(fileName)) {
-        return _evaluate(e.value);
+        return _evaluate(e.value, fileName);
       }
     }
     return "";

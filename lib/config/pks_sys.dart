@@ -326,6 +326,7 @@ class PksEditSession {
 ///
 class PksConfiguration {
   PksConfiguration._();
+  static const copyrightProfilesFilename = "copyright_profiles.json";
   static const sessionFilename = "pkssession.json";
   static const configFilename = "pkseditini.json";
   static const themeFilename = "themeconfig.json";
@@ -412,8 +413,8 @@ class PksConfiguration {
   /// 
   Future<Themes> get themes async {
     if (_themes == null) {
-      var themeFile = File(join(pksSysDirectory, themeFilename));
-      if (themeFile.existsSync()) {
+      var themeFile = findFile(themeFilename);
+      if (themeFile != null) {
         _logger.i("Reading theme configuration file ${themeFile.path}.");
         var string = themeFile.readAsStringSync();
         _themes = Themes.fromJson(jsonDecode(string));
@@ -429,8 +430,8 @@ class PksConfiguration {
   ///
   Future<ActionBindings> get actionBindings async {
     if (_actionBindings == null) {
-      var configFile = File(join(pksSysDirectory, actionBindingsFilename));
-      if (configFile.existsSync()) {
+      var configFile = findFile(actionBindingsFilename);
+      if (configFile != null) {
         _logger.i("Reading action bindings configuration file ${configFile.path}.");
         var string = configFile.readAsStringSync();
         _actionBindings = ActionBindings.fromJson(jsonDecode(string));
@@ -447,8 +448,8 @@ class PksConfiguration {
   ///
   Future<EditingConfigurations> get editingConfigurations async {
     if (_editingConfigurations == null) {
-      var configFile = File(join(pksSysDirectory, editingConfigurationFilename));
-      if (configFile.existsSync()) {
+      var configFile = findFile(editingConfigurationFilename);
+      if (configFile != null) {
         _logger.i("Reading editing configuration file ${configFile.path}.");
         var string = configFile.readAsStringSync();
         _editingConfigurations = EditingConfigurations.fromJson(jsonDecode(string));
@@ -465,8 +466,8 @@ class PksConfiguration {
   ///
   Future<PksIniConfiguration> get configuration async {
     if (_pksIniConfiguration == null) {
-      var configFile = File(join(pksSysDirectory, configFilename));
-      if (configFile.existsSync()) {
+      var configFile = findFile(configFilename);
+      if (configFile != null) {
         _logger.i("Reading application configuration file ${configFile.path}.");
         var string = configFile.readAsStringSync();
         _pksIniConfiguration = PksIniConfiguration.fromJson(jsonDecode(string));
@@ -482,8 +483,8 @@ class PksConfiguration {
   ///
   Future<PksEditSession> get currentSession async {
     if (_pksEditSession == null) {
-      var sessionFile = File(join(pksSysDirectory, sessionFilename));
-      if (sessionFile.existsSync()) {
+      var sessionFile = findFile(sessionFilename);
+      if (sessionFile != null) {
         _logger.i(
             "Reading session file ${sessionFile.path} to restore last editor session.");
         var string = sessionFile.readAsStringSync();
@@ -521,5 +522,14 @@ class PksConfiguration {
     var settingsFile = File(join(pksSysDirectory, configFilename));
     settingsFile.writeAsStringSync(
         const JsonEncoder.withIndent("  ").convert(configuration.toJson()));
+  }
+
+  ///
+  /// Finds a file with the given [filename] in the PKS_SYS directories.
+  /// If a file can be found and exists, return it, otherwise return null.
+  ///
+  File? findFile(String filename) {
+    final f = File(join(pksSysDirectory, filename));
+    return f.existsSync() ? f : null;
   }
 }
