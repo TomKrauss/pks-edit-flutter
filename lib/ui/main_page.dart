@@ -53,12 +53,16 @@ class _PksEditMainPageState extends State<PksEditMainPage>
   late final FocusNode _editorFocusNode;
   late StreamSubscription<CommandResult> _errorSubscription;
   PksEditActionContext _actionContext = PksEditActionContext(openFileState: null);
-
+  bool _initialized = false;
   late final PksEditActions actions;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_initialized) {
+      return;
+    }
+    _initialized = true;
     bloc = EditorBloc.of(context);
     bloc.actionBindings.processBindingsWith(actions);
     bloc.actionBindings.registerAdditionalAction(
@@ -86,8 +90,11 @@ class _PksEditMainPageState extends State<PksEditMainPage>
     windowManager.addListener(this);
     _searchbarFocusNode = FocusNode();
     _editorFocusNode = FocusNode();
-    actions = PksEditActions(getBuildContext: () => context,
-        handleCommandResult: _handleCommandResult, getActionContext: () => _actionContext
+    actions = PksEditActions(
+        getBuildContext: () => context,
+        editorFocusNode: _editorFocusNode,
+        handleCommandResult: _handleCommandResult,
+        getActionContext: () => _actionContext
     );
     super.initState();
   }

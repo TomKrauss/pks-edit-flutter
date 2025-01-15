@@ -23,27 +23,35 @@ class Template {
   Template({required this.text});
 }
 
-class _TemplateCaretPosition {
+///
+/// The position of a caret / selection position *after*
+/// a template had been inserted.
+///
+class TemplateCaretPosition {
   final int row;
   final int column;
 
-  _TemplateCaretPosition({required this.row, required this.column});
+  TemplateCaretPosition({required this.row, required this.column});
 }
 
-class _TemplateContext {
+///
+/// Context to pass for template insertion. Contains values to use in the template and
+/// contains some additional information to be used after the insertion.
+///
+class TemplateContext {
   final String filename;
-  _TemplateCaretPosition? caretPosition;
-  _TemplateCaretPosition? selectionEndPosition;
-  int currentRow = 0;
-  int currentColumn = 0;
+  TemplateCaretPosition? caretPosition;
+  TemplateCaretPosition? selectionEndPosition;
+  int _currentRow = 0;
+  int _currentColumn = 0;
 
   void saveCaretPosition() {
-    caretPosition = _TemplateCaretPosition(row: currentRow, column: currentColumn);
+    caretPosition = TemplateCaretPosition(row: _currentRow, column: _currentColumn);
   }
   void saveSelectionEndPosition() {
-    selectionEndPosition = _TemplateCaretPosition(row: currentRow, column: currentColumn);
+    selectionEndPosition = TemplateCaretPosition(row: _currentRow, column: _currentColumn);
   }
-  _TemplateContext({required this.filename});
+  TemplateContext({required this.filename});
 }
 
 class Templates {
@@ -84,7 +92,7 @@ class Templates {
     }
     return "unknown date format $variable";
   }
-  String _evaluateVariable(String variable, _TemplateContext context) {
+  String _evaluateVariable(String variable, TemplateContext context) {
     if (variable == "copyright") {
       var copyright = CopyrightManager.current.getCopyrightFormatted(Grammar(scopeName: "default",
           commentDescriptor: CommentDescriptor(commentStart: "/*", commentEnd: "*/", commentSingle: "//")));
@@ -104,7 +112,7 @@ class Templates {
     return "";
   }
 
-  String _evaluateVariablesIn(String s, _TemplateContext context) {
+  String _evaluateVariablesIn(String s, TemplateContext context) {
     var result = StringBuffer();
     for (int i = 0; i < s.length; i++) {
       var c = s[i];
@@ -131,19 +139,19 @@ class Templates {
       }
       result.write(c);
       if (c == '\n') {
-        context.currentColumn = 0;
-        context.currentRow++;
+        context._currentColumn = 0;
+        context._currentRow++;
       } else {
-        context.currentColumn++;
+        context._currentColumn++;
       }
     }
     return result.toString();
   }
 
-  String generateInitialContent(String fileName) {
+  String generateInitialContent(TemplateContext context) {
     for (final e in _templates.entries) {
-      if (e.key.hasMatch(fileName)) {
-        return _evaluateVariablesIn(e.value.text, _TemplateContext(filename: fileName));
+      if (e.key.hasMatch(context.filename)) {
+        return _evaluateVariablesIn(e.value.text, context);
       }
     }
     return "";

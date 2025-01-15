@@ -147,13 +147,14 @@ class PksEditActionWithState extends PksEditAction {
 class PksEditActions {
   static const actionExit = "exit-edit";
   static const actionCloseWindow = "quit-file";
+  final FocusNode editorFocusNode;
   final PksEditActionContext Function() getActionContext;
   final BuildContext Function() getBuildContext;
   final Future<void> Function(CommandResult commandResult) handleCommandResult;
   final Map<String, PksEditAction> actions = {};
 
   PksEditActions({required this.getBuildContext, required this.getActionContext,
-        required this.handleCommandResult}) {
+        required this.handleCommandResult, required this.editorFocusNode}) {
     _initialize();
   }
 
@@ -796,6 +797,7 @@ class PksEditActions {
 
   Future<void> _changeSettings() async {
     await SettingsDialog.show(context: getBuildContext());
+    editorFocusNode.requestFocus();
   }
 
   bool _canSave() =>
@@ -917,6 +919,7 @@ class PksEditActions {
       );
       controller.makeCursorCenterIfInvisible();
     }
+    editorFocusNode.requestFocus();
   }
 
   Future<void> _openFile() async {
@@ -929,6 +932,7 @@ class PksEditActions {
     if (result != null) {
       await handleCommandResult(await bloc.openFile(result.path));
     }
+    editorFocusNode.requestFocus();
   }
 
   Future<void> _newFile() async {
@@ -943,6 +947,7 @@ class PksEditActions {
     if (result != null) {
       await handleCommandResult(await bloc.newFile(path.join(path.dirname(newFilename), result.selectedText), insertTemplate: result.firstOptionSelected));
     }
+    editorFocusNode.requestFocus();
   }
 
   Future<void> _closeWindows(List<OpenFile> files) async {

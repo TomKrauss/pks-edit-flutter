@@ -65,6 +65,7 @@ class InputDialog extends StatefulWidget {
           required InputDialogArguments arguments}) =>
       showDialog(
           context: context,
+          barrierDismissible: false,
           builder: (context) => InputDialog(arguments: arguments));
 
   @override

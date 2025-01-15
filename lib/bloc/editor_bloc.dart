@@ -625,11 +625,20 @@ class EditorBloc {
     if (File(filename).existsSync()) {
       return await openFile(filename);
     }
+    var context = TemplateContext(filename: filename);
+    var text = insertTemplate ? Templates.singleton.generateInitialContent(context) : "";
+    var extent = context.selectionEndPosition?.column;
+    if (extent != null) {
+      extent -= (context.caretPosition?.column ?? 0);
+    }
     _addOpenFile(OpenFile(filename: filename,
         isNew: true,
         lineBreak: Platform.isWindows ? TextLineBreak.crlf : TextLineBreak.lf,
         editingConfiguration: await editingConfigurations.forFile(filename),
-        text: insertTemplate ? Templates.singleton.generateInitialContent(filename) : ""));
+        initialLineNumber: context.caretPosition?.row,
+        initialColumn: context.caretPosition?.column,
+        initialSelectionExtent: extent,
+        text: text));
     return CommandResult(success: true);
   }
 
