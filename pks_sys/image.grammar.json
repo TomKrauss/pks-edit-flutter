@@ -1,0 +1,14 @@
+{
+  "grammars": [
+    {
+      "scopeName": "image",
+      "description": "Images",
+      "wysiwygRenderer": "image",
+      "defaultDisplayMode": "wysiwyg",
+      "highlightBrackets": [
+      ],
+      "patterns": [
+      ]
+    }
+  ]
+}

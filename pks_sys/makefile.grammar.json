@@ -1,0 +1,98 @@
+{
+  "grammars": [
+    {
+      "scopeName": "makefile",
+      "description": "Make Build File",
+      "formatter": "code",
+      "increaseIndentPatterns": [
+        {
+          "pattern": "^[.a-zA-Z0-9]+\\s*:",
+          "regex": true
+        }
+      ],
+      "navigation": [
+        {
+          "name": "include-link",
+          "pattern": "^include\\s+([a-z0-9_.]+)",
+          "filenameCapture": 1
+        }
+      ],
+      "patterns": [
+        {
+          "match": "#.*",
+          "style": "comment",
+          "name": "comment.singleLine"
+        },
+        {
+          "match": "^[.a-z_A-Z0-9]+:",
+          "style": "annotation",
+          "name": "makefile.target"
+        },
+        {
+          "match": "\"(?:\\\"|[^\"])+?\"",
+          "style": "string",
+          "name": "string"
+        },
+        {
+          "match": "\\$\\([a-z0-9A-Z_.-]+\\)",
+          "style": "literal",
+          "name": "makefile.variable"
+        },
+        {
+          "match": "[%@$<>=:]+",
+          "style": "operator",
+          "name": "makefile.references"
+        },
+        {
+          "keywords": [
+            "AR",
+            "ARFLAGS",
+            "AS",
+            "ASFLAGS",
+            "CFLAGS",
+            "CC",
+            "CO",
+            "COFLAGS",
+            "CPPFLAGS",
+            "FC",
+            "FFLAGS",
+            "GET",
+            "GFLAGS",
+            "LDFLAGS",
+            "LDLIBS",
+            "MAKEINFO",
+            "LEX",
+            "LINT",
+            "PC",
+            "PFLAGS",
+            "RM",
+            "RFLAGS",
+            "TANGLE",
+            "TAGS",
+            "WEAVE",
+            "YACC",
+            "YFLAGS"
+          ],
+          "style": "constant",
+          "name": "keyword.implicit.variables"
+        },
+        {
+          "keywords": [
+            "export",
+            "ifeq",
+            "ifneq",
+            "define",
+            "endef",
+            "endif",
+            "include",
+			"vpath",
+            "override",
+            "private"
+          ],
+          "style": "keyword",
+          "name": "keyword.makefile"
+        }
+      ]
+    }
+  ]
+}

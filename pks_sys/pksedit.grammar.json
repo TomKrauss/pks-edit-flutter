@@ -1,0 +1,136 @@
+{
+  "grammars": [
+    {
+      "scopeName": "pksedit",
+      "description": "Grammar for the PKS-Edit macro language PKSMacroC",
+      "import": [ "commonc" ],
+      "increaseIndentPatterns": [
+        { "pattern": "{" },
+        { "pattern": "(" }
+      ],
+      "decreaseIndentPatterns": [
+        { "pattern": "}" },
+        { "pattern": ")" }
+      ],
+      "analyzer": "pks-macros",
+      "evaluator": "pks-macros",
+      "wordCharacterClass": "a-zäöü=A-ZÄÖÜß_0-9@-",
+      "patterns": [
+        {
+          "begin": "/*",
+          "end": "*/",
+          "style": "comment",
+          "patterns": [
+            {
+              "match": "@[a-zA-Z]+",
+              "style": "bold-comment",
+              "name": "javadoc.tags"
+            }
+          ],
+          "name": "comment.multiLine"
+        },
+        {
+          "match": "#.*",
+          "style": "comment",
+          "name": "comment.singleLine2"
+        },
+        {
+          "match": "//.*",
+          "style": "comment",
+          "name": "comment.singleLine"
+        },
+        {
+          "match": "<[A-Z_][A-Z_0-9]*>",
+          "name": "constant.identifier",
+          "style": "identifier"
+        },
+        {
+          "match": "<@[A-Za-z0-9_-]+>",
+          "name": "pksedit.command.identifier",
+          "style": "annotation"
+        },
+        {
+          "name": "keyword.pksedit",
+          "style": "keyword",
+          "keywords": [
+            "auto",
+            "void",
+            "map",
+            "do",
+            "if",
+            "enum",
+            "typedef",
+            "struct",
+            "default",
+            "native",
+            "else",
+            "elif",
+            "switch",
+            "while",
+            "continue",
+            "namespace",
+            "for",
+            "const",
+            "break",
+            "return",
+            "static",
+            "range",
+            "local",
+            "goto",
+            "char",
+            "int",
+            "any",
+            "string",
+            "long",
+            "boolean",
+            "require",
+            "new",
+            "true",
+            "false",
+            "float"
+          ]
+        },
+        {
+          "match": "'.{1,2}'",
+          "style": "literal",
+          "name": "literal.character"
+        },
+        {
+          "match": "\"(?:\\\"|[^\"])+?\"",
+          "style": "string",
+          "name": "literal.string"
+        },
+        {
+          "match": "<0[xX][0-9a-fA-F_]+>",
+          "name": "constant.numeric.hex",
+          "style": "literal"
+        },
+        {
+          "match": "<0b[01_]+>",
+          "name": "constant.numeric.binary",
+          "style": "literal"
+        },
+        {
+          "match": "<-?[0-9_.]+d?>",
+          "name": "constant.numeric",
+          "style": "literal"
+        },
+        {
+          "match": "<[A-Za-z0-9_-]+>",
+          "name": "pksmacroc.identifier",
+          "style": "default"
+        },
+        {
+          "match": "[*%/+\\[\\]{}^&|!-]+",
+          "name": "keyword.operator",
+          "style": "operator"
+        },
+        {
+          "match": "[(),]+",
+          "name": "keyword.function.delimiter",
+          "style": "expression"
+        }
+      ]
+    }
+  ]
+}

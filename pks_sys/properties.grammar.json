@@ -1,0 +1,47 @@
+{
+  "grammars": [
+    {
+      "scopeName": "properties",
+      "description": "Properties File",
+      "navigation": [
+        {
+          "name": "html-link",
+          "pattern": "(https?:[a-zA-Z0-9._/-]+|[a-zA-Z0-9._/-]+)",
+          "filenameCapture": 1
+        }
+      ],
+      "patterns": [
+        {
+          "match": "^#.*",
+          "style": "comment",
+          "ignore-case": true,
+          "name": "comment.singleLine"
+        },
+        {
+          "match": "^\\s*([0-9a-zA-Z_.]+)\\s*=",
+          "style": "string",
+          "name": "properties.start",
+          "captures": [
+            {
+              "name": "properties.key"
+            }
+          ]
+        },
+        {
+          "name": "properties.key",
+          "style": "identifier"
+        },
+        {
+          "match": "\\$([{}0-9a-zA-Z_.]+)",
+          "style": "annotation",
+          "name": "variable"
+        },
+        {
+          "match": "=",
+          "style": "operator",
+          "name": "operator.equals"
+        }
+      ]
+    }
+  ]
+}

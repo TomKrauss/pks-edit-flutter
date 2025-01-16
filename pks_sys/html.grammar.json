@@ -1,0 +1,17 @@
+{
+  "grammars": [
+    {
+      "scopeName": "html",
+      "description": "Hypertext Markup Language",
+      "wysiwygRenderer": "html",
+      "import": [ "commonmarkup" ],
+      "navigation": [
+        {
+          "name": "html-link",
+          "pattern": "[\"'](https?:[^\"]+)[\"']",
+          "filenameCapture": 1
+        }
+      ]
+    }
+  ]
+}

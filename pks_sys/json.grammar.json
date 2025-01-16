@@ -1,0 +1,40 @@
+{
+  "grammars": [
+    {
+      "scopeName": "json",
+      "description": "JavaScript Object Notation",
+      "analyzer": "json",
+      "patterns": [
+        {
+          "match": "<\"[A-Za-z0-9_-]+\":",
+          "name": "string.json.key",
+          "style": "identifier"
+        },
+        {
+          "match": "\"(?:\\\\.|[^\"])+?\"",
+          "name": "string.json.value",
+          "style": "literal"
+        },
+        {
+          "keywords": [
+            "true",
+            "false",
+            "null"
+          ],
+          "name": "keyword.control.json",
+          "style": "keyword"
+        },
+        {
+          "match": "[\\[\\]{}]",
+          "name": "keyword.operator.json",
+          "style": "operator"
+        },
+        {
+          "match": "<[0-9.]+>",
+          "name": "constant.numeric",
+          "style": "literal"
+        }
+      ]
+    }
+  ]
+}

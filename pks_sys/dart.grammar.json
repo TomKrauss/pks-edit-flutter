@@ -1,0 +1,127 @@
+{
+  "grammars": [
+    {
+      "scopeName": "dart",
+      "description": "Dart Programming Language",
+      "import": [ "commonc" ],
+      "templates": [
+        {
+          "match": "copyright",
+          "contents": "${copyright}"
+        },
+        {
+          "name": "file",
+          "match": "file",
+          "contents": "${copyright}\nclass ${file_name_no_suffix.camelCase()} {\n\n}\n"
+        }
+      ],
+      "patterns": [
+        {
+          "match": "///.*",
+          "style": "comment",
+          "patterns": [
+            {
+              "match": "\\[[a-zA-Z_0-9.]+\\]",
+              "style": "annotation",
+              "name": "dartdoc.reference"
+            }
+          ],
+          "name": "comment.documentation"
+        },
+        {
+          "match": "r?[\"'](?:\\\"|[^\"])+[\"']",
+          "style": "string",
+          "name": "string",
+          "patterns": [
+            {
+              "name": "string.var.reference",
+              "style": "annotation",
+              "match": "\\$\\{[^\\}]+\\}"
+            }
+          ]
+        },
+        {
+          "match": "<_[a-zA-Z][a-zA-Z_0-9]*>",
+          "style": "identifier",
+          "name": "private.identifier"
+        },
+        {
+          "match": "<[A-Z][a-zA-Z_0-9]*>",
+          "style": "constant",
+          "name": "class.identifier"
+        },
+        {
+          "keywords": [
+            "async",
+            "async*",
+            "async**",
+            "abstract",
+            "continue",
+            "false",
+            "new",
+            "as",
+            "default",
+            "late",
+            "final",
+            "null",
+            "throw",
+            "assert",
+            "deferred",
+            "finally",
+            "operator",
+            "true",
+            "part",
+            "try",
+            "do",
+            "await",
+            "dynamic",
+            "get",
+            "set",
+            "sealed",
+            "rethrow",
+            "typedef",
+            "else",
+            "if",
+            "return",
+            "var",
+            "break",
+            "enum",
+            "implements",
+            "void",
+            "case",
+            "export",
+            "import",
+            "static",
+            "while",
+            "catch",
+            "external",
+            "in",
+            "super",
+            "with",
+            "class",
+            "extends",
+            "is",
+            "switch",
+            "yield",
+            "yield*",
+            "yield**",
+            "const",
+            "factory",
+            "library",
+            "mixin",
+            "final",
+            "hide",
+            "synch"
+          ],
+          "style": "keyword",
+          "name": "keyword.dart"
+        },
+        {
+          "match": "@\\s*[a-zA-Z0-9_]+",
+          "style": "annotation",
+          "name": "annotation.dart"
+        }
+      ]
+    }
+  ]
+}

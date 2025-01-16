@@ -1,0 +1,171 @@
+{
+  "grammars": [
+    {
+      "scopeName": "javascript",
+      "description": "Javascript Programming Language",
+      "increaseIndentPatterns": [
+        { "pattern": "{" },
+        { "pattern": "(" },
+        { "pattern": "[" }
+      ],
+      "decreaseIndentPatterns": [
+        { "pattern": "}" },
+        { "pattern": ")" },
+        { "pattern": "]" }
+      ],
+      "templates": [
+        {
+          "match": "'",
+          "contents": "${cursor}'",
+          "auto-insert": true
+        },
+        {
+          "match": "constructor(",
+          "contents": "${cursor}props) {\n${indent}${tab}super(props);\n${indent}}\n",
+          "auto-insert": true
+        },
+        {
+          "match": "(",
+          "contents": "${cursor})",
+          "auto-insert": true
+        },
+        {
+          "match": "{",
+          "contents": "${cursor}}",
+          "auto-insert": true
+        },
+        {
+          "match": "\"",
+          "contents": "${cursor}\"",
+          "auto-insert": true
+        },
+        {
+          "match": "copyright",
+          "contents": "${copyright}"
+        },
+        {
+          "name": "file",
+          "match": "file",
+          "contents": "${copyright}\nclass ${file_name_no_suffix} {\n\n}\n"
+        },
+        {
+          "match": "/*",
+          "contents": "\n * ${cursor}\n */",
+          "auto-insert": true
+        }
+      ],
+      "formatter": "code",
+      "patterns": [
+        {
+          "begin": "/*",
+          "end": "*/",
+          "style": "comment",
+          "name": "comment.multiLine"
+        },
+        {
+          "match": "//.*",
+          "style": "comment",
+          "name": "comment.singleLine"
+        },
+        {
+          "match": "/[^/]+/",
+          "style": "expression",
+          "name": "expression"
+        },
+        {
+          "match": "r?[\"'`](?:\\\"|[^\"`'])+[\"'`]",
+          "style": "string",
+          "name": "string"
+        },
+        {
+          "keywords": [
+            "abstract",
+            "arguments",
+            "await",
+            "boolean",
+            "break",
+            "byte",
+            "case",
+            "catch",
+            "char",
+            "class",
+            "const",
+            "continue",
+            "debugger",
+            "default",
+            "delete",
+            "do",
+            "double",
+            "else",
+            "enum",
+            "eval",
+            "export",
+            "extends",
+            "false",
+            "final",
+            "finally",
+            "float",
+            "for",
+            "function",
+            "goto",
+            "if",
+            "implements",
+            "import",
+            "in",
+            "instanceof",
+            "int",
+            "interface",
+            "let",
+            "long",
+            "native",
+            "new",
+            "null",
+            "of",
+            "package",
+            "private",
+            "protected",
+            "public",
+            "require",
+            "return",
+            "short",
+            "statuc",
+            "super",
+            "switch",
+            "synchronized",
+            "this",
+            "throw",
+            "throws",
+            "transient",
+            "true",
+            "try",
+            "typeof",
+            "undefined",
+            "var",
+            "void",
+            "volatile",
+            "while",
+            "with",
+            "yield"
+          ],
+          "style": "keyword",
+          "name": "keyword.js"
+        },
+        {
+          "match": "<[a-z_][A-Z_a-z0-9]*>:",
+          "style": "annotation",
+          "name": "js.named.parameter"
+        },
+        {
+          "match": "<[-+]?[0-9.]+([xX][a-fA-F0-9]+|b[01]+|e[-+0-9]+)?>",
+          "style": "literal",
+          "name": "literal.numeric"
+        },
+        {
+          "match": "[-+&|<>=]{1,3}",
+          "style": "operator",
+          "name": "keyword.operator"
+        }
+      ]
+    }
+  ]
+}

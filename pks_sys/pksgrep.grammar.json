@@ -1,0 +1,20 @@
+{
+  "grammars": [
+    {
+      "scopeName": "pksgrep",
+      "description": "PKS Search Result File",
+      "patterns": [
+        {
+          "match": "~[^~]+~",
+          "style": "bold",
+          "name": "grep.match"
+        },
+        {
+          "match": "\"[^\"]+\"",
+          "style": "identifier",
+          "name": "filename"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "grammars": [
+    {
+      "scopeName": "csv",
+      "description": "Comma separated Values",
+      "patterns": [
+        {
+          "match": "([0-9-.]+)",
+          "name": "csv.numeric",
+          "style": "literal"
+        },
+        {
+          "match": "([^,;\t]+)",
+          "name": "csv.other",
+          "style": "keyword"
+        },
+        {
+          "match": "[,;-#]",
+          "name": "csv.separator",
+          "style": "operator"
+        }
+      ]
+    }
+  ]
+}

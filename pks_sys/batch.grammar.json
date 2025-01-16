@@ -1,0 +1,99 @@
+{
+  "grammars": [
+    {
+      "scopeName": "batch",
+      "description": "DOS Batch Syntax",
+      "patterns": [
+        {
+          "match": "^@?rem.*",
+          "style": "comment",
+          "ignore-case": true,
+          "name": "comment.singleLine"
+        },
+        {
+          "match": "^::",
+          "style": "comment",
+          "ignore-case": true,
+          "name": "comment.singleLine"
+        },
+        {
+          "match": ":[a-z0-9_]+",
+          "style": "annotation",
+          "name": "batch.label"
+        },
+        {
+          "match": "\"[^\"]*\"",
+          "style": "string",
+          "name": "batch.variable"
+        },
+        {
+          "match": "%[0-9a-zA-Z%_*]+",
+          "style": "identifier",
+          "name": "batch.variable"
+        },
+        {
+          "match": "![0-9a-zA-Z_]+!",
+          "style": "string",
+          "name": "batch.variable2"
+        },
+        {
+          "match": "@[a-z]+",
+          "style": "annotation",
+          "name": "batch.noecho"
+        },
+        {
+          "match": " /[a-zA-Z]",
+          "style": "expression",
+          "name": "batch.option"
+        },
+        {
+          "keywords": [
+            "break",
+            "by",
+            "call",
+            "callext",
+            "case",
+            "debug",
+            "drop",
+            "do",
+            "doskey",
+            "gtr",
+            "else",
+            "echo",
+            "end",
+            "endfor",
+            "endfunction",
+            "endif",
+            "endselect",
+            "endswitch",
+            "endwhile",
+            "exit",
+            "exist",
+            "for",
+            "gosub",
+            "goto",
+            "if",
+            "include",
+            "next",
+            "not",
+            "return",
+            "set",
+            "select",
+            "switch",
+            "then",
+            "to",
+            "while"
+          ],
+          "ignore-case": true,
+          "style": "keyword",
+          "name": "keyword.batch"
+        },
+        {
+          "match": "<[=+<>-]{1,2}>",
+          "style": "operator",
+          "name": "batch.operator"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,169 @@
+{
+  "grammars": [
+    {
+      "scopeName": "cs",
+      "description": "C# Syntax",
+      "import": [ "commonc" ],
+      "templates": [
+        {
+          "match": "'",
+          "contents": "${cursor}'",
+          "auto-insert": true
+        },
+        {
+          "match": "(",
+          "contents": "${cursor})",
+          "auto-insert": true
+        },
+        {
+          "match": "{",
+          "contents": "\n${indent}${tab}${cursor}\n${indent}}",
+          "auto-insert": true,
+          "lexical-context-initial": true
+        },
+        {
+          "match": "\"",
+          "contents": "${cursor}\"",
+          "auto-insert": true
+        },
+        {
+          "match": "/*",
+          "contents": "\n${indent} * ${cursor}\n${indent} */",
+          "auto-insert": true
+        },
+        {
+          "match": "copyright_header",
+          "contents": "/*\n * ${file_name}\n *\n * PKS-EDIT for Windows\n *\n * purpose: ${cursor}handle xxx${selection_end}\n *\n * created: ${date}\n * author: ${user}\n *\n * This Source Code Form is subject to the terms of the Mozilla Public\n * License, v. 2.0. If a copy of the MPL was not distributed with this\n * file, You can obtain one at https://mozilla.org/MPL/2.0/.\n */\n"
+        },
+        {
+          "match": "for_loop",
+          "contents": "for (int ${word_selection}; ${word_selection} < ${cursor}10${selection_end}; ${word_selection}++) {\n${indent}${tab}printf(x);\n${indent}}\n"
+        },
+        {
+          "match": "main_function",
+          "contents": "/* Main Function*/\nint main(int argc, char* argv[]) {\n    ${cursor}return 0;\n}\n"
+        }
+      ],
+      "patterns": [
+        {
+          "match": "///.*",
+          "style": "single-line-comment",
+          "name": "comment.singleLine",
+          "patterns": [
+            {
+              "name": "param.tag",
+              "style": "bold-comment",
+              "keywords-no-identifiers": true,
+              "keywords": [
+                "<code>",
+                "</code>",
+                "<include>",
+                "<exception>",
+                "</exception>",
+                "<example>",
+                "<paramref>",
+                "<remarks>",
+                "</remarks>",
+                "<returns>",
+                "</returns>",
+                "<see>",
+                "<seealso>",
+                "<value>",
+                "</value>",
+                "<typeparam>",
+                "</typeparam>",
+                "<typeparamref>",
+                "<summary>",
+                "</summary>",
+                "<param>",
+                "</param>"
+              ]
+            }
+          ]
+        },
+        {
+          "keywords": [
+            "abstract",
+            "event",
+            "namespace",
+            "static",
+            "as",
+            "explicit",
+            "new",
+            "string",
+            "base",
+            "extern",
+            "struct",
+            "bool",
+            "false",
+            "object",
+            "switch",
+            "break",
+            "finally",
+            "break",
+            "operator",
+            "this",
+            "byte",
+            "fixed",
+            "out",
+            "throw",
+            "case",
+            "float",
+            "override",
+            "catch",
+            "for",
+            "params",
+            "try",
+            "char",
+            "foreach",
+            "private",
+            "typeof",
+            "checked",
+            "protected",
+            "goto",
+            "uint",
+            "class",
+            "public",
+            "if",
+            "ulong",
+            "const",
+            "implicit",
+            "readonly",
+            "unckecked",
+            "continue",
+            "in",
+            "ref",
+            "unsafe",
+            "decimal",
+            "int",
+            "return",
+            "ushort",
+            "default",
+            "interface",
+            "sbyte",
+            "using",
+            "delegate",
+            "internal",
+            "sealed",
+            "virtual",
+            "do",
+            "is",
+            "short",
+            "void",
+            "double",
+            "sizeof",
+            "lock",
+            "volatile",
+            "else",
+            "long",
+            "stackalloc",
+            "while",
+            "enum"
+          ],
+          "style": "keyword",
+          "name": "keyword.cs"
+        }
+      ]
+    }
+  ]
+}

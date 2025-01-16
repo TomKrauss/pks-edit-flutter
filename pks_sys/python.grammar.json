@@ -1,0 +1,145 @@
+{
+  "grammars": [
+    {
+      "scopeName": "python",
+      "description": "Python Programming Language",
+      "highlightBrackets": [
+        {
+          "left": "(",
+          "right": ")"
+        },
+        {
+          "left": "{",
+          "right": "}"
+        },
+        {
+          "left": "[",
+          "right": "]"
+        }
+      ],
+      "templates": [
+        {
+          "match": "copyright",
+          "contents": "${copyright}"
+        },
+        {
+          "name": "file",
+          "match": "file",
+          "contents": "${copyright}"
+        },
+        {
+          "match": "for_loop",
+          "contents": "for char${cursor} in [1,2,3]:\n${indent}${tab}print(char${secondary})\n"
+        },
+        {
+          "match": "while_loop",
+          "contents": "while i${cursor} < 10:\n${indent}${tab}print(i${secondary})\n${indent}${tab}i += 1\n"
+        },
+        {
+          "match": "if_elif_else",
+          "contents": "if b > a:\n${indent}${tab}print(\"b is greater than a\")\nelif a == b:\n${indent}${tab}print(\"a and b are equal\")\nelse:\n${indent}${tab}print(\"a is greater than b\")\n"
+        }
+      ],
+      "patterns": [
+        {
+          "begin": "\"\"\"",
+          "end": "\"\"\"",
+          "style": "comment",
+          "name": "comment.multiLine",
+          "patterns": [
+            {
+              "match": ":[a-zA-Z]+",
+              "style": "bold-comment",
+              "name": "pythodoc.tags"
+            }
+          ]
+        },
+        {
+          "begin": "'''",
+          "end": "'''",
+          "style": "comment",
+          "name": "comment.multiLine",
+          "patterns": [
+            {
+              "match": ":[a-zA-Z]+",
+              "style": "bold-comment",
+              "name": "pythodoc.tags"
+            }
+          ]
+        },
+        {
+          "match": "#.*",
+          "style": "single-line-comment",
+          "name": "comment.singleLine"
+        },
+        {
+          "match": "\"(?:\\\"|[^\"])+\"",
+          "style": "string",
+          "name": "string"
+        },
+        {
+          "match": "'(?:\\'|[^'])+'",
+          "style": "string",
+          "name": "string2"
+        },
+        {
+          "keywords": [
+            "def",
+            "with",
+            "as",
+            "and",
+            "break",
+            "class",
+            "continue",
+            "def",
+            "del",
+            "elif",
+            "else",
+            "except",
+            "exec",
+            "finally",
+            "from",
+            "for",
+            "global",
+            "if",
+            "in",
+            "is",
+            "import",
+            "lambda",
+            "pass",
+            "True",
+            "False",
+            "None",
+            "yield",
+            "return",
+            "try",
+            "self",
+            "super"
+          ],
+          "style": "keyword",
+          "name": "keyword.py"
+        },
+        {
+          "match": "<[A-Z_a-z][A-Z_0-9a-z]*\\.",
+          "style": "identifier",
+          "name": "identifier.qualifier"
+        },
+        {
+          "match": "<[-+]?[0-9.]+([xX][a-fA-F0-9]+|b[01]+|e[-+0-9]+)?>",
+          "style": "literal",
+          "name": "literal.numeric"
+        },
+        {
+          "match": "'(?:\\\\'|\\\\u\\\\d+|[^'])'",
+          "style": "literal",
+          "name": "literal.char"
+        },
+        {
+          "match": "[-+&|<>=!%]{1,2}",
+          "style": "operator",
+          "name": "keyword.operator"
+        }
+      ]
+    }
+  ]
+}
