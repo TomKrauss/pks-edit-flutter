@@ -129,7 +129,8 @@ class CopyrightManager {
     var options = p.forLanguage(grammar.scopeName);
     var result = StringBuffer();
     var cd = grammar.commentDescriptor;
-    var linePrefix = options.singleLineComments ? "${cd.commentSingle} " : cd.commentStart.length > 1 ? " ${cd.commentStart[1]} " : "";
+    var singleLineComment = cd.commentSingle ?? "//";
+    var linePrefix = options.singleLineComments ? "$singleLineComment " : (cd.commentStart?.length ?? 0) > 1 ? " ${cd.commentStart?[1]} " : "";
     if (options.addBlankLineBefore) {
       if (options.singleLineComments) {
         result.writeln(linePrefix);
@@ -139,8 +140,8 @@ class CopyrightManager {
     }
     if (!options.singleLineComments) {
       result.writeln(cd.commentStart);
-      result.write(linePrefix);
     }
+    result.write(linePrefix);
     for (int i = 0; i < profile.notice.length; i++) {
       var c = profile.notice[i];
       result.write(c);

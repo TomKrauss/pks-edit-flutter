@@ -625,7 +625,8 @@ class EditorBloc {
     if (File(filename).existsSync()) {
       return await openFile(filename);
     }
-    var context = TemplateContext(filename: filename);
+    var dt = await editingConfigurations.findDocumentType(filename);
+    var context = TemplateContext(filename: filename, documentType: dt);
     var text = insertTemplate ? Templates.singleton.generateInitialContent(context) : "";
     var extent = context.selectionEndPosition?.column;
     if (extent != null) {
@@ -770,7 +771,7 @@ class EditorBloc {
     }
     var session = await PksConfiguration.singleton.currentSession;
     themes = await PksConfiguration.singleton.themes;
-    editingConfigurations = await PksConfiguration.singleton.editingConfigurations;
+    editingConfigurations = PksConfiguration.singleton.editingConfigurations;
     actionBindings = await PksConfiguration.singleton.actionBindings;
     final pksIniConfiguration = await PksConfiguration.singleton.configuration;
     final applicationConfiguration = pksIniConfiguration.configuration;

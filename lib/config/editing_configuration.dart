@@ -171,11 +171,13 @@ class EditingConfigurations {
   Future<EditingConfiguration> forFile(String filename) async {
     var extension = path.extension(filename);
     // try a quick extension lookup first
-    final documentType = _documentTypeByExtensionLookup[extension] ?? await _findDocumentType(filename);
+    final documentType = _documentTypeByExtensionLookup[extension] ?? await findDocumentType(filename);
     return _editingConfigLookup[documentType.editorConfiguration] ?? EditingConfiguration.defaultConfiguration;
   }
 
-  Future<DocumentType> _findDocumentType(String filename) async {
+  Future<DocumentType> findDocumentType(String filename) async {
+    DocumentType? best;
+    var extension = path.extension(filename);
     for (final dt in documentTypes) {
       if (dt.firstLineMatch != null) {
         final s = await File(filename).openRead().transform(utf8.decoder).transform(const LineSplitter()).first;
@@ -183,14 +185,22 @@ class EditingConfigurations {
           return dt;
         }
       }
+      var nRanking = 100;
+      int? nMatchRanking;
       for (final pattern in dt.filePatterns) {
-        // TODO(alphacentauri4711): implement complete file name match.
         if ((pattern == "*" && path.extension(filename).isEmpty) || pattern == "*.*") {
-          return dt;
+          nMatchRanking = 3;
+        } else if (pattern.startsWith("*.") && pattern.substring(1) == extension) {
+          nMatchRanking = 2;
+          break;
         }
       }
+      if (nMatchRanking != null && nMatchRanking < nRanking) {
+        nRanking = nMatchRanking;
+        best = dt;
+      }
     }
-    return DocumentType.defaultConfiguration;
+    return best ?? DocumentType.defaultConfiguration;
   }
 
   ///
@@ -218,4 +228,5 @@ class EditingConfigurations {
     }
     return result;
   }
+
 }

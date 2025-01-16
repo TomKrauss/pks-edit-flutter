@@ -446,7 +446,7 @@ class PksConfiguration {
   ///
   /// Returns the current editing configuration.
   ///
-  Future<EditingConfigurations> get editingConfigurations async {
+  EditingConfigurations get editingConfigurations {
     if (_editingConfigurations == null) {
       var configFile = findFile(editingConfigurationFilename);
       if (configFile != null) {

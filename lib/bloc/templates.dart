@@ -13,15 +13,12 @@
 
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:pks_edit_flutter/bloc/grammar.dart';
 import 'package:pks_edit_flutter/config/copyright.dart';
-
-class Template {
-  final String text;
-  Template({required this.text});
-}
+import 'package:pks_edit_flutter/config/editing_configuration.dart';
 
 ///
 /// The position of a caret / selection position *after*
@@ -40,6 +37,7 @@ class TemplateCaretPosition {
 ///
 class TemplateContext {
   final String filename;
+  final DocumentType documentType;
   TemplateCaretPosition? caretPosition;
   TemplateCaretPosition? selectionEndPosition;
   int _currentRow = 0;
@@ -51,19 +49,12 @@ class TemplateContext {
   void saveSelectionEndPosition() {
     selectionEndPosition = TemplateCaretPosition(row: _currentRow, column: _currentColumn);
   }
-  TemplateContext({required this.filename});
+  TemplateContext({required this.filename, required this.documentType});
 }
 
 class Templates {
   static final Templates singleton = Templates._();
   Templates._();
-  final Map<RegExp, Template> _templates = {
-    RegExp(r".*\.java"): Template(text: ' \${copyright}\npublic void main(String[] args)\n    System.out.println("hello world");\n}'),
-    RegExp(r".*\.dart"): Template(text: "\${copyright}\nvoid main(args) {\n   print('hello world');\n}"),
-    RegExp(r".*\.(yaml|yml)"): Template(text: "sample:\n  property: hello"),
-    RegExp(r".*\.(html|xhtml|htm)"): Template(text: '<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN">\n<html>\n</html>'),
-    RegExp(r".*\.py"): Template(text:""),
-  };
 
   String _timeVariable(DateTime time, String variable) {
     if (variable == "year") {
@@ -94,8 +85,7 @@ class Templates {
   }
   String _evaluateVariable(String variable, TemplateContext context) {
     if (variable == "copyright") {
-      var copyright = CopyrightManager.current.getCopyrightFormatted(Grammar(scopeName: "default",
-          commentDescriptor: CommentDescriptor(commentStart: "/*", commentEnd: "*/", commentSingle: "//")));
+      var copyright = CopyrightManager.current.getCopyrightFormatted(GrammarManager.instance.forDocumentType(context.documentType));
       return _evaluateVariablesIn(copyright, context);
     }
     if (variable == "user") {
@@ -149,10 +139,10 @@ class Templates {
   }
 
   String generateInitialContent(TemplateContext context) {
-    for (final e in _templates.entries) {
-      if (e.key.hasMatch(context.filename)) {
-        return _evaluateVariablesIn(e.value.text, context);
-      }
+    var grammar = GrammarManager.instance.forDocumentType(context.documentType);
+    var fileTemplate = grammar.templates.firstWhereOrNull((t) => t.name == "file");
+    if (fileTemplate != null) {
+      return _evaluateVariablesIn(fileTemplate.contents, context);
     }
     return "";
   }
