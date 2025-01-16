@@ -14,10 +14,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/util/platform_extension.dart';
-import 'package:sound_library/sound_library.dart';
 
 part 'pks_ini.g.dart';
 
@@ -128,14 +128,15 @@ class ApplicationConfiguration {
   ///
   /// The error sound to play, when an error occurs.
   ///
-  Sounds get errorSound {
+  SystemSoundType get errorSound {
     try {
-      return Sounds.values.byName(soundName);
+      return SystemSoundType.values.byName(soundName);
     } catch(_) {
 
     }
-    return Sounds.deleted;
+    return SystemSoundType.alert;
   }
+
   @JsonKey(name: "sound-on-error")
   bool playSoundOnError;
 

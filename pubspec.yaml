@@ -28,7 +28,6 @@ dependencies:
   glob: ^2.1.2
   jovial_svg: ^1.1.24
   flutter_markdown: ^0.7.4+1
-  sound_library: ^1.0.0
   font_awesome_flutter: ^10.8.0
   font_awesome_flutter_named: ^1.1.2+1
   material_icons_named: ^3.16.0

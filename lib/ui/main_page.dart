@@ -31,7 +31,6 @@ import 'package:pks_edit_flutter/ui/menu_bar_widget.dart';
 import 'package:pks_edit_flutter/ui/status_bar_widget.dart';
 import 'package:pks_edit_flutter/ui/tool_bar_widget.dart';
 import 'package:re_editor/re_editor.dart';
-import 'package:sound_library/sound_library.dart';
 import 'package:super_drag_and_drop/super_drag_and_drop.dart';
 import 'package:window_manager/window_manager.dart';
 ///
@@ -138,7 +137,7 @@ class _PksEditMainPageState extends State<PksEditMainPage>
       var config = PksIniConfiguration.of(context).configuration;
       final intl = S.of(context);
       if (config.playSoundOnError) {
-        await SoundPlayer.play(config.errorSound);
+        await SystemSound.play(config.errorSound);
       }
       if (!mounted) {
         return;
