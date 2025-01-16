@@ -520,8 +520,13 @@ class PksConfiguration {
   ///
   Future<void> saveSettings(PksIniConfiguration configuration) async {
     var settingsFile = File(join(pksSysDirectory, configFilename));
-    settingsFile.writeAsStringSync(
-        const JsonEncoder.withIndent("  ").convert(configuration.toJson()));
+    try {
+      settingsFile.createSync(recursive: true);
+      settingsFile.writeAsStringSync(
+          const JsonEncoder.withIndent("  ").convert(configuration.toJson()));
+    } catch(ex) {
+      _logger.e("Cannot save settings file $settingsFile");
+    }
   }
 
   ///
