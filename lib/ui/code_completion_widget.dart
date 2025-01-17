@@ -91,7 +91,7 @@ class _CodeAutocompleteListViewState extends State<CodeAutocompleteListView> {
                       borderRadius: radius
                   ),
                   child: RichText(
-                    text: prompt.createSpan(context, widget.notifier.value.input),
+                    text: prompt.createSpan(context, widget.notifier.value.input, index == widget.notifier.value.index),
                     overflow: TextOverflow.ellipsis,
                     maxLines: 1,
                   ),
@@ -110,8 +110,11 @@ class _CodeAutocompleteListViewState extends State<CodeAutocompleteListView> {
 
 extension _CodePromptExtension on CodePrompt {
 
-  InlineSpan createSpan(BuildContext context, String input) {
-    const TextStyle style = TextStyle();
+  InlineSpan createSpan(BuildContext context, String input, bool selected) {
+    TextStyle style = Theme.of(context).textTheme.bodyMedium ?? const TextStyle();
+    if (selected) {
+      style = style.copyWith(color: Theme.of(context).colorScheme.onPrimary);
+    }
     final InlineSpan span = style.createSpan(
       value: word,
       anchor: input,
