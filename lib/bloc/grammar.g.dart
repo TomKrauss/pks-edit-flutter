@@ -26,6 +26,11 @@ GrammarPattern _$GrammarPatternFromJson(Map<String, dynamic> json) =>
       begin: json['begin'] as String?,
       end: json['end'] as String?,
       match: json['match'] as String?,
+      ignoreCase: json['ignoreCase'] as bool?,
+      keywordsNoIdentifiers: json['keywordsNoIdentifiers'] as bool?,
+      keywords: (json['keywords'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList(),
     );
 
 Map<String, dynamic> _$GrammarPatternToJson(GrammarPattern instance) =>
@@ -34,6 +39,9 @@ Map<String, dynamic> _$GrammarPatternToJson(GrammarPattern instance) =>
       'begin': instance.begin,
       'end': instance.end,
       'match': instance.match,
+      'keywordsNoIdentifiers': instance.keywordsNoIdentifiers,
+      'keywords': instance.keywords,
+      'ignoreCase': instance.ignoreCase,
     };
 
 Grammar _$GrammarFromJson(Map<String, dynamic> json) => Grammar(

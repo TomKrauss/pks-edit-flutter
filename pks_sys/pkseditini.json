@@ -1,123 +1,116 @@
 {
-    "configuration": {
-        "autosave-to-temp": true,
-        "preserve-history": true,
-        "create-back-in-temp-path": true,
-        "cleanup-autosave-files": true,
-        "sound-on-error": true,
-        "forms-follow-mouse": true,
-        "hide-selection-on-move": true,
-        "save-clipboards-on-exit": true,
-        "maintain-clipboard-history": true,
-        "reuse-application-running-instance": true,
-        "show-error-toast": true,
-        "silently-reload-changed-files": true,
-        "undo-enabled": true,
-        "compact-editor-tabs": true,
-        "show-function-keys": true,
-        "show-optionbar": true,
-        "show-statusbar": true,
-        "show-toolbar": true,
-        "icon-size": "small",
-        "undo-history": 100,
-        "autosave-time": 10,
-        "maximum-open-windows": 15,
-        "theme": "system default",
-        "include-path": "..\\include;include",
-        "language": "English",
-        "default-font": "Consolas",
-        "search-engine": "Google",
-        "compiler-output-patterns": [
-        {
-            "name": "PKSMAKROC",
-            "pattern": "^[^ ]+ ([^ ]+) ([0-9]+): *(.*)",
-            "filename-pattern": ".pkc",
-            "filename-capture": 1,
-            "linenumber-capture": 2,
-            "columnnumber-capture": 0,
-            "comment-capture": 3
-        },
-        {
-            "name": "MSC",
-            "pattern": "^([^(]*)(([0-9]+)) : (.*)",
-            "filename-capture": 1,
-            "linenumber-capture": 2,
-            "columnnumber-capture": 0,
-            "comment-capture": 3
-        },
-        {
-            "name": "Java",
-            "pattern": "^ *\\[[^]]+\\] *(.+):([0-9]+): error:*(.*)",
-            "filename-pattern": ".java",
-            "filename-capture": 1,
-            "linenumber-capture": 2,
-            "columnnumber-capture": 0,
-            "comment-capture": 3
-        },
-        {
-            "name": "Dart",
-            "pattern": "^ *[a-z]+ - *(.+):([0-9]+):([0-9]+) - (.*)",
-            "filename-pattern": ".dart",
-            "filename-capture": 1,
-            "linenumber-capture": 2,
-            "columnnumber-capture": 3,
-            "comment-capture": 4
-        },
-        {
-            "name": "Typescript",
-            "pattern": "^*[A-Za-z]+: *(.+):([0-9]+):[0-9]+ - (.*)",
-            "filename-pattern": ".ts",
-            "filename-capture": 1,
-            "linenumber-capture": 2,
-            "columnnumber-capture": 0,
-            "comment-capture": 3
-        }
-        ]
+  "configuration": {
+    "theme": "system default",
+    "language": "English",
+    "default-font": "Consolas",
+    "icon-size": "small",
+    "show-statusbar": true,
+    "show-functionkeys": true,
+    "show-optionbar": true,
+    "show-toolbar": true,
+    "compact-editor-tabs": true,
+    "forms-follow-mouse": true,
+    "show-error-toast": true,
+    "sound-name": "default",
+    "sound-on-error": true,
+    "maximum-open-windows": 15,
+    "preserve-history": true,
+    "reuse-application-running-instance": true,
+    "maintain-clipboard-history": true,
+    "autosave-to-temp": true,
+    "autosave-on-exit": false,
+    "create-back-in-temp-path": true,
+    "lock-files-for-edit": false,
+    "hide-selection-on-move": true,
+    "autosave-time": 10,
+    "undo-enabled": true,
+    "undo-history": 100,
+    "cleanup-autosave-files": true,
+    "silently-reload-changed-files": true,
+    "search-engine": "Google",
+    "include-path": "..\\include;include",
+    "compiler-output-patterns": [
+      {
+        "name": "PKSMAKROC",
+        "pattern": "^[^ ]+ ([^ ]+) ([0-9]+): *(.*)",
+        "filename-capture": 1,
+        "linenumber-capture": 2,
+        "comment-capture": 3
+      },
+      {
+        "name": "MSC",
+        "pattern": "^([^(]*)(([0-9]+)) : (.*)",
+        "filename-capture": 1,
+        "linenumber-capture": 2,
+        "comment-capture": 3
+      },
+      {
+        "name": "Java",
+        "pattern": "^ *\\[[^]]+\\] *(.+):([0-9]+): error:*(.*)",
+        "filename-capture": 1,
+        "linenumber-capture": 2,
+        "comment-capture": 3
+      },
+      {
+        "name": "Dart",
+        "pattern": "^ *[a-z]+ - *(.+):([0-9]+):([0-9]+) - (.*)",
+        "filename-capture": 1,
+        "linenumber-capture": 2,
+        "comment-capture": 4
+      },
+      {
+        "name": "Typescript",
+        "pattern": "^*[A-Za-z]+: *(.+):([0-9]+):[0-9]+ - (.*)",
+        "filename-capture": 1,
+        "linenumber-capture": 2,
+        "comment-capture": 3
+      }
+    ]
+  },
+  "print-configuration": {
+    "header": {
+      "template": "Printed by PKS-Edit",
+      "decoration": 1,
+      "font": {
+        "face": "Consolas",
+        "width": 110,
+        "height": 180
+      },
+      "align": "center",
+      "lines": 2,
+      "margin": 3,
+      "spacing-numerator": 0,
+      "spacing-denominator": 0
     },
-    "print-configuration": {
-        "header": {
-            "template": "Printed by PKS-Edit",
-            "decoration": 1,
-            "font": {
-                "face": "Consolas",
-                "width": 110,
-                "height": 180
-            },
-            "align": "center",
-            "lines": 2,
-            "margin": 3,
-            "spacing-numerator": 0,
-            "spacing-denominator": 0
-        },
-        "footer": {
-            "template": "%s$f - %D",
-            "decoration": 2,
-            "font": {
-                "face": "Consolas",
-                "width": 110,
-                "height": 180
-            },
-            "align": "center",
-            "lines": 2,
-            "margin": 3,
-            "spacing-numerator": 0,
-            "spacing-denominator": 0
-        },
-        "font": {
-            "face": "Consolas",
-            "width": 110,
-            "height": 180
-        },
-        "pagelen": 80,
-        "lmargin": 5,
-        "rmargin": 5,
-        "tabsize": 5,
-        "characters-per-line": 120,
-        "spacing-numerator": 1,
-        "spacing-denominator": 1,
-        "print-headers": true,
-        "print-line-numbers": true,
-        "syntax-highlighting": true,
-        "wrap": true
-    }
+    "footer": {
+      "template": "%s$f - %D",
+      "decoration": 2,
+      "font": {
+        "face": "Consolas",
+        "width": 110,
+        "height": 180
+      },
+      "align": "center",
+      "lines": 2,
+      "margin": 3,
+      "spacing-numerator": 0,
+      "spacing-denominator": 0
+    },
+    "font": {
+      "face": "Consolas",
+      "width": 110,
+      "height": 180
+    },
+    "pagelen": 80,
+    "lmargin": 5,
+    "rmargin": 5,
+    "tabsize": 5,
+    "characters-per-line": 120,
+    "spacing-numerator": 1,
+    "spacing-denominator": 1,
+    "print-headers": true,
+    "print-line-numbers": true,
+    "syntax-highlighting": true,
+    "wrap": true
+  }
 }

@@ -25,6 +25,7 @@ import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
 import 'package:pks_edit_flutter/renderer/renderers.dart';
+import 'package:pks_edit_flutter/ui/code_completion_widget.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/context_menu_widget.dart';
 import 'package:pks_edit_flutter/ui/menu_bar_widget.dart';
@@ -306,7 +307,9 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
     if (file.editingConfiguration.showWysiwyg) {
       child = Renderers.singleton.createWidget(file.language.renderer, widget.editorFocusNode, file, bloc);
     } else {
-      child = CodeEditor(
+      child = CodeAutocomplete(viewBuilder: (context, notifier, onSelected) =>
+            CodeAutocompleteListView(notifier: notifier, onSelected: onSelected),
+            promptsBuilder: GrammarBasedPromptsBuilder(grammar: file.grammar), child: CodeEditor(
           autofocus: true,
           readOnly: file.readOnly,
           onChanged: file.onChanged,
@@ -337,7 +340,7 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
                   languages: {
                     file.language.name:
                     CodeHighlightThemeMode(mode: file.language.mode)
-                  }) : null));
+                  }) : null)));
     }
     return FractionallySizedBox(
         heightFactor: 1 / factor,

@@ -62,8 +62,13 @@ class GrammarPattern {
   /// the end marker maybe e.g. '$' to match the end of line. Currently only one multi-line pattern supported.
   final String? end;
   final String? match;
-
-  GrammarPattern({required this.name, this.begin, this.end, this.match});
+  /// Special case: keywords are not delimited by word boundaries.
+  final bool? keywordsNoIdentifiers;
+  /// If an array list of keywords exists, these are matched after the pattern has matched.
+  final List<String>? keywords;
+  /// If matches should be performed in a case ignore way.
+  final bool? ignoreCase;
+  GrammarPattern({required this.name, this.begin, this.end, this.match, this.ignoreCase, this.keywordsNoIdentifiers, this.keywords});
 
   static GrammarPattern fromJson(Map<String, dynamic> jsonInput) =>
       _$GrammarPatternFromJson(jsonInput);

@@ -18,7 +18,6 @@ import 'package:intl/intl.dart';
 import 'package:path/path.dart';
 import 'package:pks_edit_flutter/bloc/grammar.dart';
 import 'package:pks_edit_flutter/config/copyright.dart';
-import 'package:pks_edit_flutter/config/editing_configuration.dart';
 
 ///
 /// The position of a caret / selection position *after*
@@ -37,7 +36,7 @@ class TemplateCaretPosition {
 ///
 class TemplateContext {
   final String filename;
-  final DocumentType documentType;
+  final Grammar grammar;
   TemplateCaretPosition? caretPosition;
   TemplateCaretPosition? selectionEndPosition;
   int _currentRow = 0;
@@ -49,7 +48,7 @@ class TemplateContext {
   void saveSelectionEndPosition() {
     selectionEndPosition = TemplateCaretPosition(row: _currentRow, column: _currentColumn);
   }
-  TemplateContext({required this.filename, required this.documentType});
+  TemplateContext({required this.filename, required this.grammar});
 }
 
 class Templates {
@@ -85,7 +84,7 @@ class Templates {
   }
   String _evaluateVariable(String variable, TemplateContext context) {
     if (variable == "copyright") {
-      var copyright = CopyrightManager.current.getCopyrightFormatted(GrammarManager.instance.forDocumentType(context.documentType));
+      var copyright = CopyrightManager.current.getCopyrightFormatted(context.grammar);
       return _evaluateVariablesIn(copyright, context);
     }
     if (variable == "user") {
@@ -139,8 +138,7 @@ class Templates {
   }
 
   String generateInitialContent(TemplateContext context) {
-    var grammar = GrammarManager.instance.forDocumentType(context.documentType);
-    var fileTemplate = grammar.templates.firstWhereOrNull((t) => t.name == "file");
+    var fileTemplate = context.grammar.templates.firstWhereOrNull((t) => t.name == "file");
     if (fileTemplate != null) {
       return _evaluateVariablesIn(fileTemplate.contents, context);
     }

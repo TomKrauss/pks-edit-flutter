@@ -24,6 +24,7 @@ import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/actions/action_bindings.dart';
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
 import 'package:pks_edit_flutter/bloc/file_io.dart';
+import 'package:pks_edit_flutter/bloc/grammar.dart';
 import 'package:pks_edit_flutter/bloc/templates.dart';
 import 'package:pks_edit_flutter/config/editing_configuration.dart';
 import 'package:pks_edit_flutter/config/pks_ini.dart';
@@ -178,6 +179,11 @@ class OpenFile {
   ///
   late final CodeFindController findController;
 
+  ///
+  /// The grammar of this file.
+  ///
+  final Grammar grammar;
+
   EditingConfiguration editingConfiguration;
 
   String get title {
@@ -256,6 +262,7 @@ class OpenFile {
   OpenFile({required this.filename, required this.text, this.dock = dockNameDefault,
     required this.editingConfiguration,
     required TextLineBreak lineBreak,
+    required this.grammar,
     this.readOnly = false,
     DateTime? modificationTime,
     this.modified = false,
@@ -626,7 +633,8 @@ class EditorBloc {
       return await openFile(filename);
     }
     var dt = await editingConfigurations.findDocumentType(filename);
-    var context = TemplateContext(filename: filename, documentType: dt);
+    var grammar = GrammarManager.instance.forDocumentType(dt);
+    var context = TemplateContext(filename: filename, grammar: grammar);
     var text = insertTemplate ? Templates.singleton.generateInitialContent(context) : "";
     var extent = context.selectionEndPosition?.column;
     if (extent != null) {
@@ -634,6 +642,7 @@ class EditorBloc {
     }
     _addOpenFile(OpenFile(filename: filename,
         isNew: true,
+        grammar: grammar,
         lineBreak: Platform.isWindows ? TextLineBreak.crlf : TextLineBreak.lf,
         editingConfiguration: await editingConfigurations.forFile(filename),
         initialLineNumber: context.caretPosition?.row,
@@ -672,6 +681,8 @@ class EditorBloc {
       if (openFiles.length > 10) {
         openFiles.removeRange(10, openFiles.length);
       }
+      var dt = await editingConfigurations.findDocumentType(filename);
+      var grammar = GrammarManager.instance.forDocumentType(dt);
       _addOpenFile(OpenFile(
           readOnly: readOnly,
           modificationTime: stat.modified,
@@ -679,6 +690,7 @@ class EditorBloc {
           filename: filename,
           isNew: false,
           text: text,
+          grammar: grammar,
           lineBreak: result.lineBreak,
           encoding: result.encoding,
           initialLineNumber: lineNumber,
@@ -844,5 +856,45 @@ class EditorBloc {
     await windowManager.hide();
     await windowManager.destroy();
     exit(0);
+  }
+}
+
+
+class GrammarBasedPromptsBuilder implements CodeAutocompletePromptsBuilder {
+  final RegExp identifierMatch = RegExp("[a-zA-Z_0-9_]");
+  final Grammar grammar;
+  GrammarBasedPromptsBuilder({required this.grammar});
+
+  List<CodeKeywordPrompt> getPrompts() {
+    final result = <CodeKeywordPrompt>[];
+    for (final p in grammar.patterns) {
+      if (p.keywords != null) {
+        for (final k in p.keywords!) {
+          result.add(CodeKeywordPrompt(word: k));
+        }
+      }
+    }
+    return result;
+  }
+
+  @override
+  CodeAutocompleteEditingValue? build(BuildContext context, CodeLine codeLine, CodeLineSelection selection) {
+    final String text = codeLine.text;
+    final Characters charactersBefore = text.substring(0, selection.extentOffset).characters;
+    if (charactersBefore.isEmpty) {
+      return null;
+    }
+    int start = charactersBefore.length - 1;
+    for (; start >= 0; start--) {
+      if (!identifierMatch.hasMatch(charactersBefore.elementAt(start))) {
+        break;
+      }
+    }
+    var input = charactersBefore.getRange(start + 1, charactersBefore.length).string;
+    final result = getPrompts().where((p) => p.match(input));
+    if (result.isEmpty) {
+      return null;
+    }
+    return CodeAutocompleteEditingValue(input: input, prompts: result.toList(), index: 0);
   }
 }
