@@ -859,14 +859,29 @@ class EditorBloc {
   }
 }
 
+///
+/// A code completion prompt to insert a template.
+///
+class CodeTemplatePrompt extends CodePrompt {
+  final String template;
+  CodeTemplatePrompt({required this.template, required super.word});
+  @override
+  CodeAutocompleteResult get autocomplete => CodeAutocompleteResult.fromWord(template);
 
+  @override
+  bool match(String input) => word.startsWith(input) || RegExp(word).hasMatch(input);
+}
+
+///
+/// Provides code completion suggestions based on a Grammar
+///
 class GrammarBasedPromptsBuilder implements CodeAutocompletePromptsBuilder {
   final RegExp identifierMatch = RegExp("[a-zA-Z_0-9_]");
   final Grammar grammar;
   GrammarBasedPromptsBuilder({required this.grammar});
 
-  List<CodeKeywordPrompt> getPrompts() {
-    final result = <CodeKeywordPrompt>[];
+  List<CodePrompt> getPrompts() {
+    final result = <CodePrompt>[];
     for (final p in grammar.patterns) {
       if (p.keywords != null) {
         for (final k in p.keywords!) {
@@ -874,6 +889,13 @@ class GrammarBasedPromptsBuilder implements CodeAutocompletePromptsBuilder {
         }
       }
     }
+    for (final t in grammar.templates) {
+      var word = t.match ?? t.name ?? "";
+      if (!t.auto && word.isNotEmpty) {
+        result.add(CodeTemplatePrompt(template: t.contents, word: word));
+      }
+    }
+    result.sort((a, b) => a.word.compareTo(b.word));
     return result;
   }
 

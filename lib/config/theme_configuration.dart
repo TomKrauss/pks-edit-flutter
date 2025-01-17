@@ -41,15 +41,15 @@ class ThemeConfiguration {
   final Color iconColor;
   @JsonKey(fromJson: _parseColor, toJson: _printColor)
   final Color changedLineColor;
-  @JsonKey(fromJson: _parseColor, toJson: _printColor)
-  final Color dialogLightBackground;
+  @JsonKey(fromJson: _parseOptColor, toJson: _printOptColor)
+  final Color? dialogLightBackground;
   @JsonKey(name: "dialogBackground", fromJson: _parseOptColor, toJson: _printOptColor)
   late final Color? optDialogBackground;
   Color get dialogBackground => optDialogBackground ?? (isDark ? const Color(0xFF303030) : const Color(0xFFefefef));
   @JsonKey(fromJson: _parseColor, toJson: _printColor)
   final Color dialogLight;
-  @JsonKey(fromJson: _parseColor, toJson: _printColor)
-  final Color dialogBorder;
+  @JsonKey(fromJson: _parseOptColor, toJson: _printOptColor)
+  final Color? dialogBorder;
 
   static Color? _parseOptColor(String? colorName) {
     if (colorName == null) {
@@ -63,10 +63,10 @@ class ThemeConfiguration {
       colorName = colorName.substring(1);
     }
     if (colorName.length == 6) {
-      colorName = "FF$colorName";
+      colorName = "ff$colorName";
     }
-    int colorValue = int.tryParse(colorName, radix: 16) ?? 0;
-    return Color(colorValue);
+    var colorValue = int.tryParse(colorName, radix: 16);
+    return Color(colorValue ?? 0);
   }
 
   static String? _printOptColor(Color? color) => color == null ? null : _printColor(color);
@@ -77,10 +77,10 @@ class ThemeConfiguration {
   ThemeConfiguration({this.name = "system default",
     this.backgroundColor = Colors.white,
     this.darkMode,
-    this.dialogLightBackground = Colors.black12,
+    this.dialogLightBackground,
+    this.dialogBorder,
     this.optDialogBackground,
     this.dialogLight = Colors.white38,
-    this.dialogBorder = Colors.black12,
     this.changedLineColor = Colors.white30, this.iconColor = Colors.blueAccent});
 
 

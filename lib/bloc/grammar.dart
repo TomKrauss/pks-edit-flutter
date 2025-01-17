@@ -40,11 +40,11 @@ class CommentDescriptor {
 @JsonSerializable()
 class Template {
   final String? name;
-  final String? pattern;
+  final String? match;
   final String contents;
   final bool auto;
 
-  Template({required this.name, this.pattern, required this.contents, this.auto = false});
+  Template({required this.name, this.match, required this.contents, this.auto = false});
 
   static Template fromJson(Map<String, dynamic> jsonInput) =>
       _$TemplateFromJson(jsonInput);

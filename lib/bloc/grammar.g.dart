@@ -8,14 +8,14 @@ part of 'grammar.dart';
 
 Template _$TemplateFromJson(Map<String, dynamic> json) => Template(
       name: json['name'] as String?,
-      pattern: json['pattern'] as String?,
+      match: json['match'] as String?,
       contents: json['contents'] as String,
       auto: json['auto'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$TemplateToJson(Template instance) => <String, dynamic>{
       'name': instance.name,
-      'pattern': instance.pattern,
+      'match': instance.match,
       'contents': instance.contents,
       'auto': instance.auto,
     };

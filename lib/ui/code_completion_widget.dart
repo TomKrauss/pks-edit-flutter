@@ -14,6 +14,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:re_editor/re_editor.dart';
 
 ///
@@ -60,6 +61,7 @@ class _CodeAutocompleteListViewState extends State<CodeAutocompleteListView> {
         constraints: BoxConstraints.loose(widget.preferredSize),
         decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.onPrimary,
+            border: Border.all(color: Theme.of(context).dividerColor),
             borderRadius: BorderRadius.circular(6)
         ),
         child: AutoScrollListView(
@@ -68,12 +70,7 @@ class _CodeAutocompleteListViewState extends State<CodeAutocompleteListView> {
           itemCount: widget.notifier.value.prompts.length,
           itemBuilder:(context, index) {
             final CodePrompt prompt = widget.notifier.value.prompts[index];
-            final BorderRadius radius = BorderRadius.only(
-              topLeft: index == 0 ? const Radius.circular(5) : Radius.zero,
-              topRight: index == 0 ? const Radius.circular(5) : Radius.zero,
-              bottomLeft: index == widget.notifier.value.prompts.length - 1 ? const Radius.circular(5) : Radius.zero,
-              bottomRight: index == widget.notifier.value.prompts.length - 1 ? const Radius.circular(5) : Radius.zero,
-            );
+            final BorderRadius radius = const BorderRadius.all(Radius.circular(6));
             return InkWell(
                 borderRadius: radius,
                 onTap: () {
@@ -132,6 +129,19 @@ extension _CodePromptExtension on CodePrompt {
                     color: Colors.cyan
                 )
             )
+          ]
+      );
+    }
+    if (prompt is CodeTemplatePrompt) {
+      return TextSpan(
+          children: [
+            TextSpan(
+                text: 'Template: ',
+                style: style.copyWith(
+                    color: Colors.cyan
+                )
+            ),
+            span,
           ]
       );
     }
