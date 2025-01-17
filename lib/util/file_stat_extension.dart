@@ -22,6 +22,6 @@ extension FileStatExtension on FileStat {
   ///
   bool get readOnly {
     var permissions = mode & 0xFFF;
-    return (permissions & 0x2) == 0;
+    return (permissions & ((0x2 << 6) + (0x2 << 3) + 2)) == 0;
   }
 }
