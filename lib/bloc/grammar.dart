@@ -42,6 +42,7 @@ class Template {
   final String? name;
   final String? match;
   final String contents;
+  @JsonKey(name: "auto-insert")
   final bool auto;
 
   Template({required this.name, this.match, required this.contents, this.auto = false});

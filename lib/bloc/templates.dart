@@ -85,7 +85,7 @@ class Templates {
   String _evaluateVariable(String variable, TemplateContext context) {
     if (variable == "copyright") {
       var copyright = CopyrightManager.current.getCopyrightFormatted(context.grammar);
-      return _evaluateVariablesIn(copyright, context);
+      return evaluateTemplate(copyright, context);
     }
     if (variable == "user") {
       return Platform.environment["USERNAME"] ?? Platform.environment["USER"] ?? "unknown";
@@ -101,7 +101,7 @@ class Templates {
     return "";
   }
 
-  String _evaluateVariablesIn(String s, TemplateContext context) {
+  String evaluateTemplate(String s, TemplateContext context) {
     var result = StringBuffer();
     for (int i = 0; i < s.length; i++) {
       var c = s[i];
@@ -140,7 +140,7 @@ class Templates {
   String generateInitialContent(TemplateContext context) {
     var fileTemplate = context.grammar.templates.firstWhereOrNull((t) => t.name == "file");
     if (fileTemplate != null) {
-      return _evaluateVariablesIn(fileTemplate.contents, context);
+      return evaluateTemplate(fileTemplate.contents, context);
     }
     return "";
   }

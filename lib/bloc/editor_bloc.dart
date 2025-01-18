@@ -864,9 +864,22 @@ class EditorBloc {
 ///
 class CodeTemplatePrompt extends CodePrompt {
   final String template;
-  CodeTemplatePrompt({required this.template, required super.word});
+  final OpenFile openFile;
+  CodeTemplatePrompt({required this.template, required this.openFile, required super.word});
   @override
-  CodeAutocompleteResult get autocomplete => CodeAutocompleteResult.fromWord(template);
+  CodeAutocompleteResult get autocomplete {
+    var context = TemplateContext(filename: openFile.filename, grammar: openFile.grammar);
+    var result = Templates.singleton.evaluateTemplate(template, context);
+    var baseOffset = context.caretPosition?.column ?? result.length;
+    var extentOffset = context.selectionEndPosition?.column ?? baseOffset;
+    var idx = result.indexOf("\n");
+    if (idx >= 0) {
+      baseOffset = min(idx, baseOffset);
+      extentOffset = min(idx, extentOffset);
+    }
+    var selection = TextSelection(baseOffset: baseOffset, extentOffset: extentOffset);
+    return CodeAutocompleteResult(input: '', word: result, selection: selection);
+  }
 
   @override
   bool match(String input) => word.startsWith(input) || RegExp(word).hasMatch(input);
@@ -877,22 +890,26 @@ class CodeTemplatePrompt extends CodePrompt {
 ///
 class GrammarBasedPromptsBuilder implements CodeAutocompletePromptsBuilder {
   final RegExp identifierMatch = RegExp("[a-zA-Z_0-9_]");
-  final Grammar grammar;
-  GrammarBasedPromptsBuilder({required this.grammar});
+  final OpenFile openFile;
+  GrammarBasedPromptsBuilder({required this.openFile});
 
   List<CodePrompt> getPrompts() {
     final result = <CodePrompt>[];
-    for (final p in grammar.patterns) {
+    for (final p in openFile.grammar.patterns) {
       if (p.keywords != null) {
         for (final k in p.keywords!) {
           result.add(CodeKeywordPrompt(word: k));
         }
       }
     }
-    for (final t in grammar.templates) {
+    for (final t in openFile.grammar.templates) {
       var word = t.match ?? t.name ?? "";
-      if (!t.auto && word.isNotEmpty) {
-        result.add(CodeTemplatePrompt(template: t.contents, word: word));
+      if (word.isNotEmpty) {
+        var contents = t.contents;
+        if (t.auto) {
+          contents = "$word$contents";
+        }
+        result.add(CodeTemplatePrompt(template: contents, openFile: openFile, word: word));
       }
     }
     result.sort((a, b) => a.word.compareTo(b.word));

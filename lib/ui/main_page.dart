@@ -309,7 +309,7 @@ class _EditorDockPanelWidgetState extends State<EditorDockPanelWidget> with Tick
     } else {
       child = CodeAutocomplete(viewBuilder: (context, notifier, onSelected) =>
             CodeAutocompleteListView(notifier: notifier, onSelected: onSelected),
-            promptsBuilder: GrammarBasedPromptsBuilder(grammar: file.grammar), child: CodeEditor(
+            promptsBuilder: GrammarBasedPromptsBuilder(openFile: file), child: CodeEditor(
           autofocus: true,
           readOnly: file.readOnly,
           onChanged: file.onChanged,

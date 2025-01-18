@@ -10,14 +10,14 @@ Template _$TemplateFromJson(Map<String, dynamic> json) => Template(
       name: json['name'] as String?,
       match: json['match'] as String?,
       contents: json['contents'] as String,
-      auto: json['auto'] as bool? ?? false,
+      auto: json['auto-insert'] as bool? ?? false,
     );
 
 Map<String, dynamic> _$TemplateToJson(Template instance) => <String, dynamic>{
       'name': instance.name,
       'match': instance.match,
       'contents': instance.contents,
-      'auto': instance.auto,
+      'auto-insert': instance.auto,
     };
 
 GrammarPattern _$GrammarPatternFromJson(Map<String, dynamic> json) =>
