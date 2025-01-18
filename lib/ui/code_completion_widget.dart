@@ -17,6 +17,14 @@ import 'package:flutter/material.dart';
 import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:re_editor/re_editor.dart';
 
+typedef _ScrollBuilder = Widget Function(BuildContext context, int index, _AutoScrollWidgetSelection selection);
+
+enum _AutoScrollWidgetSelection {
+  none,
+  top,
+  bottom
+}
+
 ///
 /// A widget used to present the auto-completion values of the editor.
 ///
@@ -64,14 +72,21 @@ class _CodeAutocompleteListViewState extends State<CodeAutocompleteListView> {
             border: Border.all(color: Theme.of(context).dividerColor),
             borderRadius: BorderRadius.circular(6)
         ),
-        child: AutoScrollListView(
+        child: _AutoScrollListView(
           controller: ScrollController(),
           initialIndex: widget.notifier.value.index,
           itemCount: widget.notifier.value.prompts.length,
-          itemBuilder:(context, index) {
+          itemBuilder:(context, index, selection) {
             final CodePrompt prompt = widget.notifier.value.prompts[index];
-            final BorderRadius radius = const BorderRadius.all(Radius.circular(6));
-            return InkWell(
+            var top = selection == _AutoScrollWidgetSelection.top;
+            var bottom = selection == _AutoScrollWidgetSelection.bottom;
+            final circular = const Radius.circular(5);
+            final BorderRadius radius = BorderRadius.only(
+              topLeft: top ? circular : Radius.zero,
+              topRight: top ? circular : Radius.zero,
+              bottomLeft: bottom ? circular : Radius.zero,
+              bottomRight: bottom ? circular : Radius.zero,
+            );           return InkWell(
                 borderRadius: radius,
                 onTap: () {
                   widget.onSelected(widget.notifier.value.copyWith(
@@ -216,21 +231,18 @@ extension _TextStyleExtension on TextStyle {
 
 }
 
-class AutoScrollListView extends StatefulWidget {
+class _AutoScrollListView extends StatefulWidget {
 
   final ScrollController controller;
-  final IndexedWidgetBuilder itemBuilder;
+  final _ScrollBuilder itemBuilder;
   final int itemCount;
   final int initialIndex;
-  final Axis scrollDirection;
 
-  const AutoScrollListView({
-    super.key,
+  const _AutoScrollListView({
     required this.controller,
     required this.itemBuilder,
     required this.itemCount,
-    this.initialIndex = 0,
-    this.scrollDirection = Axis.vertical,
+    this.initialIndex = 0
   });
 
   @override
@@ -238,9 +250,18 @@ class AutoScrollListView extends StatefulWidget {
 
 }
 
-class _AutoScrollListViewState extends State<AutoScrollListView> {
-
+class _AutoScrollListViewState extends State<_AutoScrollListView> {
+  _AutoScrollWidgetSelection _selection = _AutoScrollWidgetSelection.top;
   late final List<GlobalKey> _keys;
+
+  _AutoScrollWidgetSelection get selection => _selection;
+  set selection(_AutoScrollWidgetSelection newValue) {
+    if (newValue != _selection) {
+      setState(() {
+        _selection = newValue;
+      });
+    }
+  }
 
   @override
   void initState() {
@@ -252,7 +273,7 @@ class _AutoScrollListViewState extends State<AutoScrollListView> {
   }
 
   @override
-  void didUpdateWidget(covariant AutoScrollListView oldWidget) {
+  void didUpdateWidget(covariant _AutoScrollListView oldWidget) {
     if (widget.itemCount > oldWidget.itemCount) {
       _keys.addAll(List.generate(widget.itemCount - oldWidget.itemCount, (index) => GlobalKey()));
     } else if (widget.itemCount < oldWidget.itemCount) {
@@ -270,15 +291,12 @@ class _AutoScrollListViewState extends State<AutoScrollListView> {
     for (int i = 0; i < widget.itemCount; i++) {
       widgets.add(Container(
         key: _keys[i],
-        child: widget.itemBuilder(context, i),
+        child: widget.itemBuilder(context, i, selection),
       ));
     }
     return SingleChildScrollView(
       controller: widget.controller,
-      scrollDirection: widget.scrollDirection,
-      child: isHorizontal ? Row(
-        children: widgets,
-      ) : Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: widgets,
       ),
@@ -297,35 +315,32 @@ class _AutoScrollListViewState extends State<AutoScrollListView> {
     double cur = 0;
     for (int i = 0; i < _keys.length; i++) {
       final RenderObject? obj = _keys[i].currentContext?.findRenderObject();
-      if (obj == null || obj is! RenderBox) {
+      if (obj is! RenderBox) {
         continue;
       }
-      if (isHorizontal) {
-        double width = obj.size.width;
-        if (i == widget.initialIndex) {
-          cur = pre + width;
-          break;
-        }
-        pre += width;
-      } else {
-        double height = obj.size.height;
-        if (i == widget.initialIndex) {
-          cur = pre + height;
-          break;
-        }
-        pre += height;
+      double height = obj.size.height;
+      if (i == widget.initialIndex) {
+        cur = pre + height;
+        break;
       }
+      pre += height;
     }
     if (pre == cur) {
+      selection = _AutoScrollWidgetSelection.none;
       return;
     }
     if (pre < widget.controller.offset) {
-      controller.jumpTo(pre - 1);
+      selection = _AutoScrollWidgetSelection.top;
+      controller.jumpTo(pre);
     } else if (cur > controller.offset + controller.position.viewportDimension) {
+      selection = _AutoScrollWidgetSelection.bottom;
       controller.jumpTo(cur - controller.position.viewportDimension);
+    } else {
+      if (widget.initialIndex == 0) {
+        selection = _AutoScrollWidgetSelection.top;
+      } else {
+        selection = _AutoScrollWidgetSelection.none;
+      }
     }
   }
-
-  bool get isHorizontal => widget.scrollDirection == Axis.horizontal;
-
 }

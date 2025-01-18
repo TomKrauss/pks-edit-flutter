@@ -634,7 +634,8 @@ class EditorBloc {
     }
     var dt = await editingConfigurations.findDocumentType(filename);
     var grammar = GrammarManager.instance.forDocumentType(dt);
-    var context = TemplateContext(filename: filename, grammar: grammar);
+    var editorConfiguration = await editingConfigurations.forFile(filename);
+    var context = TemplateContext(filename: filename, grammar: grammar, tabSize: editorConfiguration.tabSize);
     var text = insertTemplate ? Templates.singleton.generateInitialContent(context) : "";
     var extent = context.selectionEndPosition?.column;
     if (extent != null) {
@@ -868,7 +869,8 @@ class CodeTemplatePrompt extends CodePrompt {
   CodeTemplatePrompt({required this.template, required this.openFile, required super.word});
   @override
   CodeAutocompleteResult get autocomplete {
-    var context = TemplateContext(filename: openFile.filename, grammar: openFile.grammar);
+    var context = TemplateContext(filename: openFile.filename, grammar: openFile.grammar, tabSize: openFile.editingConfiguration.tabSize,
+        controller: openFile.controller);
     var result = Templates.singleton.evaluateTemplate(template, context);
     var baseOffset = context.caretPosition?.column ?? result.length;
     var extentOffset = context.selectionEndPosition?.column ?? baseOffset;
@@ -889,7 +891,6 @@ class CodeTemplatePrompt extends CodePrompt {
 /// Provides code completion suggestions based on a Grammar
 ///
 class GrammarBasedPromptsBuilder implements CodeAutocompletePromptsBuilder {
-  final RegExp identifierMatch = RegExp("[a-zA-Z_0-9_]");
   final OpenFile openFile;
   GrammarBasedPromptsBuilder({required this.openFile});
 
@@ -919,17 +920,17 @@ class GrammarBasedPromptsBuilder implements CodeAutocompletePromptsBuilder {
   @override
   CodeAutocompleteEditingValue? build(BuildContext context, CodeLine codeLine, CodeLineSelection selection) {
     final String text = codeLine.text;
-    final Characters charactersBefore = text.substring(0, selection.extentOffset).characters;
+    final charactersBefore = text.substring(0, selection.extentOffset);
     if (charactersBefore.isEmpty) {
       return null;
     }
     int start = charactersBefore.length - 1;
     for (; start >= 0; start--) {
-      if (!identifierMatch.hasMatch(charactersBefore.elementAt(start))) {
+      if (charactersBefore[start] == ' ' || charactersBefore[start] == '\t') {
         break;
       }
     }
-    var input = charactersBefore.getRange(start + 1, charactersBefore.length).string;
+    var input = charactersBefore.substring(start + 1, charactersBefore.length);
     final result = getPrompts().where((p) => p.match(input));
     if (result.isEmpty) {
       return null;
