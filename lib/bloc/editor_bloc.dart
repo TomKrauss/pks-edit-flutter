@@ -15,7 +15,6 @@ import 'dart:async';
 import 'dart:convert' as convert;
 import 'dart:io';
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -739,8 +738,12 @@ class EditorBloc {
     var screenSize = PksEditSession.screenSize;
     var width = session.screenWidth;
     var height = session.screenHeight;
-    var wFactor = screenSize.width / max(1, width);
-    var hFactor = screenSize.height / max(1, height);
+    double wFactor = 1;
+    double hFactor = 1;
+    if (width != null && height != null) {
+      wFactor = screenSize.width / max(1, width);
+      hFactor = screenSize.height / max(1, height);
+    }
     var size = Size((p.right-p.left)*wFactor, (p.bottom-p.top)*hFactor);
     WindowOptions windowOptions = WindowOptions(
         size: p.show == MainWindowPlacement.swShowMaximized ? null : size,

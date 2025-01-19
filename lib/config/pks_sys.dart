@@ -206,9 +206,9 @@ class SearchAndReplaceOptions {
 @JsonSerializable(explicitToJson: true, includeIfNull: false)
 class PksEditSession {
   @JsonKey(name: "screen-width")
-  final int screenWidth;
+  final int? screenWidth;
   @JsonKey(name: "screen-height")
-  final int screenHeight;
+  final int? screenHeight;
   @JsonKey(name: "search-replace-options")
   int searchReplaceOptions;
   @JsonKey(name: "open-files")

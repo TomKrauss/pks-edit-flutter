@@ -47,8 +47,8 @@ Map<String, dynamic> _$MainFrameDockToJson(MainFrameDock instance) =>
 
 PksEditSession _$PksEditSessionFromJson(Map<String, dynamic> json) =>
     PksEditSession(
-      screenWidth: (json['screen-width'] as num).toInt(),
-      screenHeight: (json['screen-height'] as num).toInt(),
+      screenWidth: (json['screen-width'] as num?)?.toInt(),
+      screenHeight: (json['screen-height'] as num?)?.toInt(),
       searchReplaceOptions: (json['search-replace-options'] as num).toInt(),
       mainWindowPlacement: MainWindowPlacement.fromJson(
           json['main-window-placement'] as Map<String, dynamic>),
@@ -79,8 +79,8 @@ PksEditSession _$PksEditSessionFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$PksEditSessionToJson(PksEditSession instance) =>
     <String, dynamic>{
-      'screen-width': instance.screenWidth,
-      'screen-height': instance.screenHeight,
+      if (instance.screenWidth case final value?) 'screen-width': value,
+      if (instance.screenHeight case final value?) 'screen-height': value,
       'search-replace-options': instance.searchReplaceOptions,
       'open-files': instance.openFiles,
       'folders': instance.folders,
