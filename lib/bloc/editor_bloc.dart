@@ -747,7 +747,12 @@ class EditorBloc {
         minimumSize: p.show == MainWindowPlacement.swShowMaximized ? null : size,
         skipTaskbar: false);
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
-      await windowManager.setPosition(Offset(p.left * wFactor, p.top*hFactor));
+      if (Platform.isLinux) {
+        await windowManager.center();
+      } else {
+        await windowManager.setPosition(
+            Offset(p.left * wFactor, p.top * hFactor));
+      }
       await windowManager.focus();
     });
     if (p.show == MainWindowPlacement.swShowMaximized) {
