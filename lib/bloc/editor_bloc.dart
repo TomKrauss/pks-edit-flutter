@@ -736,12 +736,9 @@ class EditorBloc {
 
   Future<void> initWindowOptions(PksEditSession session) async {
     final p = session.mainWindowPlacement;
-  // First get the FlutterView.
-    FlutterView view = WidgetsBinding.instance.platformDispatcher.views.first;
-  // Dimensions in physical pixels (px)
-    Size screenSize = view.physicalSize;
+    var screenSize = PksEditSession.screenSize;
     var width = session.screenWidth;
-    var height = session.screenWidth;
+    var height = session.screenHeight;
     var wFactor = screenSize.width / max(1, width);
     var hFactor = screenSize.height / max(1, height);
     var size = Size((p.right-p.left)*wFactor, (p.bottom-p.top)*hFactor);

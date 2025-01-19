@@ -2,6 +2,7 @@
   "configuration": {
     "theme": "system default",
     "language": "English",
+    "pruned-search-directories": ".*:build:target",
     "default-font": "Consolas",
     "icon-size": "small",
     "show-statusbar": true,
@@ -28,7 +29,6 @@
     "cleanup-autosave-files": true,
     "silently-reload-changed-files": true,
     "search-engine": "Google",
-    "pruned-search-directories": ".*:build:target",
     "include-path": "..\\include;include",
     "compiler-output-patterns": [
       {

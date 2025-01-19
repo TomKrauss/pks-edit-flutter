@@ -237,6 +237,14 @@ class PksEditSession {
   final MainFrameDock? dock2;
   @JsonKey(fromJson: _dockFromJson)
   final MainFrameDock? dock3;
+
+  static Size? _screenSize;
+
+  static Size get screenSize {
+    _screenSize ??= WidgetsBinding.instance.platformDispatcher.views.first.physicalSize;
+    return _screenSize!;
+  }
+
   PksEditSession(
       {required this.screenWidth,
       required this.screenHeight,
@@ -276,11 +284,11 @@ class PksEditSession {
       MainFrameDock? dock3,
       required OpenFileState state}) async {
     final openEditors = state.files;
-    var view = View.of(context);
     var bounds = await windowManager.getBounds();
+    var screenSize = PksEditSession.screenSize;
     return PksEditSession(
-        screenWidth: view.physicalSize.width.toInt(),
-        screenHeight: view.physicalSize.height.toInt(),
+        screenWidth: screenSize.width.toInt(),
+        screenHeight: screenSize.height.toInt(),
         mainWindowPlacement: MainWindowPlacement(
             left: bounds.left.toInt(),
             right: bounds.right.toInt(),
