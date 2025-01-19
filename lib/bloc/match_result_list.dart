@@ -38,15 +38,6 @@ class MatchedFileLocation {
 
   MatchedFileLocation({required this.fileName, required this.lineNumber, required this.column, required this.matchLength, this.matchedLine, this.comment});
 
-  String get shortenedFileName {
-    var n = fileName;
-    var l = n.length;
-    if (l > 30) {
-      return "...${n.substring(l-30)}";
-    }
-    return n;
-  }
-
   List<String> get matchedSegments {
     var line = matchedLine;
     var col = column;
