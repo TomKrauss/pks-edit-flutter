@@ -748,6 +748,7 @@ class EditorBloc {
         skipTaskbar: false);
     await windowManager.waitUntilReadyToShow(windowOptions, () async {
       await windowManager.setPosition(Offset(p.left * wFactor, p.top*hFactor));
+      await windowManager.focus();
     });
     if (p.show == MainWindowPlacement.swShowMaximized) {
       WidgetsBinding.instance.addPostFrameCallback((timeStamp) {
