@@ -845,7 +845,6 @@ class EditorBloc {
       return;
     }
     final session = await current.prepareSave(context: context, state: _openFileState);
-    _logger.i("Saving current session.");
     await PksConfiguration.singleton.saveSession(session);
   }
 

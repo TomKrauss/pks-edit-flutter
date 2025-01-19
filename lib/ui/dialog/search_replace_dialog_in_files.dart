@@ -16,6 +16,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pks_edit_flutter/bloc/match_result_list.dart';
 import 'package:pks_edit_flutter/bloc/search_in_files_controller.dart';
+import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/config/pks_sys.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
 import 'package:pks_edit_flutter/ui/dialog/dialog.dart';
@@ -443,7 +444,7 @@ class _SearchReplaceInFilesDialogState
 
   void _find() {
     _applyOptions();
-    searchInFilesController.run(parameter);
+    searchInFilesController.run(parameter, PksIniConfiguration.of(context));
   }
 
   void _replace() {

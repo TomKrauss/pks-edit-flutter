@@ -519,6 +519,7 @@ class PksConfiguration {
   ///
   Future<void> saveSession(PksEditSession session) async {
     var sessionFile = File(join(pksSysDirectory, sessionFilename));
+    _logger.i("Saving current session in $sessionFile.");
     sessionFile.writeAsStringSync(
         const JsonEncoder.withIndent("  ").convert(session.toJson()));
   }
