@@ -22,6 +22,7 @@ import 'package:logger/logger.dart';
 import 'package:path/path.dart' as path;
 import 'package:pks_edit_flutter/actions/action_bindings.dart';
 import 'package:pks_edit_flutter/bloc/bloc_provider.dart';
+import 'package:pks_edit_flutter/bloc/controller_extension.dart';
 import 'package:pks_edit_flutter/bloc/file_io.dart';
 import 'package:pks_edit_flutter/bloc/grammar.dart';
 import 'package:pks_edit_flutter/bloc/templates.dart';
@@ -35,6 +36,7 @@ import 'package:pks_edit_flutter/util/file_watcher.dart';
 import 'package:pks_edit_flutter/util/logger.dart';
 import 'package:re_editor/re_editor.dart';
 import 'package:rxdart/rxdart.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:window_manager/window_manager.dart';
 
 ///
@@ -856,6 +858,11 @@ class EditorBloc {
     await windowManager.hide();
     await windowManager.destroy();
     exit(0);
+  }
+
+  Future<void> searchOnInternet(PksIniConfiguration configuration, OpenFile file) async {
+    var engine = configuration.configuration.getSearchEngineCommand();
+    await launchUrl(Uri.parse(engine.replaceAll("\$1", file.controller.currentWord)));
   }
 }
 

@@ -13,6 +13,7 @@
 
 import 'dart:io';
 
+import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -60,6 +61,13 @@ enum IconSize {
   const IconSize(this.size);
 }
 
+class SearchEngine {
+  final String name;
+  final String command;
+
+  SearchEngine({required this.name, required this.command});
+}
+
 ///
 /// Represents the configuration settings related to editing and the appearance of PKS EDIT
 /// defined in $PKS_SYS/pkseditini.json.
@@ -67,6 +75,27 @@ enum IconSize {
 @JsonSerializable(includeIfNull: false)
 class ApplicationConfiguration {
   static const supportedLanguages = ["Deutsch", "English"];
+  static final List<SearchEngine> defaultSearchEngines = [
+    SearchEngine(name: "Google", command: "https://www.google.com/search?q=\$1"),
+    SearchEngine(name: "Bing", command: "https://www.bing.com/search?q=\$1"),
+    SearchEngine(name: "Yahoo", command: "https://search.yahoo.com/search?q=\$1"),
+    SearchEngine(name: "DuckDuckGo", command: "https://duckduckgo.com/?q=\$1"),
+    SearchEngine(name: "Ecosia", command: "https://www.ecosia.org/search?q=\$1"),
+    SearchEngine(name: "Ask", command: "https://www.ask.com/web?q=\$1"),
+    SearchEngine(name: "Startpage", command: "https://www.startpage.com/sp/search?q=\$1"),
+    SearchEngine(name: "Infinity Search", command: "https://infinitysearch.co/results?q=\$1"),
+    SearchEngine(name: "Aol", command: "https://search.aol.com/aol/search?q=\$1"),
+    SearchEngine(name: "excite", command: "https://results.excite.com/serp?q=\$1"),
+    SearchEngine(name: "Search", command: "https://www.search.com/web?q=\$1"),
+    SearchEngine(name: "Answers", command: "https://www.answers.com/search?q=\$1"),
+    SearchEngine(name: "Lycos", command: "https://search20.lycos.com/web/?q=\$1"),
+    SearchEngine(name: "Infospace", command: "https://infospace.com/serp?q=\$1"),
+    SearchEngine(name: "WebCrawler", command: "https://www.webcrawler.com/serp?q=\$1"),
+    SearchEngine(name: "Babylon", command: "http://search.babylon.com/?q=\$1"),
+    SearchEngine(name: "Kiddle", command: "https://www.kiddle.co/s.php?q=\$1"),
+    SearchEngine(name: "Yandex", command: "https://yandex.com/search/?text=\$1"),
+    SearchEngine(name: "Wolfram|Alpha", command: "https://www.wolframalpha.com/input/?i=\$1"),
+  ];
   static List<String> get supportedFonts => [
     if (Platform.isWindows)
     "Consolas",
@@ -189,11 +218,13 @@ class ApplicationConfiguration {
   //// Searching and handling compiler output formats
   /// The default search engine for performing a search for editor words.
   @JsonKey(name: "search-engine")
-  final String searchEngine;
+  String searchEngine;
   /// Used for include searches, when editing c-/c++ files.
   List<String> get includes => includePath.split(PlatformExtension.filePathSeparator);
   @JsonKey(name: "include-path")
   final String includePath;
+  @JsonKey(name: "temp-path")
+  String? pksEditTempPath;
   /// Used for navigating errors from compiler outputs.
   @JsonKey(name: "compiler-output-patterns")
   final List<CompilerOutputPattern> compilerOutputPatterns;
@@ -204,6 +235,7 @@ class ApplicationConfiguration {
     this.playSoundOnError = false,
     this.silentlyReloadChangedFiles = true,
     this.soundName = "default",
+    this.pksEditTempPath,
     this.compilerOutputPatterns = const [],
     this.formsFollowMouse = false,
     this.maintainClipboardHistory = false,
@@ -298,6 +330,11 @@ class ApplicationConfiguration {
   static ApplicationConfiguration fromJson(Map<String, dynamic> map) =>
       _$ApplicationConfigurationFromJson(map);
   Map<String, dynamic> toJson() => _$ApplicationConfigurationToJson(this);
+
+  ///
+  /// Get the search engine command to be used to perform internet searches of selected words.
+  ///
+  String getSearchEngineCommand() => (defaultSearchEngines.firstWhereOrNull((s) => s.name == searchEngine) ?? defaultSearchEngines.first).command;
 }
 
 ///

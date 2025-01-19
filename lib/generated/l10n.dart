@@ -470,6 +470,16 @@ class S {
     );
   }
 
+  /// `Search Word on Internet`
+  String get actionSearchOnInternet {
+    return Intl.message(
+      'Search Word on Internet',
+      name: 'actionSearchOnInternet',
+      desc: '',
+      args: [],
+    );
+  }
+
   /// `Use LF for Line Ends`
   String get actionUseLinuxLineEnds {
     return Intl.message(

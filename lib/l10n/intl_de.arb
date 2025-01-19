@@ -59,6 +59,7 @@
   "actionZoomIncrease": "Font vergrößern",
   "actionZoomDecrease": "Font verkleinern",
   "actionExit": "Ende",
+  "actionSearchOnInternet": "Wort im Internet suchen",
   "actionDescriptionExit": "PKS Edit beenden",
   "actionDescriptionSaveCurrentFile": "Aktuelle Datei speichern",
   "actionUndo": "Rückgängig",

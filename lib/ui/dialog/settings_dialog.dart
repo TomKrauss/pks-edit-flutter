@@ -71,6 +71,14 @@ class _SettingsDialogState extends State<SettingsDialog> {
       }
     },));
 
+  Widget stringProperty(String label, IconData? icon, String originalValue, void Function(String newValue) assignValue) =>
+      property(label, icon, TextField(controller: TextEditingController(text: originalValue),
+        textAlign: TextAlign.right,
+        inputFormatters: [FilteringTextInputFormatter.digitsOnly], onChanged: (newValue) {
+          changed = true;
+          assignValue(newValue);
+        },));
+
   Widget booleanProperty(String label, IconData? icon, bool checked, void Function(bool newValue) onCheck) =>
     CheckboxListTile(
         secondary: Icon(icon),
@@ -132,17 +140,19 @@ class _SettingsDialogState extends State<SettingsDialog> {
         DialogAction.createCancelAction(context)
       ],
         children: [
-          SizedBox(height: 450, width: 600, child: DefaultTabController(length: 3, child: Column(children: [
+          SizedBox(height: 450, width: 750, child: DefaultTabController(length: 4, child: Column(children: [
             TabBar(tabs: [
               _tab(Icons.save, S.of(context).saving),
               _tab(Icons.notification_important_rounded, S.of(context).warnings),
               _tab(FontAwesomeIcons.palette, S.of(context).layout),
+              _tab(FontAwesomeIcons.userGear, "Miscellaneous"),
             ]),
             Expanded(child: TabBarView(
                 children: [
               _tabPage([
                 booleanProperty(bundle.silentlyReloadFilesChangedExternally, Icons.refresh, conf.silentlyReloadChangedFiles, (newValue) {conf.silentlyReloadChangedFiles = newValue; }),
                 booleanProperty(S.of(context).autosaveFilesOnExit, Icons.refresh, conf.autoSaveOnExit, (newValue) {conf.autoSaveOnExit = newValue; }),
+                stringProperty("Autosave Path", FontAwesomeIcons.kitMedical, conf.pksEditTempPath ?? "", (newValue) { conf.pksEditTempPath = newValue; }),
                 intProperty(bundle.maximumNumberOfWindows, FontAwesomeIcons.windowMaximize, conf.maximumOpenWindows, (newValue) { conf.maximumOpenWindows = newValue; }),
                 intProperty(S.of(context).autosaveTimeInSeconds, Icons.auto_awesome, conf.autosaveTimeSeconds??0, (newValue) { conf.autosaveTimeSeconds = newValue; }),
               ]),
@@ -163,6 +173,16 @@ class _SettingsDialogState extends State<SettingsDialog> {
                 booleanProperty(bundle.showToolbar, Icons.border_top, conf.showToolbar, (newValue) {conf.showToolbar = newValue; }),
                 booleanProperty(bundle.showStatusbar, Icons.border_bottom, conf.showStatusbar, (newValue) {conf.showStatusbar = newValue; }),
               ]),
+              _tabPage([
+                stringProperty("Pruned Search Directories", FontAwesomeIcons.forward, conf.prunedSearchDirectories, (newValue) { conf.prunedSearchDirectories = newValue; }),
+                booleanProperty("Open Dialogs Close to Mouse cursor", FontAwesomeIcons.arrowPointer, conf.formsFollowMouse, (newValue) {
+                  conf.formsFollowMouse = newValue;
+                }),
+                enumProperty("Default Search Engine", FontAwesomeIcons.google, ApplicationConfiguration.defaultSearchEngines.map((e) => e.name).toList(),
+                    conf.searchEngine, (newValue) {
+                  conf.searchEngine = newValue;
+                })
+              ])
             ]))
           ],)))
       ]);

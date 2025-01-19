@@ -94,6 +94,8 @@ class MessageLookup extends MessageLookupByLibrary {
         "actionSaveFile": MessageLookupByLibrary.simpleMessage("Save File"),
         "actionSaveFileAs":
             MessageLookupByLibrary.simpleMessage("Save File As..."),
+        "actionSearchOnInternet":
+            MessageLookupByLibrary.simpleMessage("Search Word on Internet"),
         "actionSelectAll": MessageLookupByLibrary.simpleMessage("Select All"),
         "actionSelectCursorWordLeft":
             MessageLookupByLibrary.simpleMessage("Select word left"),

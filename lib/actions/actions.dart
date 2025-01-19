@@ -11,19 +11,6 @@
 // file, You can obtain one at https://mozilla.org/MPL/2.0/.
 //
 
-//
-// actions.dart
-//
-// PKS-EDIT - Flutter
-//
-// Last modified: 07.04.24, 08:07
-// Author: Tom Krauß
-//
-// This Source Code Form is subject to the terms of the Mozilla Public
-// License, v. 2.0. If a copy of the MPL was not distributed with this
-// file, You can obtain one at https://mozilla.org/MPL/2.0/.
-//
-
 import 'dart:async';
 import 'dart:io';
 
@@ -37,6 +24,7 @@ import 'package:pks_edit_flutter/bloc/editor_bloc.dart';
 import 'package:pks_edit_flutter/bloc/match_result_list.dart';
 import 'package:pks_edit_flutter/bloc/search_in_files_controller.dart';
 import 'package:pks_edit_flutter/config/editing_configuration.dart';
+import 'package:pks_edit_flutter/config/pks_ini.dart';
 import 'package:pks_edit_flutter/generated/l10n.dart';
 import 'package:pks_edit_flutter/ui/dialog/confirmation_dialog.dart';
 import 'package:pks_edit_flutter/ui/dialog/input_dialog.dart';
@@ -225,6 +213,11 @@ class PksEditActions {
           execute: _find,
           isEnabled: _hasFile,
           textKey: "actionFind"),
+      PksEditAction(
+          id: "search-on-internet",
+          execute: _searchOnInternet,
+          isEnabled: _hasFile,
+          textKey: "actionSearchOnInternet"),
       PksEditAction(
           id: "find-in-filelist",
           execute: _findInFiles,
@@ -698,6 +691,12 @@ class PksEditActions {
     _withCurrentFile((file) {
       SearchReplaceDialog.show(context: getBuildContext(),
           arguments: SearchReplaceDialogArguments(findController: file.findController, replace: false));
+    });
+  }
+
+  void _searchOnInternet() {
+    _withCurrentFileAndBloc((bloc, file) {
+      bloc.searchOnInternet(PksIniConfiguration.of(getBuildContext()), file);
     });
   }
 
