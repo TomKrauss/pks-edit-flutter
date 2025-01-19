@@ -87,6 +87,8 @@ class ApplicationConfiguration {
     }
     return "de";
   }
+  @JsonKey(name: "pruned-search-directories")
+  String prunedSearchDirectories = ".*:build:target";
   /// The default font used in editors.
   @JsonKey(name: "default-font")
   String defaultFont;

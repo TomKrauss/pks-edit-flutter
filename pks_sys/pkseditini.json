@@ -28,6 +28,7 @@
     "cleanup-autosave-files": true,
     "silently-reload-changed-files": true,
     "search-engine": "Google",
+    "pruned-search-directories": ".*:build:target",
     "include-path": "..\\include;include",
     "compiler-output-patterns": [
       {

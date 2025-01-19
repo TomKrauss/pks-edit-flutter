@@ -68,13 +68,14 @@ ApplicationConfiguration _$ApplicationConfigurationFromJson(
           json['reuse-application-running-instance'] as bool? ?? true,
       defaultFont: json['default-font'] as String?,
       searchEngine: json['search-engine'] as String? ?? "Google",
-    );
+    )..prunedSearchDirectories = json['pruned-search-directories'] as String;
 
 Map<String, dynamic> _$ApplicationConfigurationToJson(
         ApplicationConfiguration instance) =>
     <String, dynamic>{
       'theme': instance.theme,
       'language': instance.language,
+      'pruned-search-directories': instance.prunedSearchDirectories,
       'default-font': instance.defaultFont,
       'icon-size': _$IconSizeEnumMap[instance.iconSize]!,
       'show-statusbar': instance.showStatusbar,
